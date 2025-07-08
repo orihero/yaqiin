@@ -93,4 +93,6 @@ UserSchema.methods.comparePassword = function (candidate: string) {
   return bcrypt.compare(candidate, this.password);
 };
 
-export default mongoose.model<IUser>('User', UserSchema); 
+export default mongoose.model<IUser>('User', UserSchema);
+
+export type UserDocument = Document & IUser; 

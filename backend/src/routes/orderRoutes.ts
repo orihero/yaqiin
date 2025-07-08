@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { parseQuery } from '../utils/queryHelper';
@@ -7,11 +7,11 @@ import authMiddleware from '../utils/authMiddleware';
 const router = Router();
 
 // List all orders for the authenticated user, with product images
-router.get('/', authMiddleware, async (req, res, next) => {
+router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { filter, page, limit, skip } = parseQuery(req, ['orderNumber', 'status', 'paymentStatus', 'notes']);
     // Ensure only the current user's orders are returned
-    filter.customerId = req.user._id;
+    filter.customerId = (req as any).user!._id;
 
     // Fetch orders and total count
     const [orders, total] = await Promise.all([
@@ -54,17 +54,20 @@ router.get('/', authMiddleware, async (req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const order = await Order.findById(req.params.id);
-    if (!order) return next({ status: 404, message: 'Order not found' });
+    if (!order) {
+      next({ status: 404, message: 'Order not found' });
+      return;
+    }
     res.json({ success: true, data: order });
   } catch (err) {
     next(err);
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const order = new Order(req.body);
     await order.save();
@@ -74,24 +77,30 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!order) return next({ status: 404, message: 'Order not found' });
+    if (!order) {
+      next({ status: 404, message: 'Order not found' });
+      return;
+    }
     res.json({ success: true, data: order, message: 'Order updated' });
   } catch (err) {
     next({ status: 400, message: 'Failed to update order', details: err });
   }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
-    if (!order) return next({ status: 404, message: 'Order not found' });
+    if (!order) {
+      next({ status: 404, message: 'Order not found' });
+      return;
+    }
     res.json({ success: true, data: null, message: 'Order deleted' });
   } catch (err) {
     next(err);
   }
 });
 
-export default router; 
+export default router;
