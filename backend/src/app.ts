@@ -22,7 +22,7 @@ import path from 'path';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/yaqiin";
 
 // Disable ETag to prevent 304 Not Modified responses
