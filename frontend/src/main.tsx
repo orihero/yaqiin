@@ -34,18 +34,10 @@ async function telegramMiniAppAuth(setUser: (user: any, token: string) => void) 
 }
 
 function App() {
-  const { authError } = useAuthCheck();
   const setUser = useUserStore((s) => s.setUser);
   React.useEffect(() => {
     telegramMiniAppAuth(setUser);
   }, [setUser]);
-  if (authError) {
-    return (
-      <div className="min-h-screen bg-[#232c43] flex items-center justify-center">
-        <span className="text-white text-lg text-center px-4">{authError}</span>
-      </div>
-    );
-  }
   return (
     <Router>
       <Routes>
