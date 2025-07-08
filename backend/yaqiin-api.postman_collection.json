@@ -1,0 +1,242 @@
+{
+  "info": {
+    "_postman_id": "yaqiin-api-collection",
+    "name": "Yaqiin API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Yaqiin backend API. Set {{base_url}} and {{token}} as environment variables."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo\",\n  \"password\": \"demo123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login and receive JWT token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Get current user's profile (requires JWT)."
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "List all users with pagination and filtering."
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ":id"]
+            },
+            "description": "Get user by ID."
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"pass123\",\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Create a new user."
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ":id"]
+            },
+            "description": "Update user by ID."
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ":id"]
+            },
+            "description": "Delete user by ID."
+          }
+        },
+        {
+          "name": "Available Owners",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/available-owners",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "available-owners"]
+            },
+            "description": "Get available shop owners (not assigned to a shop)."
+          }
+        },
+        {
+          "name": "Available Couriers",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/available-couriers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "available-couriers"]
+            },
+            "description": "Get available couriers (not assigned to a courier)."
+          }
+        }
+      ]
+    },
+    { "name": "Products", "item": [
+      { "name": "List Products", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/products", "host": ["{{base_url}}"], "path": ["api", "products"] }, "description": "List all products with pagination and filtering." } },
+      { "name": "Get Product by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/products/:id", "host": ["{{base_url}}"], "path": ["api", "products", ":id"] }, "description": "Get product by ID." } },
+      { "name": "Create Product", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "multipart/form-data" } ], "body": { "mode": "formdata", "formdata": [ { "key": "name", "value": "{\"uz\":\"Product name\",\"ru\":\"Название\"}", "type": "text" }, { "key": "description", "value": "{\"uz\":\"Desc\",\"ru\":\"Описание\"}", "type": "text" }, { "key": "images", "type": "file", "src": "" } ] }, "url": { "raw": "{{base_url}}/api/products", "host": ["{{base_url}}"], "path": ["api", "products"] }, "description": "Create a new product (supports file upload)." } },
+      { "name": "Update Product", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "multipart/form-data" } ], "body": { "mode": "formdata", "formdata": [ { "key": "name", "value": "{\"uz\":\"Updated\",\"ru\":\"Обновлено\"}", "type": "text" }, { "key": "images", "type": "file", "src": "" } ] }, "url": { "raw": "{{base_url}}/api/products/:id", "host": ["{{base_url}}"], "path": ["api", "products", ":id"] }, "description": "Update product by ID (supports file upload)." } },
+      { "name": "Delete Product", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/products/:id", "host": ["{{base_url}}"], "path": ["api", "products", ":id"] }, "description": "Delete product by ID." } }
+    ] },
+    { "name": "Orders", "item": [
+      { "name": "List Orders", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/orders", "host": ["{{base_url}}"], "path": ["api", "orders"] }, "description": "List all orders with pagination and filtering." } },
+      { "name": "Get Order by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/orders/:id", "host": ["{{base_url}}"], "path": ["api", "orders", ":id"] }, "description": "Get order by ID." } },
+      { "name": "Create Order", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"orderNumber\": \"000001\",\n  \"items\": []\n}" }, "url": { "raw": "{{base_url}}/api/orders", "host": ["{{base_url}}"], "path": ["api", "orders"] }, "description": "Create a new order." } },
+      { "name": "Update Order", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"status\": \"updated\"\n}" }, "url": { "raw": "{{base_url}}/api/orders/:id", "host": ["{{base_url}}"], "path": ["api", "orders", ":id"] }, "description": "Update order by ID." } },
+      { "name": "Delete Order", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/orders/:id", "host": ["{{base_url}}"], "path": ["api", "orders", ":id"] }, "description": "Delete order by ID." } }
+    ] },
+    { "name": "Categories", "item": [
+      { "name": "List Categories", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"] }, "description": "List all categories with pagination and filtering." } },
+      { "name": "Get Category by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/categories/:id", "host": ["{{base_url}}"], "path": ["api", "categories", ":id"] }, "description": "Get category by ID." } },
+      { "name": "Create Category", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": {\"uz\":\"Category\",\"ru\":\"Категория\"}\n}" }, "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"] }, "description": "Create a new category." } },
+      { "name": "Update Category", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": {\"uz\":\"Updated\",\"ru\":\"Обновлено\"}\n}" }, "url": { "raw": "{{base_url}}/api/categories/:id", "host": ["{{base_url}}"], "path": ["api", "categories", ":id"] }, "description": "Update category by ID." } },
+      { "name": "Delete Category", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/categories/:id", "host": ["{{base_url}}"], "path": ["api", "categories", ":id"] }, "description": "Delete category by ID." } }
+    ] },
+    { "name": "Shops", "item": [
+      { "name": "List Shops", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/shops", "host": ["{{base_url}}"], "path": ["api", "shops"] }, "description": "List all shops with pagination and filtering." } },
+      { "name": "Get Shop by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/shops/:id", "host": ["{{base_url}}"], "path": ["api", "shops", ":id"] }, "description": "Get shop by ID." } },
+      { "name": "Create Shop", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Shop\"\n}" }, "url": { "raw": "{{base_url}}/api/shops", "host": ["{{base_url}}"], "path": ["api", "shops"] }, "description": "Create a new shop." } },
+      { "name": "Update Shop", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Shop\"\n}" }, "url": { "raw": "{{base_url}}/api/shops/:id", "host": ["{{base_url}}"], "path": ["api", "shops", ":id"] }, "description": "Update shop by ID." } },
+      { "name": "Delete Shop", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/shops/:id", "host": ["{{base_url}}"], "path": ["api", "shops", ":id"] }, "description": "Delete shop by ID." } }
+    ] },
+    { "name": "Couriers", "item": [
+      { "name": "List Couriers", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/couriers", "host": ["{{base_url}}"], "path": ["api", "couriers"] }, "description": "List all couriers with pagination and filtering." } },
+      { "name": "Get Courier by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/couriers/:id", "host": ["{{base_url}}"], "path": ["api", "couriers", ":id"] }, "description": "Get courier by ID." } },
+      { "name": "Create Courier", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"userId\": \"...\"\n}" }, "url": { "raw": "{{base_url}}/api/couriers", "host": ["{{base_url}}"], "path": ["api", "couriers"] }, "description": "Create a new courier." } },
+      { "name": "Update Courier", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"availability\": true\n}" }, "url": { "raw": "{{base_url}}/api/couriers/:id", "host": ["{{base_url}}"], "path": ["api", "couriers", ":id"] }, "description": "Update courier by ID." } },
+      { "name": "Delete Courier", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/couriers/:id", "host": ["{{base_url}}"], "path": ["api", "couriers", ":id"] }, "description": "Delete courier by ID." } }
+    ] },
+    { "name": "Deliveries", "item": [
+      { "name": "List Deliveries", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/deliveries", "host": ["{{base_url}}"], "path": ["api", "deliveries"] }, "description": "List all deliveries with pagination and filtering." } },
+      { "name": "Get Delivery by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/deliveries/:id", "host": ["{{base_url}}"], "path": ["api", "deliveries", ":id"] }, "description": "Get delivery by ID." } },
+      { "name": "Create Delivery", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"orderId\": \"...\"\n}" }, "url": { "raw": "{{base_url}}/api/deliveries", "host": ["{{base_url}}"], "path": ["api", "deliveries"] }, "description": "Create a new delivery." } },
+      { "name": "Update Delivery", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"status\": \"delivered\"\n}" }, "url": { "raw": "{{base_url}}/api/deliveries/:id", "host": ["{{base_url}}"], "path": ["api", "deliveries", ":id"] }, "description": "Update delivery by ID." } },
+      { "name": "Delete Delivery", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/deliveries/:id", "host": ["{{base_url}}"], "path": ["api", "deliveries", ":id"] }, "description": "Delete delivery by ID." } }
+    ] },
+    { "name": "Notifications", "item": [
+      { "name": "List Notifications", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/notifications", "host": ["{{base_url}}"], "path": ["api", "notifications"] }, "description": "List all notifications with pagination and filtering." } },
+      { "name": "Get Notification by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/notifications/:id", "host": ["{{base_url}}"], "path": ["api", "notifications", ":id"] }, "description": "Get notification by ID." } },
+      { "name": "Create Notification", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"message\": \"Hello\"\n}" }, "url": { "raw": "{{base_url}}/api/notifications", "host": ["{{base_url}}"], "path": ["api", "notifications"] }, "description": "Create a new notification." } },
+      { "name": "Update Notification", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"message\": \"Updated\"\n}" }, "url": { "raw": "{{base_url}}/api/notifications/:id", "host": ["{{base_url}}"], "path": ["api", "notifications", ":id"] }, "description": "Update notification by ID." } },
+      { "name": "Delete Notification", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/notifications/:id", "host": ["{{base_url}}"], "path": ["api", "notifications", ":id"] }, "description": "Delete notification by ID." } }
+    ] },
+    { "name": "Reviews", "item": [
+      { "name": "List Reviews", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/reviews", "host": ["{{base_url}}"], "path": ["api", "reviews"] }, "description": "List all reviews with pagination and filtering." } },
+      { "name": "Get Review by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/reviews/:id", "host": ["{{base_url}}"], "path": ["api", "reviews", ":id"] }, "description": "Get review by ID." } },
+      { "name": "Create Review", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"text\": \"Great!\"\n}" }, "url": { "raw": "{{base_url}}/api/reviews", "host": ["{{base_url}}"], "path": ["api", "reviews"] }, "description": "Create a new review." } },
+      { "name": "Update Review", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"text\": \"Updated\"\n}" }, "url": { "raw": "{{base_url}}/api/reviews/:id", "host": ["{{base_url}}"], "path": ["api", "reviews", ":id"] }, "description": "Update review by ID." } },
+      { "name": "Delete Review", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/reviews/:id", "host": ["{{base_url}}"], "path": ["api", "reviews", ":id"] }, "description": "Delete review by ID." } }
+    ] },
+    { "name": "Analytics", "item": [
+      { "name": "Dashboard Stats", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/analytics/dashboard", "host": ["{{base_url}}"], "path": ["api", "analytics", "dashboard"] }, "description": "Get dashboard analytics statistics." } }
+    ] },
+    { "name": "Settings", "item": [
+      { "name": "List Settings", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/settings", "host": ["{{base_url}}"], "path": ["api", "settings"] }, "description": "List all settings with pagination and filtering." } },
+      { "name": "Get Setting by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/settings/:id", "host": ["{{base_url}}"], "path": ["api", "settings", ":id"] }, "description": "Get setting by ID." } },
+      { "name": "Create Setting", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"key\": \"setting\",\n  \"value\": \"value\"\n}" }, "url": { "raw": "{{base_url}}/api/settings", "host": ["{{base_url}}"], "path": ["api", "settings"] }, "description": "Create a new setting." } },
+      { "name": "Update Setting", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"value\": \"updated\"\n}" }, "url": { "raw": "{{base_url}}/api/settings/:id", "host": ["{{base_url}}"], "path": ["api", "settings", ":id"] }, "description": "Update setting by ID." } },
+      { "name": "Delete Setting", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/settings/:id", "host": ["{{base_url}}"], "path": ["api", "settings", ":id"] }, "description": "Delete setting by ID." } }
+    ] },
+    { "name": "Support Tickets", "item": [
+      { "name": "List Support Tickets", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/support-tickets", "host": ["{{base_url}}"], "path": ["api", "support-tickets"] }, "description": "List all support tickets with pagination and filtering." } },
+      { "name": "Get Support Ticket by ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/support-tickets/:id", "host": ["{{base_url}}"], "path": ["api", "support-tickets", ":id"] }, "description": "Get support ticket by ID." } },
+      { "name": "Create Support Ticket", "request": { "method": "POST", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"subject\": \"Help\",\n  \"message\": \"I need help\"\n}" }, "url": { "raw": "{{base_url}}/api/support-tickets", "host": ["{{base_url}}"], "path": ["api", "support-tickets"] }, "description": "Create a new support ticket." } },
+      { "name": "Update Support Ticket", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"message\": \"Updated\"\n}" }, "url": { "raw": "{{base_url}}/api/support-tickets/:id", "host": ["{{base_url}}"], "path": ["api", "support-tickets", ":id"] }, "description": "Update support ticket by ID." } },
+      { "name": "Delete Support Ticket", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/support-tickets/:id", "host": ["{{base_url}}"], "path": ["api", "support-tickets", ":id"] }, "description": "Delete support ticket by ID." } }
+    ] }
+  ]
+} 
