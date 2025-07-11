@@ -54,7 +54,7 @@ export interface IUser extends Document {
   phoneNumber?: string;
   email?: string;
   password?: string;
-  role: 'client' | 'courier' | 'admin' | 'shop_owner';
+  role: 'client' | 'courier' | 'admin' | 'shop_owner' | 'operator';
   status: 'active' | 'inactive' | 'suspended';
   addresses: IAddress[];
   preferences: IUserPreferences;
@@ -73,7 +73,7 @@ const UserSchema = new Schema<IUser>({
   phoneNumber: { type: String },
   email: { type: String },
   password: { type: String, select: false },
-  role: { type: String, enum: ['client', 'courier', 'admin', 'shop_owner'], required: true },
+  role: { type: String, enum: ['client', 'courier', 'admin', 'shop_owner', 'operator'], required: true },
   status: { type: String, enum: ['active', 'inactive', 'suspended'], required: true },
   addresses: [AddressSchema],
   preferences: { type: UserPreferencesSchema, default: undefined },

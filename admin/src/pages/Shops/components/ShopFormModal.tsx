@@ -4,6 +4,7 @@ import { Shop } from '@yaqiin/shared/types/shop';
 import { useQuery } from '@tanstack/react-query';
 import { getAvailableOwners, getUserById } from '../../../services/userService';
 import { ShopOperatingHours, OperatingHoursDay } from '@yaqiin/shared/types/shop';
+import { getUnassignedGroups } from '../../../services/shopService';
 
 interface ShopFormModalProps {
   open: boolean;
@@ -70,6 +71,15 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
   } = useQuery({
     queryKey: ['available-owners'],
     queryFn: getAvailableOwners,
+    enabled: open,
+  });
+  const {
+    data: groupsData,
+    isLoading: groupsLoading,
+    error: groupsError
+  } = useQuery({
+    queryKey: ['unassigned-groups'],
+    queryFn: getUnassignedGroups,
     enabled: open,
   });
   const [operatingHours, setOperatingHours] = useState<ShopOperatingHours>(
@@ -172,6 +182,33 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
                 </select>
               )}
               {errors.ownerId && <span className="text-red-400 text-xs">{errors.ownerId.message as string}</span>}
+            </div>
+            {/* Orders Chat ID field */}
+            <div>
+              <label className="block mb-1">Telegram Orders Chat Group</label>
+              {groupsLoading ? (
+                <div className="text-gray-400 text-xs">Loading groups...</div>
+              ) : groupsError ? (
+                <div className="text-red-400 text-xs">Failed to load groups</div>
+              ) : (
+                <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('orders_chat_id')} defaultValue={initialValues?.orders_chat_id || ''}>
+                  <option value="">Select group</option>
+                  {groupsData && groupsData.map((group: any) => (
+                    <option key={group.chatId} value={group.chatId}>
+                      {group.title || group.chatId} ({group.chatId})
+                    </option>
+                  ))}
+                  {/* If editing and current value is not in unassigned, show it */}
+                  {isEdit && initialValues?.orders_chat_id &&
+                    !groupsData?.some((g: any) => String(g.chatId) === String(initialValues.orders_chat_id)) && (
+                      <option value={initialValues.orders_chat_id}>
+                        {initialValues.orders_chat_id} (currently assigned)
+                      </option>
+                    )}
+                </select>
+              )}
+              <span className="text-gray-400 text-xs">Select the Telegram group chat for this shop's orders.</span>
+              {errors.orders_chat_id && <span className="text-red-400 text-xs">{errors.orders_chat_id.message as string}</span>}
             </div>
             <div>
               <label className="block mb-1">Phone Number</label>

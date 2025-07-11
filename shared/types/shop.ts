@@ -56,6 +56,7 @@ export interface Shop {
   rating?: ShopRating;
   status: 'active' | 'inactive' | 'suspended';
   commission?: number;
+  orders_chat_id?: string;
   createdAt: Date;
   updatedAt: Date;
 } 

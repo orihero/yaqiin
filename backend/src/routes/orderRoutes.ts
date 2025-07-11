@@ -76,7 +76,13 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction): Prom
 
 router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const order = new Order(req.body);
+    // Always set status to 'created' on backend
+    const orderData = { ...req.body, status: 'created' };
+    // Only set courierId if provided and not empty
+    if (!orderData.courierId) {
+      delete orderData.courierId;
+    }
+    const order = new Order(orderData);
     await order.save();
 
     // --- Notification logic ---
@@ -97,6 +103,28 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
               Markup.button.callback('❌ Buyurtmani rad etish', `order_reject_${order._id}_shop`)
             ]
           ])
+        );
+      }
+      // Notify shop group via orders_chat_id
+      if (shop.orders_chat_id) {
+        // Get client info
+        const client = await User.findById(order.customerId);
+        let clientName = client ? `${client.firstName || ''} ${client.lastName || ''}`.trim() : 'Client';
+        let clientPhone = client?.phoneNumber || '';
+        // Compose order details
+        let orderText = `🆕🛒 Yangi buyurtma!\nOrder ID: ${order._id}\nMijoz: ${clientName}${clientPhone ? `\nTelefon: ${clientPhone}` : ''}\n\nMahsulotlar:`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\nUmumiy: ${order.pricing.total}`;
+        // Buttons: Confirm/Accept, Call Client
+        const callbackRow = [Markup.button.callback('✅ Qabul qilish', `order_accept_${order._id}`)];
+        const urlRow = clientPhone ? [Markup.button.url('📞 Mijozga qo‘ng‘iroq', `tel:${clientPhone}`)] : [];
+        const keyboard = urlRow.length > 0 ? [callbackRow, urlRow] : [callbackRow];
+        await mainBot.telegram.sendMessage(
+          shop.orders_chat_id,
+          orderText,
+          { reply_markup: Markup.inlineKeyboard(keyboard).reply_markup }
         );
       }
       // Notify couriers

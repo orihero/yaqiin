@@ -113,6 +113,7 @@ export default function UserFormModal({ open, mode, initialValues, loading, erro
                 <option value="courier">Courier</option>
                 <option value="admin">Admin</option>
                 <option value="shop_owner">Shop Owner</option>
+                <option value="operator">Operator</option>
               </select>
             </div>
             <div>

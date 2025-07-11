@@ -173,13 +173,12 @@ mainBot.on('message', async (ctx: CustomContext) => {
     if (!state) return;
     if (customReasonMap.has(userId)) {
       const { orderId, role } = customReasonMap.get(userId);
-      const customReason = ctx.message.text;
+      const customReason = ctx.message && 'text' in ctx.message ? ctx.message['text'] : '';
+      if (!ctx.from) return;
       const order = await Order.findById(orderId);
       if (order) {
-        order.status = 'rejected_by_shop';
-        order.rejectionReason = customReason;
-        await order.save();
-        await ctx.reply(t(ctx, 'orderRejected'));
+        await Order.updateStatus(orderId, 'rejected', String(ctx.from.id), customReason);
+        await ctx.reply('Order rejected.');
       }
       customReasonMap.delete(userId);
       return;
@@ -254,59 +253,28 @@ mainBot.on('callback_query', async (ctx: CustomContext) => {
   if (nextMatch) {
     const orderId = nextMatch[1];
     const order = await Order.findById(orderId);
-    if (!order) return ctx.answerCbQuery(t(ctx, 'orderNotFound'));
+    if (!order) return ctx.answerCbQuery('Order not found');
+    if (!ctx.from) return ctx.answerCbQuery('User not found');
     if (order.status === 'created') {
-      order.status = 'packing';
-      await order.save();
+      await Order.updateStatus(orderId, 'packing', String(ctx.from.id));
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.reply(t(ctx, 'orderPacked'));
+      await ctx.reply('Order packed!');
     } else if (order.status === 'packing') {
-      order.status = 'courier_picked';
-      await order.save();
+      await Order.updateStatus(orderId, 'courier_picked', String(ctx.from.id));
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.reply(t(ctx, 'orderPicked'));
+      await ctx.reply('Order picked by courier!');
     } else {
-      await ctx.answerCbQuery(t(ctx, 'noFurtherAction'));
+      await ctx.answerCbQuery('No further action.');
       return;
     }
+    return;
   }
   // Match reject for shop
   const rejectMatch = data.match(/^order_reject_(.+)_shop$/);
   if (rejectMatch) {
     const orderId = rejectMatch[1];
-    // Show reason picker
-    await ctx.reply(t(ctx, 'rejectReasonPrompt'), Markup.inlineKeyboard([
-      [Markup.button.callback(t(ctx, 'reasonOutOfStock'), `order_reject_reason_${orderId}_shop_out_of_stock`)],
-      [Markup.button.callback(t(ctx, 'reasonClosed'), `order_reject_reason_${orderId}_shop_closed`)],
-      [Markup.button.callback(t(ctx, 'reasonOutOfArea'), `order_reject_reason_${orderId}_shop_out_of_area`)],
-      [Markup.button.callback(t(ctx, 'reasonOther'), `order_reject_reason_${orderId}_shop_other`)]
-    ]));
-    return;
-  }
-  // Handle reason selection
-  const reasonMatch = data.match(/^order_reject_reason_(.+)_shop_(.+)$/);
-  if (reasonMatch) {
-    const orderId = reasonMatch[1];
-    const reasonKey = reasonMatch[2];
-    let reason = '';
-    if (reasonKey === 'out_of_stock') reason = t(ctx, 'reasonOutOfStock');
-    else if (reasonKey === 'closed') reason = t(ctx, 'reasonClosed');
-    else if (reasonKey === 'out_of_area') reason = t(ctx, 'reasonOutOfArea');
-    else if (reasonKey === 'other') {
-      // Ask for custom reason
-      await ctx.reply(t(ctx, 'enterCustomReason'));
-      customReasonMap.set(userId, { orderId, role: 'shop' });
-      return;
-    }
-    if (reason) {
-      const order = await Order.findById(orderId);
-      if (order) {
-        order.status = 'rejected_by_shop';
-        order.rejectionReason = reason;
-        await order.save();
-        await ctx.reply(t(ctx, 'orderRejected'));
-      }
-    }
+    await ctx.reply('Please provide a reason for rejection:');
+    customReasonMap.set(userId, { orderId, role: 'shop' });
     return;
   }
 });

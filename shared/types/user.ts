@@ -30,7 +30,7 @@ export interface User {
   lastName?: string;
   phoneNumber?: string;
   email?: string;
-  role: 'client' | 'courier' | 'admin' | 'shop_owner';
+  role: 'client' | 'courier' | 'admin' | 'shop_owner' | 'operator';
   status: 'active' | 'inactive' | 'suspended';
   addresses?: Address[];
   preferences?: UserPreferences;

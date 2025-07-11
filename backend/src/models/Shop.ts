@@ -102,6 +102,7 @@ export interface IShop extends Document {
   status: 'active' | 'inactive' | 'suspended';
   commission?: number;
   couriers?: mongoose.Types.ObjectId[];
+  orders_chat_id?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -118,6 +119,7 @@ const ShopSchema = new Schema<IShop>({
   status: { type: String, enum: ['active', 'inactive', 'suspended'], required: true },
   commission: { type: Number },
   couriers: [{ type: Schema.Types.ObjectId, ref: 'Courier' }],
+  orders_chat_id: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -12,7 +12,7 @@ const NotificationTitleMessageSchema = new Schema<INotificationTitleMessage>({
 
 export interface INotification extends Document {
   recipientId: mongoose.Types.ObjectId;
-  recipientType: 'client' | 'courier' | 'admin' | 'shop_owner';
+  recipientType: 'client' | 'courier' | 'admin' | 'shop_owner' | 'operator';
   type: 'order_update' | 'promotion' | 'system' | 'chat_message';
   title: INotificationTitleMessage;
   message: INotificationTitleMessage;
@@ -27,7 +27,7 @@ export interface INotification extends Document {
 
 const NotificationSchema = new Schema<INotification>({
   recipientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  recipientType: { type: String, enum: ['client', 'courier', 'admin', 'shop_owner'], required: true },
+  recipientType: { type: String, enum: ['client', 'courier', 'admin', 'shop_owner', 'operator'], required: true },
   type: { type: String, enum: ['order_update', 'promotion', 'system', 'chat_message'], required: true },
   title: { type: NotificationTitleMessageSchema, required: true },
   message: { type: NotificationTitleMessageSchema, required: true },

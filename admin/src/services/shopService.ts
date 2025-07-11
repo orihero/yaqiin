@@ -55,4 +55,9 @@ export const assignCourierToShop = async (shopId: string, courierId: string) => 
 export const unassignCourierFromShop = async (shopId: string, courierId: string) => {
   const res = await api.delete(`/shops/${shopId}/couriers/${courierId}`);
   return res.data;
+};
+
+export const getUnassignedGroups = async () => {
+  const res = await api.get('/shops/groups/unassigned');
+  return res.data.data;
 }; 

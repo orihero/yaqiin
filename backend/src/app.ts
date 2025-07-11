@@ -17,6 +17,7 @@ import morgan from "morgan";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import path from 'path';
+import Setting from './models/Setting';
 
 // Load environment variables
 dotenv.config();
@@ -70,12 +71,35 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => {
-    app.listen(PORT, () => {
+  .then(async () => {
+    app.listen(PORT, async () => {
       console.log(`Server running on port ${PORT}`);
-      // Start Telegram bots
-      // require('./bots/mainBot');
-      require('./bots/courierBot');
+      // Start Telegram bots based on feature flags
+      const isDev = process.env.NODE_ENV === 'development';
+      let courierBotEnabled = false;
+      let mainBotEnabled = false;
+      if (isDev) {
+        courierBotEnabled = true;
+        mainBotEnabled = true;
+      } else {
+        const flags = await Setting.find({ key: { $in: ['courier_bot_enabled', 'main_bot_enabled'] }, isActive: true });
+        for (const flag of flags) {
+          if (flag.key === 'courier_bot_enabled' && flag.value === true) courierBotEnabled = true;
+          if (flag.key === 'main_bot_enabled' && flag.value === true) mainBotEnabled = true;
+        }
+      }
+      if (courierBotEnabled) {
+        require('./bots/courierBot');
+        console.log('Courier bot started');
+      } else {
+        console.log('Courier bot NOT started (feature flag off)');
+      }
+      if (mainBotEnabled) {
+        require('./bots/mainBot');
+        console.log('Main bot started');
+      } else {
+        console.log('Main bot NOT started (feature flag off)');
+      }
     });
   })
   .catch((err) => {
