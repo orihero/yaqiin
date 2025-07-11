@@ -56,4 +56,19 @@ export interface Analytics {
   type: 'daily' | 'weekly' | 'monthly';
   metrics: AnalyticsMetrics;
   createdAt: Date;
+}
+
+// Unified DashboardStats interface for dashboard components
+export interface DashboardStats {
+  totalOrders?: { value: number; percent?: number };
+  newUsers?: { value: number; percent?: number };
+  totalRevenue?: { value: number; percent?: number };
+  topProducts?: any[];
+  totalProducts?: number;
+  averageDeliveryTime?: number;
+  longestDeliveryTime?: number;
+  shortestDeliveryTime?: number;
+  usersTimeSeries?: { _id: string; count: number }[];
+  paymentsTimeSeries?: { _id: string; payments: { method: string; total: number }[] }[];
+  // ...add more fields as needed
 } 

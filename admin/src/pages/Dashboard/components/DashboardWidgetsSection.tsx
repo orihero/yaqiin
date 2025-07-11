@@ -1,15 +1,6 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar, YAxis, Cell, PieChart, Pie } from 'recharts';
-
-interface DashboardStats {
-  totalProducts?: number;
-  averageDeliveryTime?: number;
-  longestDeliveryTime?: number;
-  shortestDeliveryTime?: number;
-  usersTimeSeries?: { _id: string; count: number }[];
-  paymentsTimeSeries?: { _id: string; payments: { method: string; total: number }[] }[];
-  // ...add more fields as needed
-}
+import type { DashboardStats } from '../../../../../shared/types/analytics';
 
 const recentPurchasers = [
   { name: 'Alice', avatar: 'https://randomuser.me/api/portraits/women/1.jpg' },
@@ -56,7 +47,7 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
         <div className="text-xs text-gray-400 mb-4">Coupons used: 18/22</div>
         <div className="text-xs font-semibold text-gray-200 mb-1">Recent Purchasers</div>
         <div className="flex items-center mt-1">
-          {recentPurchasers.map((user, idx) => (
+          {recentPurchasers.map((user: { name: string; avatar: string }, idx: number) => (
             <img
               key={user.name}
               src={user.avatar}
@@ -123,12 +114,12 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
               <YAxis hide />
               <Tooltip contentStyle={{ background: '#1e293b', border: 'none', color: '#f1f5f9' }} />
               <Bar dataKey="paypal" radius={[4, 4, 0, 0]} fill="#38bdf8">
-                {paymentsData.map((entry, idx) => (
+                {paymentsData.map((entry: { day: string; paypal: number; credit: number }, idx: number) => (
                   <Cell key={`cell-paypal-${idx}`} fill="#38bdf8" />
                 ))}
               </Bar>
               <Bar dataKey="credit" radius={[4, 4, 0, 0]} fill="#64748b">
-                {paymentsData.map((entry, idx) => (
+                {paymentsData.map((entry: { day: string; paypal: number; credit: number }, idx: number) => (
                   <Cell key={`cell-credit-${idx}`} fill="#64748b" />
                 ))}
               </Bar>
@@ -173,7 +164,7 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
                 endAngle={-270}
                 paddingAngle={2}
               >
-                {productsData.map((entry, idx) => (
+                {productsData.map((entry: { name: string; value: number; color: string }, idx: number) => (
                   <Cell key={`cell-product-${idx}`} fill={entry.color} />
                 ))}
               </Pie>

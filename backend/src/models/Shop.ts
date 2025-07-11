@@ -101,6 +101,7 @@ export interface IShop extends Document {
   rating?: IShopRating;
   status: 'active' | 'inactive' | 'suspended';
   commission?: number;
+  couriers?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -116,6 +117,7 @@ const ShopSchema = new Schema<IShop>({
   rating: { type: ShopRatingSchema, default: undefined },
   status: { type: String, enum: ['active', 'inactive', 'suspended'], required: true },
   commission: { type: Number },
+  couriers: [{ type: Schema.Types.ObjectId, ref: 'Courier' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

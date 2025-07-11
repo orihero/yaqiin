@@ -12,9 +12,10 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'));
 const Login = React.lazy(() => import('./pages/Login/Login'));
 const Users = React.lazy(() => import('./pages/Users/Users'));
 const Shops = React.lazy(() => import('./pages/Shops/Shops'));
+const ShopDetails = React.lazy(() => import('./pages/Shops/ShopDetails'));
 const Products = React.lazy(() => import('./pages/Products/Products'));
 const Categories = React.lazy(() => import('./pages/Categories/Categories'));
-const Orders = React.lazy(() => import('./pages/Orders/Orders'));
+const Deliveries = React.lazy(() => import('./pages/Deliveries/Deliveries'));
 const Couriers = React.lazy(() => import('./pages/Couriers/Couriers'));
 const SupportTickets = React.lazy(() => import('./pages/SupportTickets/SupportTickets'));
 const Settings = React.lazy(() => import('./pages/Settings/Settings'));
@@ -52,9 +53,10 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/users" element={<Users />} />
               <Route path="/shops" element={<Shops />} />
+              <Route path="/shops/:shopId" element={<ShopDetails />} />
               <Route path="/products" element={<Products />} />
               <Route path="/categories" element={<Categories />} />
-              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders" element={<Deliveries />} />
               <Route path="/couriers" element={<Couriers />} />
               <Route path="/support-tickets" element={<SupportTickets />} />
               <Route path="/settings" element={<Settings />} />

@@ -16,9 +16,9 @@ export interface IAddress extends Document {
 
 const AddressSchema = new Schema<IAddress>({
   title: { type: String, required: true },
-  street: { type: String, required: true },
-  city: { type: String, required: true },
-  district: { type: String, required: true },
+  street: { type: String }, // not required
+  city: { type: String }, // not required
+  district: { type: String }, // not required
   postalCode: { type: String },
   coordinates: {
     lat: { type: Number, required: true },
@@ -28,7 +28,7 @@ const AddressSchema = new Schema<IAddress>({
 });
 
 export interface IUserPreferences {
-  language: 'uz' | 'ru';
+  language: 'uz' | 'ru' | 'en';
   notifications: {
     orderUpdates: boolean;
     promotions: boolean;
@@ -37,7 +37,7 @@ export interface IUserPreferences {
 }
 
 const UserPreferencesSchema = new Schema<IUserPreferences>({
-  language: { type: String, enum: ['uz', 'ru'], required: true },
+  language: { type: String, enum: ['uz', 'ru', 'en'], required: true },
   notifications: {
     orderUpdates: { type: Boolean, default: true },
     promotions: { type: Boolean, default: true },
@@ -47,6 +47,7 @@ const UserPreferencesSchema = new Schema<IUserPreferences>({
 
 export interface IUser extends Document {
   telegramId: string;
+  chat_id?: number;
   username?: string;
   firstName?: string;
   lastName?: string;
@@ -65,6 +66,7 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>({
   telegramId: { type: String, unique: true, sparse: true },
+  chat_id: { type: Number },
   username: { type: String },
   firstName: { type: String },
   lastName: { type: String },

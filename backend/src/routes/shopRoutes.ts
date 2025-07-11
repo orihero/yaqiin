@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import Shop from '../models/Shop';
 import { parseQuery } from '../utils/queryHelper';
+import mongoose from 'mongoose';
+import Courier from '../models/Courier';
 
 const router = Router();
 
@@ -64,6 +66,63 @@ router.delete('/:id', async (req, res, next) => {
     res.json({ success: true, data: null, message: 'Shop deleted' });
   } catch (err) {
     next(err);
+  }
+});
+
+// Assign a courier to a shop
+router.post('/:id/couriers/:courierId', async (req, res, next) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return next({ status: 404, message: 'Shop not found' });
+    const courierId = req.params.courierId;
+    if (!shop.couriers) shop.couriers = [];
+    if (!shop.couriers.some(id => id.toString() === courierId)) {
+      shop.couriers.push(new mongoose.Types.ObjectId(courierId));
+      await shop.save();
+    }
+    res.json({ success: true, data: shop, message: 'Courier assigned to shop' });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to assign courier', details: err });
+  }
+});
+
+// Unassign a courier from a shop
+router.delete('/:id/couriers/:courierId', async (req, res, next) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return next({ status: 404, message: 'Shop not found' });
+    const courierId = req.params.courierId;
+    if (shop.couriers) {
+      shop.couriers = shop.couriers.filter(id => id.toString() !== courierId);
+      await shop.save();
+    }
+    res.json({ success: true, data: shop, message: 'Courier unassigned from shop' });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to unassign courier', details: err });
+  }
+});
+
+// Get all couriers assigned to a shop
+router.get('/:id/couriers', async (req, res, next) => {
+  try {
+    const shop = await Shop.findById(req.params.id).populate('couriers');
+    if (!shop) return next({ status: 404, message: 'Shop not found' });
+    res.json({ success: true, data: shop.couriers || [] });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to get assigned couriers', details: err });
+  }
+});
+
+// Get all couriers not assigned to a shop (available for assignment)
+router.get('/:id/available-couriers', async (req, res, next) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return next({ status: 404, message: 'Shop not found' });
+    const assignedIds = (shop.couriers || []).map(id => id.toString());
+    const availableCouriers = await Courier.find({ _id: { $nin: assignedIds } });
+    res.json({ success: true, data: availableCouriers });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to get available couriers', details: err });
   }
 });
 

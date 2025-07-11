@@ -1,22 +1,41 @@
+// Extend the Window interface to include Telegram for TypeScript
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: {
+        initData?: string;
+        // Add more mock properties if needed
+      };
+    };
+  }
+}
+// Mock Telegram WebApp for local development if ?mockTelegram is in the URL
+if (window.location.search.includes('mockTelegram')) {
+  window.Telegram = {
+    WebApp: {
+      initData: 'user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%7D&chat_instance=abcdef1234567890&auth_date=1710000000&hash=abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+      // Add more mock properties if needed
+    }
+  };
+}
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../index.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 // i18n setup
 import './i18n';
-import LoadingScreen from './screens/LoadingScreen';
-import OnboardingScreen from './screens/OnboardingScreen';
 import HomeScreen from './screens/HomeScreen/index';
-import ProductDetails from './screens/ProductDetails';
+import LoadingScreen from './screens/LoadingScreen';
 import MyCartScreen from './screens/MyCartScreen';
-import ProfileScreen from './screens/ProfileScreen/index';
+import OnboardingScreen from './screens/OnboardingScreen';
 import OrderScreen from './screens/OrderScreen';
-import { useAuthCheck } from './hooks/useAuthCheck';
-import { useUserStore } from './store/userStore';
+import ProductDetails from './screens/ProductDetails';
+import ProfileScreen from './screens/ProfileScreen/index';
 import api from './services/api';
+import { useUserStore } from './store/userStore';
 
 async function telegramMiniAppAuth(setUser: (user: any, token: string) => void) {
   // @ts-ignore

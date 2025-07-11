@@ -13,6 +13,12 @@ export const getOrders = async (page = 1, limit = 10): Promise<OrderListResponse
   return response.data;
 };
 
+export const getOrdersByShop = async (shopId: string, page = 1, limit = 10): Promise<OrderListResponse> => {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit), shopId });
+  const response = await api.get(`/orders?${params.toString()}`);
+  return response.data;
+};
+
 export const createOrder = async (input: any): Promise<Order> => {
   const { orderNumber, ...rest } = input;
   const response = await api.post('/orders', rest);

@@ -6,6 +6,7 @@ import ShopFormModal from './components/ShopFormModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { Shop } from '@yaqiin/shared/types/shop';
 import { User } from '@yaqiin/shared/types/user';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -34,6 +35,7 @@ export default function ShopsPage() {
   const [editShop, setEditShop] = useState<Shop | null>(null);
   const [deleteShop, setDeleteShop] = useState<Shop | null>(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery<{ success: boolean; data: Shop[]; meta: { total: number; page: number; limit: number; totalPages: number } }, Error>({
     queryKey: ['shops', page, limit, search],
@@ -128,7 +130,12 @@ export default function ShopsPage() {
               <tr><td colSpan={7} className="text-center py-8">No shops found.</td></tr>
             ) : (
               data.data.map((shop: Shop, idx: number) => (
-                <tr key={shop._id} className="border-b border-[#2e3650] hover:bg-[#202840] transition">
+                <tr
+                  key={shop._id}
+                  className="border-b border-[#2e3650] hover:bg-[#202840] transition cursor-pointer"
+                  onClick={() => navigate(`/shops/${shop._id}`)}
+                  title="View shop details"
+                >
                   <td className="py-3 px-4">{(page - 1) * limit + idx + 1}</td>
                   <td className="py-3 px-4 font-semibold">{shop.name}</td>
                   <td className="py-3 px-4">{
@@ -139,7 +146,7 @@ export default function ShopsPage() {
                   <td className="py-3 px-4">{shop.contactInfo?.phoneNumber}</td>
                   <td className="py-3 px-4">{shop.address?.city}</td>
                   <td className="py-3 px-4 capitalize">{shop.status}</td>
-                  <td className="py-3 px-4 flex gap-3">
+                  <td className="py-3 px-4 flex gap-3" onClick={e => e.stopPropagation()}>
                     <button onClick={() => { setEditShop(shop); setShowModal(true); }} className="hover:text-blue-400" title="Edit">
                       <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z"/></svg>
                     </button>

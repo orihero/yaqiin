@@ -94,7 +94,9 @@ export interface IOrder extends Document {
   deliveryAddress: IOrderAddress;
   paymentMethod: 'cash_on_delivery' | 'bank_transfer';
   paymentStatus: 'pending' | 'paid' | 'failed';
-  status: string;
+  status: 'created' | 'packing' | 'courier_picked' | 'delivered' | 'paid' | 'rejected_by_shop' | 'rejected_by_courier' | 'cancelled_by_client';
+  rejectionReason?: string;
+  cancellationReason?: string;
   statusHistory?: IOrderStatusHistory[];
   scheduledDelivery?: IOrderScheduledDelivery;
   estimatedDeliveryTime?: Date;
@@ -115,7 +117,9 @@ const OrderSchema = new Schema<IOrder>({
   deliveryAddress: { type: OrderAddressSchema, required: true },
   paymentMethod: { type: String, enum: ['cash_on_delivery', 'bank_transfer'], required: true },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], required: true },
-  status: { type: String, required: true },
+  status: { type: String, enum: ['created', 'packing', 'courier_picked', 'delivered', 'paid', 'rejected_by_shop', 'rejected_by_courier', 'cancelled_by_client'], required: true },
+  rejectionReason: { type: String },
+  cancellationReason: { type: String },
   statusHistory: [OrderStatusHistorySchema],
   scheduledDelivery: { type: OrderScheduledDeliverySchema },
   estimatedDeliveryTime: { type: Date },

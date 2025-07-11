@@ -2,6 +2,11 @@ import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import type { DashboardStats } from '../../../../../shared/types/analytics';
+
+interface AnalyticsChartProps {
+  stats?: DashboardStats;
+}
 
 const mockData = [
   { day: 'Mon', value1: 0, value2: 0 },
@@ -13,7 +18,8 @@ const mockData = [
   { day: 'Sun', value1: 30, value2: 24 },
 ];
 
-function AnalyticsChart() {
+function AnalyticsChart({ stats }: AnalyticsChartProps) {
+  // You can use stats here as needed
   return (
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
