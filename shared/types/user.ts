@@ -13,7 +13,7 @@ export interface Address {
 }
 
 export interface UserPreferences {
-  language: 'uz' | 'ru';
+  language: 'uz' | 'ru' | 'en';
   notifications: {
     orderUpdates: boolean;
     promotions: boolean;
@@ -24,6 +24,7 @@ export interface UserPreferences {
 export interface User {
   _id: string;
   telegramId: string;
+  chat_id?: number;
   username?: string;
   firstName?: string;
   lastName?: string;

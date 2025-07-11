@@ -122,13 +122,13 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[9999]">
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-all"
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-all z-[9999]"
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className="fixed top-0 right-0 h-full w-full max-w-xl bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+      <div className="fixed top-0 right-0 h-full w-full max-w-xl bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0 z-[99999]">
         <h2 className="text-xl font-bold mb-4">{isEdit ? 'Edit Shop' : 'Add Shop'}</h2>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         {renderDetails(details)}

@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { LOCALSTORAGE_AUTH_KEY } from '../store/auth';
 
 // You can set this to your actual API base URL or use an environment variable
 const BASE_API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -11,9 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Get token from localStorage (or sessionStorage if you prefer)
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const auth = JSON.parse(localStorage.getItem(LOCALSTORAGE_AUTH_KEY) || '{}');
+    if (auth.token) {
+      config.headers['Authorization'] = `Bearer ${auth.token}`;
     }
     // Do not handle navigation or throw errors here
     return config;
@@ -26,12 +27,12 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: any) => {
     // Handle global errors (e.g., auth, network)
-    if (error.response?.status === 401) {
-      // Unauthorized, redirect to login
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-    }
+    // if (error.response?.status === 401) {
+    //   // Unauthorized, redirect to login
+    //   if (window.location.pathname !== '/login') {
+    //     window.location.href = '/login';
+    //   }
+    // }
     return Promise.reject(error);
   }
 );

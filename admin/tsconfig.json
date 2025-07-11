@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@yaqiin/shared/*": ["../../shared/*"]
+      "@yaqiin/shared/*": ["../../shared/*"],
+      "src/*": ["./src/*"]
     },
     "jsx": "react-jsx",
     "module": "esnext",

@@ -17,7 +17,7 @@ interface AuthState {
   hydrate: () => void;
 }
 
-const LOCAL_KEY = 'admin_auth';
+export const LOCALSTORAGE_AUTH_KEY = 'admin_auth';
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
@@ -25,14 +25,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   login: (token, user) => {
     set({ token, user, isAuthenticated: true });
-    localStorage.setItem(LOCAL_KEY, JSON.stringify({ token, user }));
+    localStorage.setItem(LOCALSTORAGE_AUTH_KEY, JSON.stringify({ token, user }));
   },
   logout: () => {
     set({ token: null, user: null, isAuthenticated: false });
-    localStorage.removeItem(LOCAL_KEY);
+    localStorage.removeItem(LOCALSTORAGE_AUTH_KEY);
   },
   hydrate: () => {
-    const data = localStorage.getItem(LOCAL_KEY);
+    const data = localStorage.getItem(LOCALSTORAGE_AUTH_KEY);
     if (data) {
       const { token, user } = JSON.parse(data);
       set({ token, user, isAuthenticated: !!token });

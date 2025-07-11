@@ -13,6 +13,7 @@ export default function UsersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<{ success: boolean; data: User[]; meta: { total: number; page: number; limit: number; totalPages: number } }, Error>({
@@ -144,6 +145,20 @@ export default function UsersPage() {
                     <button onClick={() => setDeleteUser(user)} className="hover:text-red-400" title="Delete">
                       <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                     </button>
+                    <button
+                      className="hover:text-green-400"
+                      title="Copy User ID"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(user._id);
+                        setCopiedUserId(user._id);
+                        setTimeout(() => setCopiedUserId(null), 1500);
+                      }}
+                    >
+                      📋
+                    </button>
+                    {copiedUserId === user._id && (
+                      <span className="ml-2 text-green-400 text-xs">Copied!</span>
+                    )}
                   </td>
                 </tr>
               ))

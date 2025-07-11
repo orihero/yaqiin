@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrders, createOrder, updateOrder, deleteOrder } from '../../services/orderService';
-import { Order, OrderListResponse } from '../../services/orderService';
 import { Icon } from '@iconify/react';
-import OrderFormModal from './components/OrderFormModal';
 import { getAllUsers } from '../../services/userService';
 import { getAllShops } from '../../services/shopService';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { Order } from '@yaqiin/shared/types/order';
+import { createOrder, deleteOrder, getOrders, OrderListResponse, updateOrder } from '../../services/deliveryService';
+import OrderFormModal from './components/DeliveryFormModal';
 
 const Orders: React.FC = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);

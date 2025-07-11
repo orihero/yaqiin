@@ -23,6 +23,11 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "dependencies": {
+    "@types/leaflet-draw": "^1.0.12",
+    "leaflet-draw": "^1.0.4"
   }
 }

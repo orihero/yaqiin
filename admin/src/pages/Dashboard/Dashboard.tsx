@@ -5,15 +5,7 @@ import DashboardWidgetsSection from './components/DashboardWidgetsSection';
 import TopGroceryProductsTable from './components/TopGroceryProductsTable';
 import { useQuery } from '@tanstack/react-query';
 import analyticsService from '../../services/analyticsService';
-
-// Define the expected dashboard stats type
-interface DashboardStats {
-  totalOrders?: { value: number; percent?: number };
-  newUsers?: { value: number; percent?: number };
-  totalRevenue?: { value: number; percent?: number };
-  topProducts?: any[];
-  // ...add more fields as needed
-}
+import type { DashboardStats } from '../../../../shared/types/analytics';
 
 function Dashboard() {
   const { data, isLoading, error } = useQuery<{ success: boolean; data: DashboardStats }, Error>({

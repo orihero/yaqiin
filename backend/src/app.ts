@@ -73,6 +73,9 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      // Start Telegram bots
+      // require('./bots/mainBot');
+      require('./bots/courierBot');
     });
   })
   .catch((err) => {

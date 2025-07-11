@@ -6,6 +6,8 @@ import Header from '../../components/Header';
 import TabBar from '../../components/TabBar';
 import { useSwipeable } from 'react-swipeable';
 import type { CartItem as CartItemType } from '../../store/cartStore';
+import { createOrder } from '../../services/orderService';
+import { toast } from 'react-toastify';
 
 type CartItemProps = {
   item: CartItemType;
@@ -90,6 +92,8 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
 const MyCartScreen = () => {
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart } = useCartStore();
   const navigate = useNavigate();
+  const [checkoutOpen, setCheckoutOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const getTotal = () => cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
@@ -101,6 +105,23 @@ const MyCartScreen = () => {
     else if (tab === 'Search') navigate('/search');
     else if (tab === 'My Cart') navigate('/cart');
     else if (tab === 'Profile') navigate('/profile');
+  };
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      await createOrder({
+        items: cart.map(item => ({ productId: item.product._id, quantity: item.quantity })),
+      });
+      toast.success('Order placed successfully!');
+      clearCart();
+      setCheckoutOpen(false);
+      // Optionally navigate to order history or confirmation page
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to place order');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,13 +162,38 @@ const MyCartScreen = () => {
             <button
               className="w-full bg-[#232c43] text-white rounded-full py-4 text-lg font-bold shadow-md disabled:opacity-60"
               disabled={cart.length === 0}
-              onClick={() => {/* handle checkout */ }}
+              onClick={() => setCheckoutOpen(true)}
             >
               Checkout
             </button>
           </div>
         </div>
       </div>
+      {/* Checkout Confirmation Modal */}
+      {checkoutOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-sm w-full flex flex-col items-center">
+            <h2 className="text-xl font-bold mb-4 text-[#232c43]">Confirm Checkout</h2>
+            <p className="mb-4 text-gray-600">Are you sure you want to place this order for <span className="font-bold">${getTotal().toFixed(2)}</span>?</p>
+            <div className="flex gap-4 w-full">
+              <button
+                className="flex-1 bg-gray-200 text-[#232c43] rounded-full py-2 font-semibold"
+                onClick={() => setCheckoutOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 bg-[#232c43] text-white rounded-full py-2 font-semibold"
+                onClick={handleCheckout}
+                disabled={loading}
+              >
+                {loading ? 'Placing...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Bottom Navigation (reuse from HomeScreen if needed) */}
       <TabBar current="My Cart" onTabChange={handleTabChange} />
     </div>

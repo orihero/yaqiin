@@ -30,4 +30,29 @@ export const deleteShop = async (_id: string) => {
 export const getAllShops = async (): Promise<Shop[]> => {
   const res = await api.get('/shops');
   return res.data.data;
+};
+
+export const getShop = async (shopId: string) => {
+  const res = await api.get(`/shops/${shopId}`);
+  return res.data;
+};
+
+export const getShopCouriers = async (shopId: string) => {
+  const res = await api.get(`/shops/${shopId}/couriers`);
+  return res.data;
+};
+
+export const getShopAvailableCouriers = async (shopId: string) => {
+  const res = await api.get(`/shops/${shopId}/available-couriers`);
+  return res.data;
+};
+
+export const assignCourierToShop = async (shopId: string, courierId: string) => {
+  const res = await api.post(`/shops/${shopId}/couriers/${courierId}`);
+  return res.data;
+};
+
+export const unassignCourierFromShop = async (shopId: string, courierId: string) => {
+  const res = await api.delete(`/shops/${shopId}/couriers/${courierId}`);
+  return res.data;
 }; 
