@@ -6,7 +6,7 @@ export interface NotificationTitleMessage {
 export interface Notification {
   _id: string;
   recipientId: string;
-  recipientType: 'client' | 'courier' | 'admin' | 'shop_owner';
+  recipientType: 'client' | 'courier' | 'admin' | 'shop_owner' | 'operator';
   type: 'order_update' | 'promotion' | 'system' | 'chat_message';
   title: NotificationTitleMessage;
   message: NotificationTitleMessage;

@@ -14,6 +14,7 @@ const userRoles = [
   { value: 'client', label: 'Client' },
   { value: 'courier', label: 'Courier' },
   { value: 'shop_owner', label: 'Shop Owner' },
+  { value: 'operator', label: 'Operator' },
 ];
 const priorities = [
   { value: 'low', label: 'Low' },

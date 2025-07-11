@@ -94,9 +94,8 @@ export interface IOrder extends Document {
   deliveryAddress: IOrderAddress;
   paymentMethod: 'cash_on_delivery' | 'bank_transfer';
   paymentStatus: 'pending' | 'paid' | 'failed';
-  status: 'created' | 'packing' | 'courier_picked' | 'delivered' | 'paid' | 'rejected_by_shop' | 'rejected_by_courier' | 'cancelled_by_client';
+  status: 'created' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected';
   rejectionReason?: string;
-  cancellationReason?: string;
   statusHistory?: IOrderStatusHistory[];
   scheduledDelivery?: IOrderScheduledDelivery;
   estimatedDeliveryTime?: Date;
@@ -105,6 +104,10 @@ export interface IOrder extends Document {
   adminNotes?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IOrderModel extends mongoose.Model<IOrder> {
+  updateStatus(orderId: string, newStatus: string, updatedBy: string, reason?: string): Promise<IOrder | null>;
 }
 
 const OrderSchema = new Schema<IOrder>({
@@ -117,9 +120,8 @@ const OrderSchema = new Schema<IOrder>({
   deliveryAddress: { type: OrderAddressSchema, required: true },
   paymentMethod: { type: String, enum: ['cash_on_delivery', 'bank_transfer'], required: true },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], required: true },
-  status: { type: String, enum: ['created', 'packing', 'courier_picked', 'delivered', 'paid', 'rejected_by_shop', 'rejected_by_courier', 'cancelled_by_client'], required: true },
+  status: { type: String, enum: ['created', 'packing', 'packed', 'courier_picked', 'delivered', 'paid', 'rejected'], required: true },
   rejectionReason: { type: String },
-  cancellationReason: { type: String },
   statusHistory: [OrderStatusHistorySchema],
   scheduledDelivery: { type: OrderScheduledDeliverySchema },
   estimatedDeliveryTime: { type: Date },
@@ -145,4 +147,22 @@ OrderSchema.pre('save', async function (next) {
   next();
 });
 
-export default mongoose.model<IOrder>('Order', OrderSchema); 
+OrderSchema.statics.updateStatus = async function(orderId, newStatus, updatedBy, reason) {
+  const order = await this.findById(orderId);
+  if (!order) return null;
+  order.status = newStatus;
+  if (newStatus === 'rejected' && reason) {
+    order.rejectionReason = reason;
+  }
+  order.statusHistory = order.statusHistory || [];
+  order.statusHistory.push({
+    status: newStatus,
+    timestamp: new Date(),
+    updatedBy,
+    notes: reason || undefined
+  });
+  await order.save();
+  return order;
+};
+
+export default mongoose.model<IOrder, IOrderModel>('Order', OrderSchema); 

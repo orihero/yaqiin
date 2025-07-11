@@ -1,7 +1,7 @@
 export interface SupportTicketResponse {
   _id: string;
   responderId: string;
-  responderRole: 'admin' | 'support' | 'customer';
+  responderRole: 'admin' | 'support' | 'customer' | 'operator';
   message: string;
   attachments?: string[];
   isInternal?: boolean;
@@ -20,7 +20,7 @@ export interface SupportTicket {
   _id: string;
   ticketNumber: string;
   userId: string;
-  userRole: 'client' | 'courier' | 'shop_owner';
+  userRole: 'client' | 'courier' | 'shop_owner' | 'operator';
   orderId?: string;
   category: string;
   subcategory?: string;

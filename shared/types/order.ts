@@ -52,7 +52,7 @@ export interface Order {
   deliveryAddress: OrderAddress;
   paymentMethod: 'cash_on_delivery' | 'bank_transfer';
   paymentStatus: 'pending' | 'paid' | 'failed';
-  status: 'created' | 'packing' | 'courier_picked' | 'delivered' | 'paid' | 'rejected_by_shop' | 'rejected_by_courier' | 'cancelled_by_client';
+  status: 'created' | 'operator_confirmed' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected_by_shop' | 'rejected_by_courier' | 'cancelled_by_client';
   rejectionReason?: string;
   cancellationReason?: string;
   statusHistory?: OrderStatusHistory[];

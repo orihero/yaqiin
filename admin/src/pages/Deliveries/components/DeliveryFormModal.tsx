@@ -114,30 +114,32 @@ export default function OrderFormModal({ open = true, order, loading = false, er
       return;
     }
     setFormError(null);
+    const orderData: any = {
+      customerId,
+      shopId,
+      items,
+      pricing: {
+        total,
+        itemsTotal: total,
+        deliveryFee,
+        serviceFee,
+        tax,
+        discount,
+      },
+      deliveryAddress: address,
+      paymentMethod,
+      paymentStatus,
+      notes,
+      adminNotes,
+      scheduledDelivery: scheduledDate && scheduledTimeSlot ? { date: new Date(scheduledDate), timeSlot: scheduledTimeSlot } : undefined,
+      estimatedDeliveryTime: estimatedDeliveryTime ? new Date(estimatedDeliveryTime) : undefined,
+      actualDeliveryTime: actualDeliveryTime ? new Date(actualDeliveryTime) : undefined,
+    };
+    if (courierId) orderData.courierId = courierId;
+    if (!order) orderData.status = 'created';
+    else orderData.status = status;
     if (onSubmit) {
-      onSubmit({
-        customerId,
-        shopId,
-        courierId,
-        items,
-        pricing: {
-          total,
-          itemsTotal: total,
-          deliveryFee,
-          serviceFee,
-          tax,
-          discount,
-        },
-        deliveryAddress: address,
-        paymentMethod,
-        paymentStatus,
-        status,
-        notes,
-        adminNotes,
-        scheduledDelivery: scheduledDate && scheduledTimeSlot ? { date: new Date(scheduledDate), timeSlot: scheduledTimeSlot } : undefined,
-        estimatedDeliveryTime: estimatedDeliveryTime ? new Date(estimatedDeliveryTime) : undefined,
-        actualDeliveryTime: actualDeliveryTime ? new Date(actualDeliveryTime) : undefined,
-      });
+      onSubmit(orderData);
     }
     onClose();
   };

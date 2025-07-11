@@ -7,4 +7,6 @@ export interface Setting {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  flagType?: 'bool' | 'text' | 'select';
+  options?: string[];
 } 

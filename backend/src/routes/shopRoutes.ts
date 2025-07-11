@@ -3,6 +3,7 @@ import Shop from '../models/Shop';
 import { parseQuery } from '../utils/queryHelper';
 import mongoose from 'mongoose';
 import Courier from '../models/Courier';
+import Group from '../models/Group';
 
 const router = Router();
 
@@ -123,6 +124,16 @@ router.get('/:id/available-couriers', async (req, res, next) => {
     res.json({ success: true, data: availableCouriers });
   } catch (err) {
     next({ status: 400, message: 'Failed to get available couriers', details: err });
+  }
+});
+
+// List all unassigned groups (shopId is null)
+router.get('/groups/unassigned', async (req, res, next) => {
+  try {
+    const groups = await Group.find({ shopId: null });
+    res.json({ success: true, data: groups });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to fetch groups', details: err });
   }
 });
 

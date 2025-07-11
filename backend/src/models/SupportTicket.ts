@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ISupportTicketResponse {
   responderId: mongoose.Types.ObjectId;
-  responderRole: 'admin' | 'support' | 'customer';
+  responderRole: 'admin' | 'support' | 'customer' | 'operator';
   message: string;
   attachments?: string[];
   isInternal?: boolean;
@@ -11,7 +11,7 @@ export interface ISupportTicketResponse {
 
 const SupportTicketResponseSchema = new Schema<ISupportTicketResponse>({
   responderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  responderRole: { type: String, enum: ['admin', 'support', 'customer'], required: true },
+  responderRole: { type: String, enum: ['admin', 'support', 'customer', 'operator'], required: true },
   message: { type: String, required: true },
   attachments: [{ type: String }],
   isInternal: { type: Boolean, default: false },
@@ -37,7 +37,7 @@ const SupportTicketResolutionSchema = new Schema<ISupportTicketResolution>({
 export interface ISupportTicket extends Document {
   ticketNumber: string;
   userId: mongoose.Types.ObjectId;
-  userRole: 'client' | 'courier' | 'shop_owner';
+  userRole: 'client' | 'courier' | 'shop_owner' | 'operator';
   orderId?: mongoose.Types.ObjectId;
   category: string;
   subcategory?: string;
@@ -62,7 +62,7 @@ export interface ISupportTicket extends Document {
 const SupportTicketSchema = new Schema<ISupportTicket>({
   ticketNumber: { type: String, required: true, unique: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  userRole: { type: String, enum: ['client', 'courier', 'shop_owner'], required: true },
+  userRole: { type: String, enum: ['client', 'courier', 'shop_owner', 'operator'], required: true },
   orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
   category: { type: String, required: true },
   subcategory: { type: String },

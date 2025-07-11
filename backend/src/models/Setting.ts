@@ -6,6 +6,8 @@ export interface ISetting extends Document {
   type: 'system' | 'business' | 'notification';
   description?: string;
   isActive: boolean;
+  flagType?: 'bool' | 'text' | 'select';
+  options?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +18,8 @@ const SettingSchema = new Schema<ISetting>({
   type: { type: String, enum: ['system', 'business', 'notification'], required: true },
   description: { type: String },
   isActive: { type: Boolean, required: true },
+  flagType: { type: String, enum: ['bool', 'text', 'select'], required: false },
+  options: { type: [String], required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
