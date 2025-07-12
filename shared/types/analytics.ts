@@ -39,7 +39,6 @@ export interface AnalyticsMetrics {
   totalUsers: number;
   activeUsers: number;
   newUsers: number;
-  totalDeliveries: number;
   averageDeliveryTime: number;
   orderCancellationRate: number;
   averageOrderValue: number;

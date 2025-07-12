@@ -2,7 +2,6 @@ import { Router } from 'express';
 import Shop from '../models/Shop';
 import { parseQuery } from '../utils/queryHelper';
 import mongoose from 'mongoose';
-import Courier from '../models/Courier';
 import Group from '../models/Group';
 
 const router = Router();
@@ -120,7 +119,11 @@ router.get('/:id/available-couriers', async (req, res, next) => {
     const shop = await Shop.findById(req.params.id);
     if (!shop) return next({ status: 404, message: 'Shop not found' });
     const assignedIds = (shop.couriers || []).map(id => id.toString());
-    const availableCouriers = await Courier.find({ _id: { $nin: assignedIds } });
+    // Find users with role 'courier' and _id not in assignedIds
+    const availableCouriers = await require('../models/User').default.find({
+      role: 'courier',
+      _id: { $nin: assignedIds },
+    });
     res.json({ success: true, data: availableCouriers });
   } catch (err) {
     next({ status: 400, message: 'Failed to get available couriers', details: err });

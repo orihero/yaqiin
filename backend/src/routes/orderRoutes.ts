@@ -1,231 +1,291 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import Order from '../models/Order';
-import Product from '../models/Product';
-import Shop from '../models/Shop';
-import User from '../models/User';
-import Courier from '../models/Courier';
-import { parseQuery } from '../utils/queryHelper';
-import authMiddleware from '../utils/authMiddleware';
-import mainBot from '../bots/mainBot';
-import courierBot from '../bots/courierBot';
-import { Markup } from 'telegraf';
+import { NextFunction, Request, Response, Router } from "express";
+import { Markup } from "telegraf";
+import courierBot from "../bots/courierBot";
+import Order from "../models/Order";
+import Product from "../models/Product";
+import Shop from "../models/Shop";
+import User from "../models/User";
+import authMiddleware from "../utils/authMiddleware";
+import { parseQuery } from "../utils/queryHelper";
+import { escapeMarkdownV2, escapeMarkdownV2Url } from "../utils/telegram";
 
 const router = Router();
 
-// List all orders for the authenticated user, with product images
-router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { filter, page, limit, skip } = parseQuery(req, ['orderNumber', 'status', 'paymentStatus', 'notes']);
-    // If user is not admin, only return their orders
-    if ((req as any).user.role !== 'admin') {
-      filter.customerId = (req as any).user!._id;
-    }
-    // Fetch orders and total count
-    const [orders, total] = await Promise.all([
-      Order.find(filter).skip(skip).limit(limit).lean(),
-      Order.countDocuments(filter)
-    ]);
-
-    // Get all unique productIds from all orders
-    const productIds = [
-      ...new Set(orders.flatMap(order => order.items.map(item => item.productId.toString())))
-    ];
-
-    // Fetch products and map by id
-    const products = await Product.find({ _id: { $in: productIds } }, { images: 1 }).lean();
-    const productImageMap = Object.fromEntries(
-      products.map(p => [p._id.toString(), p.images?.[0] || null])
-    );
-
-    // Attach image to each order item
-    const ordersWithImages = orders.map(order => ({
-      ...order,
-      items: order.items.map(item => ({
-        ...item,
-        image: productImageMap[item.productId.toString()] || null
-      }))
-    }));
-
-    res.json({
-      success: true,
-      data: ordersWithImages,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
+router.get(
+  "/",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { filter, page, limit, skip } = parseQuery(req, [
+        "orderNumber",
+        "status",
+        "paymentStatus",
+        "notes",
+      ]);
+      // If user is not admin, only return their orders
+      if ((req as any).user.role !== "admin") {
+        filter.customerId = (req as any).user!._id;
       }
-    });
-  } catch (err) {
-    next(err);
+      // Fetch orders and total count
+      const [orders, total] = await Promise.all([
+        Order.find(filter).skip(skip).limit(limit).lean(),
+        Order.countDocuments(filter),
+      ]);
+
+      // Get all unique productIds from all orders
+      const productIds = [
+        ...new Set(
+          orders.flatMap((order) =>
+            order.items.map((item) => item.productId.toString())
+          )
+        ),
+      ];
+
+      // Fetch products and map by id
+      const products = await Product.find(
+        { _id: { $in: productIds } },
+        { images: 1 }
+      ).lean();
+      const productImageMap = Object.fromEntries(
+        products.map((p) => [p._id.toString(), p.images?.[0] || null])
+      );
+
+      // Attach image to each order item
+      const ordersWithImages = orders.map((order) => ({
+        ...order,
+        items: order.items.map((item) => ({
+          ...item,
+          image: productImageMap[item.productId.toString()] || null,
+        })),
+      }));
+
+      res.json({
+        success: true,
+        data: ordersWithImages,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
-router.get('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      next({ status: 404, message: 'Order not found' });
-      return;
+router.get(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const order = await Order.findById(req.params.id);
+      if (!order) {
+        next({ status: 404, message: "Order not found" });
+        return;
+      }
+      res.json({ success: true, data: order });
+    } catch (err) {
+      next(err);
     }
-    res.json({ success: true, data: order });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
-router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // Always set status to 'created' on backend
-    const orderData = { ...req.body, status: 'created' };
-    // Only set courierId if provided and not empty
-    if (!orderData.courierId) {
-      delete orderData.courierId;
-    }
-    const order = new Order(orderData);
-    await order.save();
+router.post(
+  "/",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      console.log("[Order Create] Incoming body:", req.body);
+      // Always set status to 'created' on backend
+      const orderData = { ...req.body, status: "created" };
+      // Only set courierId if provided and not empty
+      if (!orderData.courierId) {
+        delete orderData.courierId;
+      }
+      const order = new Order(orderData);
+      await order.save();
+      console.log("[Order Create] Saved order:", order);
 
-    // --- Notification logic ---
-    // Find the shop
-    const shop = await Shop.findById(order.shopId);
-    if (shop) {
-      // Notify shop owner
-      const owner = await User.findById(shop.ownerId);
-      if (owner && owner.telegramId && owner.chat_id) {
-        // Determine next step button text for shop owner
-        const nextStepText = '🛠️ Start Packing';
-        await mainBot.telegram.sendMessage(
-          owner.chat_id,
-          `🆕🛒 Yangi buyurtma!\nOrder ID: ${order._id}\nIltimos, buyurtmani ko'rib chiqing.`,
-          Markup.inlineKeyboard([
-            [
-              Markup.button.callback(nextStepText, `order_next_${order._id}_shop`),
-              Markup.button.callback('❌ Buyurtmani rad etish', `order_reject_${order._id}_shop`)
-            ]
-          ])
-        );
-      }
-      // Notify shop group via orders_chat_id
-      if (shop.orders_chat_id) {
-        // Get client info
-        const client = await User.findById(order.customerId);
-        let clientName = client ? `${client.firstName || ''} ${client.lastName || ''}`.trim() : 'Client';
-        let clientPhone = client?.phoneNumber || '';
-        // Compose order details
-        let orderText = `🆕🛒 Yangi buyurtma!\nOrder ID: ${order._id}\nMijoz: ${clientName}${clientPhone ? `\nTelefon: ${clientPhone}` : ''}\n\nMahsulotlar:`;
-        for (const item of order.items) {
-          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
-        }
-        orderText += `\n\nUmumiy: ${order.pricing.total}`;
-        // Buttons: Confirm/Accept, Call Client
-        const callbackRow = [Markup.button.callback('✅ Qabul qilish', `order_accept_${order._id}`)];
-        const urlRow = clientPhone ? [Markup.button.url('📞 Mijozga qo‘ng‘iroq', `tel:${clientPhone}`)] : [];
-        const keyboard = urlRow.length > 0 ? [callbackRow, urlRow] : [callbackRow];
-        await mainBot.telegram.sendMessage(
-          shop.orders_chat_id,
-          orderText,
-          { reply_markup: Markup.inlineKeyboard(keyboard).reply_markup }
-        );
-      }
-      // Notify couriers
-      if (shop.couriers && shop.couriers.length > 0) {
-        const couriers = await Courier.find({ _id: { $in: shop.couriers } });
-        for (const courier of couriers) {
-          // Get courier user
-          const courierUser = await User.findById(courier.userId);
-          if (courierUser && courierUser.telegramId && courierUser.chat_id) {
-            // Determine next step button text for courier
-            const nextStepText = '✅ Buyurtmani oldim';
+      // --- Notification logic ---
+      // Find the shop
+      const shop = await Shop.findById(order.shopId);
+      console.log("[Order Create] Shop:", shop);
+      if (shop) {
+        // Notify shop owner
+        const owner = await User.findById(shop.ownerId);
+        console.log("[Order Create] Shop owner:", owner);
+        // Notify shop group via orders_chat_id
+        if (shop.orders_chat_id) {
+          // Get client info
+          const client = await User.findById(order.customerId);
+          let clientName = client
+            ? `${client.firstName || ""} ${client.lastName || ""}`.trim()
+            : "Client";
+          let clientPhone = client?.phoneNumber || "";
+          // Compose order details
+          let orderText = `${escapeMarkdownV2('🆕🛒 Yangi buyurtma!')}\nOrder ID: ${escapeMarkdownV2(String(order._id))}\nMijoz: ${escapeMarkdownV2(clientName)}`;
+          if (clientPhone) {
+            const safePhone = clientPhone.replace(/[-()\s]/g, '');
+            // Only one plus, do not double-escape
+            orderText += `\nTelefon: [${escapeMarkdownV2('📞 ' + clientPhone)}](tel:${escapeMarkdownV2Url('+' + safePhone)})`;
+          }
+          orderText += `\n\n${escapeMarkdownV2('Mahsulotlar:')}`;
+          for (const item of order.items) {
+            const productLine = `- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+            orderText += `\n${escapeMarkdownV2(productLine)}`;
+          }
+          orderText += `\n\n${escapeMarkdownV2('Umumiy:')} ${escapeMarkdownV2(String(order.pricing.total))}`;
+          // Buttons: Confirm/Accept
+          const callbackRow = [
+            Markup.button.callback(
+              "✅ Qabul qilish",
+              `order_accept_${order._id}`
+            ),
+          ];
+          // Remove the urlRow and only use callbackRow in the keyboard
+          const keyboard = [callbackRow];
+          const payload = {
+            chat_id: shop.orders_chat_id,
+            text: orderText,
+            parse_mode: 'MarkdownV2',
+            reply_markup: Markup.inlineKeyboard(keyboard).reply_markup,
+          };
+          console.log(
+            "[Order Create] Sending Telegram message to shop.orders_chat_id (order group):",
+            payload
+          );
+          try {
             await courierBot.telegram.sendMessage(
-              courierUser.chat_id,
-              `🆕🚚 Yangi buyurtma!\nOrder ID: ${order._id}\nIltimos, buyurtmani qabul qiling.`,
-              Markup.inlineKeyboard([
-                [
-                  Markup.button.callback(nextStepText, `order_next_${order._id}_courier`),
-                  Markup.button.callback('❌ Buyurtmani rad etish', `order_reject_${order._id}_courier`)
-                ]
-              ])
+              shop.orders_chat_id,
+              orderText,
+              { reply_markup: payload.reply_markup, parse_mode: 'MarkdownV2' }
             );
+          } catch (err: any) {
+            console.error(
+              "[Order Create] Telegram sendMessage error (order group):",
+              err
+            );
+            throw { on: { method: "sendMessage", payload }, response: err };
           }
         }
       }
-    }
-    // --- End notification logic ---
+      // --- End notification logic ---
 
-    res.status(201).json({ success: true, data: order, message: 'Order created' });
-  } catch (err) {
-    next({ status: 400, message: 'Failed to create order', details: err });
+      res
+        .status(201)
+        .json({ success: true, data: order, message: "Order created" });
+    } catch (err: any) {
+      console.error("[Order Create] Error:", err);
+      next({ status: 400, message: "Failed to create order", details: err });
+    }
   }
-});
+);
 
-router.put('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      next({ status: 404, message: 'Order not found' });
-      return;
+router.put(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const order = await Order.findById(req.params.id);
+      if (!order) {
+        next({ status: 404, message: "Order not found" });
+        return;
+      }
+
+      const user = (req as any).user;
+      const newStatus = req.body.status;
+      const isClient = user && user.role === "client";
+      const isShop = user && user.role === "shop_owner";
+      const isCourier = user && user.role === "courier";
+
+      // Enforce status transitions
+      if (newStatus === "cancelled_by_client") {
+        if (!isClient) {
+          res
+            .status(403)
+            .json({
+              success: false,
+              message: "Only clients can cancel orders.",
+            });
+          return;
+        }
+        if (!["created", "packing"].includes(order.status)) {
+          res
+            .status(400)
+            .json({
+              success: false,
+              message:
+                "You can only cancel before the courier picks up the order.",
+            });
+          return;
+        }
+      }
+      if (newStatus === "rejected_by_shop") {
+        if (!isShop) {
+          res
+            .status(403)
+            .json({
+              success: false,
+              message: "Only shop owners can reject orders.",
+            });
+          return;
+        }
+        if (!["created", "packing"].includes(order.status)) {
+          res
+            .status(400)
+            .json({
+              success: false,
+              message: "Shop can only reject before courier picks up.",
+            });
+          return;
+        }
+      }
+      if (newStatus === "rejected_by_courier") {
+        if (!isCourier) {
+          res
+            .status(403)
+            .json({
+              success: false,
+              message: "Only couriers can reject orders.",
+            });
+          return;
+        }
+        if (order.status !== "courier_picked") {
+          res
+            .status(400)
+            .json({
+              success: false,
+              message: "Courier can only reject after picking up.",
+            });
+          return;
+        }
+      }
+
+      // Allow other status transitions as needed (add more rules if required)
+
+      // Update order
+      Object.assign(order, req.body);
+      await order.save();
+      res.json({ success: true, data: order, message: "Order updated" });
+    } catch (err: any) {
+      next({ status: 400, message: "Failed to update order", details: err });
     }
-
-    const user = (req as any).user;
-    const newStatus = req.body.status;
-    const isClient = user && user.role === 'client';
-    const isShop = user && user.role === 'shop_owner';
-    const isCourier = user && user.role === 'courier';
-
-    // Enforce status transitions
-    if (newStatus === 'cancelled_by_client') {
-      if (!isClient) {
-        res.status(403).json({ success: false, message: 'Only clients can cancel orders.' });
-        return;
-      }
-      if (!['created', 'packing'].includes(order.status)) {
-        res.status(400).json({ success: false, message: 'You can only cancel before the courier picks up the order.' });
-        return;
-      }
-    }
-    if (newStatus === 'rejected_by_shop') {
-      if (!isShop) {
-        res.status(403).json({ success: false, message: 'Only shop owners can reject orders.' });
-        return;
-      }
-      if (!['created', 'packing'].includes(order.status)) {
-        res.status(400).json({ success: false, message: 'Shop can only reject before courier picks up.' });
-        return;
-      }
-    }
-    if (newStatus === 'rejected_by_courier') {
-      if (!isCourier) {
-        res.status(403).json({ success: false, message: 'Only couriers can reject orders.' });
-        return;
-      }
-      if (order.status !== 'courier_picked') {
-        res.status(400).json({ success: false, message: 'Courier can only reject after picking up.' });
-        return;
-      }
-    }
-
-    // Allow other status transitions as needed (add more rules if required)
-
-    // Update order
-    Object.assign(order, req.body);
-    await order.save();
-    res.json({ success: true, data: order, message: 'Order updated' });
-  } catch (err) {
-    next({ status: 400, message: 'Failed to update order', details: err });
   }
-});
+);
 
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const order = await Order.findByIdAndDelete(req.params.id);
-    if (!order) {
-      next({ status: 404, message: 'Order not found' });
-      return;
+router.delete(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const order = await Order.findByIdAndDelete(req.params.id);
+      if (!order) {
+        next({ status: 404, message: "Order not found" });
+        return;
+      }
+      res.json({ success: true, data: null, message: "Order deleted" });
+    } catch (err: any) {
+      next(err);
     }
-    res.json({ success: true, data: null, message: 'Order deleted' });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 export default router;

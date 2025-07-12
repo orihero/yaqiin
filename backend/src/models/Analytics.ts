@@ -48,7 +48,6 @@ export interface IAnalyticsMetrics {
   totalUsers: number;
   activeUsers: number;
   newUsers: number;
-  totalDeliveries: number;
   averageDeliveryTime: number;
   orderCancellationRate: number;
   averageOrderValue: number;
@@ -63,7 +62,6 @@ const AnalyticsMetricsSchema = new Schema<IAnalyticsMetrics>({
   totalUsers: { type: Number, required: true },
   activeUsers: { type: Number, required: true },
   newUsers: { type: Number, required: true },
-  totalDeliveries: { type: Number, required: true },
   averageDeliveryTime: { type: Number, required: true },
   orderCancellationRate: { type: Number, required: true },
   averageOrderValue: { type: Number, required: true },

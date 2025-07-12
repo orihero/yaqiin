@@ -17,7 +17,7 @@ export interface CourierEarnings {
 }
 
 export interface CourierStatistics {
-  totalDeliveries: number;
+  totalOrders: number;
   averageDeliveryTime: number;
   successRate: number;
 }

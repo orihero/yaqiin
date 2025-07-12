@@ -6,10 +6,11 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getOrdersByShop } from 'src/services/deliveryService';
+import { getOrdersByShop } from 'src/services/orderService';
 import { assignCourierToShop, getShop, getShopAvailableCouriers, getShopCouriers, unassignCourierFromShop, updateShop } from '../../services/shopService';
 import { getUsers } from '../../services/userService';
 import ShopFormModal from './components/ShopFormModal';
+// No Modal import needed
 
 const TABS = [
   { key: 'info', label: 'Shop Info' },
@@ -28,6 +29,11 @@ export default function ShopDetails() {
   const [editShopModalOpen, setEditShopModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState(false);
   const [tempLocation, setTempLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [courierSearch, setCourierSearch] = useState('');
+  const [assigningCourierId, setAssigningCourierId] = useState<string | null>(null);
+  const [unassigningCourierId, setUnassigningCourierId] = useState<string | null>(null);
+  const [assignError, setAssignError] = useState<string | null>(null);
+  const [unassignError, setUnassignError] = useState<string | null>(null);
 
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -38,6 +44,9 @@ export default function ShopDetails() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [addCourierModalOpen, setAddCourierModalOpen] = useState(false);
+  const [modalCourierSearch, setModalCourierSearch] = useState('');
 
   // Fetch shop details
   const { data: shopData, isLoading, error } = useQuery<{ success: boolean; data: Shop }, Error>({
@@ -57,37 +66,86 @@ export default function ShopDetails() {
     return map;
   }, [usersData]);
 
-  // Fetch deliveries (orders) for this shop
-  const { data: deliveriesData, isLoading: deliveriesLoading, error: deliveriesError } = useQuery<{ success: boolean; data: Order[]; meta: any }, Error>({
-    queryKey: ['shop-deliveries', shopId],
+  // Fetch orders for this shop
+  const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery<{ success: boolean; data: Order[]; meta: any }, Error>({
+    queryKey: ['shop-orders', shopId],
     queryFn: () => getOrdersByShop(shopId!),
     enabled: !!shopId && tab === 'orders',
   });
 
-  // Fetch assigned couriers for this shop
+  // Remove getShopCouriers, getShopAvailableCouriers, and related queries
+  // Add query to fetch users with role 'courier'
+  const { data: courierUsersData, isLoading: courierUsersLoading, error: courierUsersError } = useQuery({
+    queryKey: ['courier-users', shopId],
+    queryFn: async () => {
+      const res = await getUsers(1, 1000, '');
+      return { data: (res.data || []).filter((user: any) => user.role === 'courier') };
+    },
+    enabled: tab === 'couriers',
+  });
+
+  // Fetch assigned couriers
   const { data: assignedCouriersData, isLoading: assignedCouriersLoading, error: assignedCouriersError, refetch: refetchAssignedCouriers } = useQuery({
     queryKey: ['shop-assigned-couriers', shopId],
     queryFn: () => getShopCouriers(shopId!),
     enabled: tab === 'couriers' && !!shopId,
   });
-  // Fetch available couriers for this shop
+
+  // Fetch available couriers (not assigned to this shop)
   const { data: availableCouriersData, isLoading: availableCouriersLoading, error: availableCouriersError, refetch: refetchAvailableCouriers } = useQuery({
-    queryKey: ['shop-available-couriers', shopId],
-    queryFn: () => getShopAvailableCouriers(shopId!),
+    queryKey: ['shop-available-couriers', shopId, courierSearch],
+    queryFn: async () => {
+      const res = await getShopAvailableCouriers(shopId!);
+      // Filter by search
+      const search = courierSearch.trim().toLowerCase();
+      return {
+        data: (res.data || []).filter((user: any) => {
+          if (!search) return true;
+          return (
+            (user.firstName && user.firstName.toLowerCase().includes(search)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(search)) ||
+            (user.username && user.username.toLowerCase().includes(search)) ||
+            (user.phoneNumber && user.phoneNumber.includes(search))
+          );
+        })
+      };
+    },
     enabled: tab === 'couriers' && !!shopId,
   });
+
+  // Assign courier mutation
   const assignCourierMutation = useMutation({
-    mutationFn: ({ shopId, courierId }: { shopId: string, courierId: string }) => assignCourierToShop(shopId, courierId),
+    mutationFn: async (courierId: string) => {
+      setAssigningCourierId(courierId);
+      setAssignError(null);
+      await assignCourierToShop(shopId!, courierId);
+    },
     onSuccess: () => {
+      setAssigningCourierId(null);
       refetchAssignedCouriers();
       refetchAvailableCouriers();
     },
+    onError: (err: any) => {
+      setAssignError(err?.message || 'Failed to assign courier');
+      setAssigningCourierId(null);
+    },
   });
+
+  // Unassign courier mutation
   const unassignCourierMutation = useMutation({
-    mutationFn: ({ shopId, courierId }: { shopId: string, courierId: string }) => unassignCourierFromShop(shopId, courierId),
+    mutationFn: async (courierId: string) => {
+      setUnassigningCourierId(courierId);
+      setUnassignError(null);
+      await unassignCourierFromShop(shopId!, courierId);
+    },
     onSuccess: () => {
+      setUnassigningCourierId(null);
       refetchAssignedCouriers();
       refetchAvailableCouriers();
+    },
+    onError: (err: any) => {
+      setUnassignError(err?.message || 'Failed to unassign courier');
+      setUnassigningCourierId(null);
     },
   });
 
@@ -389,13 +447,13 @@ export default function ShopDetails() {
         )}
         {tab === 'orders' && (
           <div>
-            {/* Orders List (was Deliveries) */}
+            {/* Orders List */}
             <h2 className="text-lg font-semibold mb-2">Orders</h2>
-            {deliveriesLoading ? (
+            {ordersLoading ? (
               <div>Loading orders...</div>
-            ) : deliveriesError ? (
-              <div className="text-red-400">{String(deliveriesError.message)}</div>
-            ) : !deliveriesData?.data?.length ? (
+            ) : ordersError ? (
+              <div className="text-red-400">{String(ordersError.message)}</div>
+            ) : !ordersData?.data?.length ? (
               <div className="text-gray-400">No orders found for this shop.</div>
             ) : (
               <table className="min-w-full text-left bg-[#232b42] rounded-lg">
@@ -409,7 +467,7 @@ export default function ShopDetails() {
                   </tr>
                 </thead>
                 <tbody>
-                  {deliveriesData.data.map((order: Order) => (
+                  {ordersData.data.map((order: Order) => (
                     <tr key={order._id} className="border-b border-[#2e3650]">
                       <td className="py-2 px-4">{order.orderNumber}</td>
                       <td className="py-2 px-4 capitalize">{order.status}</td>
@@ -427,7 +485,13 @@ export default function ShopDetails() {
         )}
         {tab === 'couriers' && (
           <div>
-            <h2 className="text-lg font-semibold mb-2">Assigned Couriers</h2>
+            <h2 className="text-lg font-semibold mb-2">Assigned Couriers 🚚</h2>
+            <button
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold mb-4"
+              onClick={() => setAddCourierModalOpen(true)}
+            >
+              Add Courier ➕
+            </button>
             {assignedCouriersLoading ? (
               <div>Loading assigned couriers...</div>
             ) : assignedCouriersError ? (
@@ -439,29 +503,23 @@ export default function ShopDetails() {
                 <thead>
                   <tr>
                     <th className="py-2 px-4">#</th>
-                    <th className="py-2 px-4">Vehicle</th>
-                    <th className="py-2 px-4">License</th>
-                    <th className="py-2 px-4">Availability</th>
-                    <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Action</th>
+                    <th className="py-2 px-4">Name</th>
+                    <th className="py-2 px-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {assignedCouriersData.data.map((courier: any, idx: number) => (
                     <tr key={courier._id} className="border-b border-[#2e3650]">
                       <td className="py-2 px-4">{idx + 1}</td>
-                      <td className="py-2 px-4">{courier.vehicleType}</td>
-                      <td className="py-2 px-4">{courier.licenseNumber}</td>
-                      <td className="py-2 px-4 capitalize">{courier.availability}</td>
-                      <td className="py-2 px-4">{courier.isActive ? 'Active' : 'Inactive'}</td>
+                      <td className="py-2 px-4">{courier.firstName} {courier.lastName}</td>
                       <td className="py-2 px-4">
                         <button
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                          onClick={() => unassignCourierMutation.mutate({ shopId: shopId!, courierId: courier._id })}
-                          disabled={unassignCourierMutation.isPending}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-semibold"
+                          disabled={unassigningCourierId === courier._id}
+                          onClick={() => unassignCourierMutation.mutate(courier._id)}
                           title="Unassign Courier"
                         >
-                          Unassign
+                          {unassigningCourierId === courier._id ? 'Unassigning...' : 'Unassign ❌'}
                         </button>
                       </td>
                     </tr>
@@ -469,47 +527,73 @@ export default function ShopDetails() {
                 </tbody>
               </table>
             )}
-            <h2 className="text-lg font-semibold mb-2">Available Couriers</h2>
-            {availableCouriersLoading ? (
-              <div>Loading available couriers...</div>
-            ) : availableCouriersError ? (
-              <div className="text-red-400">{String(availableCouriersError.message)}</div>
-            ) : !availableCouriersData?.data?.length ? (
-              <div className="text-gray-400">No available couriers to assign.</div>
-            ) : (
-              <table className="min-w-full text-left bg-[#232b42] rounded-lg">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4">#</th>
-                    <th className="py-2 px-4">Vehicle</th>
-                    <th className="py-2 px-4">License</th>
-                    <th className="py-2 px-4">Availability</th>
-                    <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {availableCouriersData.data.map((courier: any, idx: number) => (
-                    <tr key={courier._id} className="border-b border-[#2e3650]">
-                      <td className="py-2 px-4">{idx + 1}</td>
-                      <td className="py-2 px-4">{courier.vehicleType}</td>
-                      <td className="py-2 px-4">{courier.licenseNumber}</td>
-                      <td className="py-2 px-4 capitalize">{courier.availability}</td>
-                      <td className="py-2 px-4">{courier.isActive ? 'Active' : 'Inactive'}</td>
-                      <td className="py-2 px-4">
-                        <button
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-                          onClick={() => assignCourierMutation.mutate({ shopId: shopId!, courierId: courier._id })}
-                          disabled={assignCourierMutation.isPending}
-                          title="Assign Courier"
-                        >
-                          Assign
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {unassignError && <div className="text-red-400 mb-2">{unassignError} ❗</div>}
+            {/* Add Courier Modal */}
+            {addCourierModalOpen && (
+              <div className="fixed inset-0 z-50">
+                <div
+                  className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-all"
+                  style={{ backdropFilter: 'blur(8px)' }}
+                  onClick={() => setAddCourierModalOpen(false)}
+                />
+                <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+                  <h2 className="text-xl font-bold mb-4">Add Courier to Shop</h2>
+                  <div className="mb-4">
+                    <input
+                      className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring mb-2"
+                      placeholder="Search available couriers..."
+                      value={modalCourierSearch}
+                      onChange={e => setModalCourierSearch(e.target.value)}
+                    />
+                  </div>
+                  {availableCouriersLoading ? (
+                    <div>Loading available couriers...</div>
+                  ) : availableCouriersError ? (
+                    <div className="text-red-400">{String(availableCouriersError.message)}</div>
+                  ) : !availableCouriersData?.data?.length ? (
+                    <div className="text-gray-400">No available couriers found.</div>
+                  ) : (
+                    <table className="min-w-full text-left bg-[#232b42] rounded-lg mb-2">
+                      <thead>
+                        <tr>
+                          <th className="py-2 px-4">#</th>
+                          <th className="py-2 px-4">Name</th>
+                          <th className="py-2 px-4">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {availableCouriersData.data?.filter((courier: any) => {
+                          const search = modalCourierSearch.trim().toLowerCase();
+                          if (!search) return true;
+                          return (
+                            (courier.firstName && courier.firstName.toLowerCase().includes(search)) ||
+                            (courier.lastName && courier.lastName.toLowerCase().includes(search))
+                          );
+                        }).map((courier: any, idx: number) => (
+                          <tr key={courier._id} className="border-b border-[#2e3650]">
+                            <td className="py-2 px-4">{idx + 1}</td>
+                            <td className="py-2 px-4">{courier.firstName} {courier.lastName}</td>
+                            <td className="py-2 px-4">
+                              <button
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded font-semibold"
+                                disabled={assigningCourierId === courier._id}
+                                onClick={() => assignCourierMutation.mutate(courier._id)}
+                                title="Assign Courier"
+                              >
+                                {assigningCourierId === courier._id ? 'Assigning...' : 'Assign ➕'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                  {assignError && <div className="text-red-400 mb-2">{assignError} ❗</div>}
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={() => setAddCourierModalOpen(false)}>Close</button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}

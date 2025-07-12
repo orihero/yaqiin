@@ -1,5 +1,4 @@
 import User from '../models/User';
-import Courier from '../models/Courier';
 import bcrypt from 'bcryptjs';
 
 const uzbekNames = [
@@ -36,9 +35,8 @@ function generateUser(role: string, i: number) {
 }
 
 export default async function userSeed() {
-  // Remove all users and couriers
+  // Remove all users
   await User.deleteMany({});
-  await Courier.deleteMany({});
 
   // Clients
   const clients = Array.from({ length: 100 }, (_, i) => generateUser('client', i));
@@ -54,18 +52,7 @@ export default async function userSeed() {
   for (const user of allUsers) {
     const exists = await User.findOne({ telegramId: user.telegramId });
     if (!exists) {
-      const createdUser = await User.create(user);
-      // If courier, create Courier entry
-      if (user.role === 'courier') {
-        await Courier.create({
-          userId: createdUser._id,
-          vehicleType: 'bike',
-          availability: 'available',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      }
+      await User.create(user);
     }
   }
   console.log('Seeded users: 100 clients, 10 couriers, 5 shop owners, 3 admins');

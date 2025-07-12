@@ -61,6 +61,7 @@ export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
   lastActiveAt?: Date;
+  shopId?: mongoose.Types.ObjectId; // Added for shop-client binding
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -80,6 +81,7 @@ const UserSchema = new Schema<IUser>({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   lastActiveAt: { type: Date },
+  shopId: { type: Schema.Types.ObjectId, ref: 'Shop' }, // Added for shop-client binding
 });
 
 // Hash password if modified

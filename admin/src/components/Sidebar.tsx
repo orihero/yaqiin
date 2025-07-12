@@ -9,7 +9,6 @@ const navItems = [
   { name: 'Categories', to: '/categories', icon: 'mdi:shape-outline' },
   { name: 'Products', to: '/products', icon: 'mdi:package-variant-closed' },
   { name: 'Orders', to: '/orders', icon: 'mdi:cart-outline' },
-  { name: 'Couriers', to: '/couriers', icon: 'mdi:truck-outline' },
   { name: 'Support Tickets', to: '/support-tickets', icon: 'mdi:lifebuoy' },
   { name: 'Settings', to: '/settings', icon: 'mdi:cog-outline' },
 ];
