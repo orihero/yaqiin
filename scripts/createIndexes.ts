@@ -22,11 +22,10 @@ async function createIndexes() {
   await mongoose.connection.collection('products').createIndex({ isFeatured: 1, isActive: 1 });
 
   // Orders Collection
-  await mongoose.connection.collection('orders').createIndex({ customerId: 1, createdAt: -1 });
-  await mongoose.connection.collection('orders').createIndex({ shopId: 1, status: 1 });
+  await mongoose.connection.collection('orders').createIndex({ orderId: 1 }, { unique: true });
   await mongoose.connection.collection('orders').createIndex({ courierId: 1, status: 1 });
-  await mongoose.connection.collection('orders').createIndex({ orderNumber: 1 }, { unique: true });
   await mongoose.connection.collection('orders').createIndex({ status: 1, createdAt: -1 });
+  await mongoose.connection.collection('orders').createIndex({ orderNumber: 1 }, { unique: true });
 
   // Couriers Collection
   await mongoose.connection.collection('couriers').createIndex({ userId: 1 }, { unique: true });

@@ -4,7 +4,6 @@ import { parseQuery } from "../utils/queryHelper";
 import Shop from "../models/Shop";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import Courier from '../models/Courier';
 
 const router = Router();
 
@@ -62,13 +61,32 @@ router.get(
 // List all users with pagination, filtering, and search
 router.get("/", async (req, res, next) => {
   try {
-    const { filter, page, limit, skip } = parseQuery(req, [
+    const { filter, page, limit, skip, search } = parseQuery(req, [
       "username",
       "firstName",
       "lastName",
       "phoneNumber",
       "email",
     ]);
+
+    // Enhanced full name search
+    if (search && search.includes(" ")) {
+      const parts = search.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        // Try both orders: firstName + lastName and lastName + firstName
+        filter.$or = [
+          { $and: [
+            { firstName: { $regex: `^${parts[0]}`, $options: "i" } },
+            { lastName: { $regex: `^${parts.slice(1).join(" ")}`, $options: "i" } }
+          ] },
+          { $and: [
+            { firstName: { $regex: `^${parts.slice(1).join(" ")}`, $options: "i" } },
+            { lastName: { $regex: `^${parts[0]}`, $options: "i" } }
+          ] }
+        ];
+      }
+    }
+
     const [users, total] = await Promise.all([
       User.find(filter).skip(skip).limit(limit),
       User.countDocuments(filter),
@@ -108,25 +126,6 @@ router.get("/available-owners", async (req, res, next) => {
   }
 });
 
-// Get available couriers (role: 'courier' and no courier assigned)
-router.get('/available-couriers', async (req, res, next) => {
-  try {
-    // Find all userIds that are already assigned to a courier
-    const couriers = await Courier.find({}, 'userId');
-    const assignedCourierUserIds = couriers.map((courier) => String(courier.userId));
-    // Find users with role 'courier' and _id not in assignedCourierUserIds
-    const availableCouriers = await User.find({
-      role: 'courier',
-      _id: { $nin: assignedCourierUserIds },
-    });
-    res.json({
-      success: true,
-      data: availableCouriers,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
 
 // Get user by ID
 router.get("/:id", async (req, res, next) => {

@@ -1,5 +1,5 @@
 const turf = require('@turf/turf');
-import Shop from '../models/Shop';
+import Shop, { IShop } from '../models/Shop';
 
 /**
  * Finds the shop whose delivery zone contains the given lat/lng point.
@@ -7,7 +7,7 @@ import Shop from '../models/Shop';
  * @param lng Longitude of the point
  * @returns The matching shop document or null
  */
-export async function findShopForLocation(lat: number, lng: number) {
+export async function findShopForLocation(lat: number, lng: number): Promise<IShop | null> {
   const shops = await Shop.find({ status: 'active' });
   const point = turf.point([lng, lat]);
 

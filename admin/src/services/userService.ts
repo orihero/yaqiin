@@ -49,4 +49,9 @@ export const getAllUsers = async () => {
 export const getAvailableCouriers = async () => {
   const res = await api.get('/users/available-couriers');
   return res.data.data;
+};
+
+export const getUsersBySearch = async (search: string) => {
+  const res = await getUsers(1, 20, search);
+  return res.data;
 }; 

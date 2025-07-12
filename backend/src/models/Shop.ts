@@ -118,7 +118,7 @@ const ShopSchema = new Schema<IShop>({
   rating: { type: ShopRatingSchema, default: undefined },
   status: { type: String, enum: ['active', 'inactive', 'suspended'], required: true },
   commission: { type: Number },
-  couriers: [{ type: Schema.Types.ObjectId, ref: 'Courier' }],
+  couriers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   orders_chat_id: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
