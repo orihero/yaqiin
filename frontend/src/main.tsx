@@ -1,23 +1,3 @@
-// Extend the Window interface to include Telegram for TypeScript
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        initData?: string;
-        // Add more mock properties if needed
-      };
-    };
-  }
-}
-// Mock Telegram WebApp for local development if ?mockTelegram is in the URL
-if (window.location.search.includes('mockTelegram')) {
-  window.Telegram = {
-    WebApp: {
-      initData: 'user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%7D&chat_instance=abcdef1234567890&auth_date=1710000000&hash=abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
-      // Add more mock properties if needed
-    }
-  };
-}
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
