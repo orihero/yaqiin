@@ -17,6 +17,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import path from 'path';
 import Setting from './models/Setting';
+import { telegramAuthMiddleware } from './utils/authMiddleware';
 
 // Load environment variables
 dotenv.config();
@@ -37,11 +38,11 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// TODO: Import and use routes here
-app.use("/api/users", userRoutes);
+// Apply Telegram auth middleware to selected routes
+app.use("/api/users", telegramAuthMiddleware, userRoutes);
+app.use("/api/products", telegramAuthMiddleware, productRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/categories", categoryRoutes);
-app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/notifications", notificationRoutes);

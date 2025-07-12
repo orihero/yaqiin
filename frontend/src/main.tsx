@@ -16,13 +16,13 @@ import ProductDetails from './screens/ProductDetails';
 import ProfileScreen from './screens/ProfileScreen/index';
 import api from './services/api';
 import { useUserStore } from './store/userStore';
+import { getTelegramInitDataRaw } from './services/telegramInitData';
 
 async function telegramMiniAppAuth(setUser: (user: any, token: string) => void) {
-  // @ts-ignore
-  const tg = window.Telegram?.WebApp;
-  if (tg && tg.initData) {
+  const initDataRaw = getTelegramInitDataRaw();
+  if (initDataRaw) {
     try {
-      const res = await api.post('/auth/telegram', { initData: tg.initData });
+      const res = await api.post('/auth/telegram', { initData: initDataRaw });
       const { token, user } = res.data.data;
       setUser(user, token);
       localStorage.setItem('token', token);
