@@ -1,18 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getAllUsers } from '../../../services/userService';
-import { getAllShops } from '../../../services/shopService';
-import { getAllProducts } from '../../../services/productService';
-import { getAllCouriers } from '../../../services/courierService';
 import { Order } from '@yaqiin/shared/types/order';
-import Select from 'react-select';
-import AsyncSelect from 'react-select/async';
 import debounce from 'lodash.debounce';
-import { getUsers } from '../../../services/userService';
-import { getShops } from '../../../services/shopService';
+import React, { useEffect, useMemo, useState } from 'react';
+import AsyncSelect from 'react-select/async';
 import { getProducts } from '../../../services/productService';
-import { getCouriers } from '../../../services/courierService';
-import { getShopCouriers } from '../../../services/shopService';
+import { getShopCouriers, getShops } from '../../../services/shopService';
+import { getUsers } from '../../../services/userService';
 
 interface OrderFormModalProps {
   open?: boolean;
