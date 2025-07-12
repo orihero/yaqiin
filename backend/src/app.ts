@@ -15,9 +15,9 @@ import supportTicketRoutes from "./routes/supportTicketRoutes";
 import morgan from "morgan";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
-import path from 'path';
-import Setting from './models/Setting';
-import { telegramAuthMiddleware } from './utils/authMiddleware';
+import path from "path";
+import Setting from "./models/Setting";
+import { telegramAuthMiddleware } from "./utils/authMiddleware";
 
 // Load environment variables
 dotenv.config();
@@ -39,8 +39,8 @@ app.get("/health", (req, res) => {
 });
 
 // Apply Telegram auth middleware to selected routes
-app.use("/api/users", telegramAuthMiddleware, userRoutes);
-app.use("/api/products", telegramAuthMiddleware, productRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
@@ -53,7 +53,7 @@ app.use("/api/support-tickets", supportTicketRoutes);
 app.use("/api/auth", authRoutes);
 
 // Serve uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -74,30 +74,35 @@ mongoose
     app.listen(PORT, async () => {
       console.log(`Server running on port ${PORT}`);
       // Start Telegram bots based on feature flags
-      const isDev = process.env.NODE_ENV === 'development';
+      const isDev = process.env.NODE_ENV === "development";
       let courierBotEnabled = false;
       let mainBotEnabled = false;
       if (isDev) {
         courierBotEnabled = true;
         mainBotEnabled = true;
       } else {
-        const flags = await Setting.find({ key: { $in: ['courier_bot_enabled', 'main_bot_enabled'] }, isActive: true });
+        const flags = await Setting.find({
+          key: { $in: ["courier_bot_enabled", "main_bot_enabled"] },
+          isActive: true,
+        });
         for (const flag of flags) {
-          if (flag.key === 'courier_bot_enabled' && flag.value === true) courierBotEnabled = true;
-          if (flag.key === 'main_bot_enabled' && flag.value === true) mainBotEnabled = true;
+          if (flag.key === "courier_bot_enabled" && flag.value === true)
+            courierBotEnabled = true;
+          if (flag.key === "main_bot_enabled" && flag.value === true)
+            mainBotEnabled = true;
         }
       }
       if (courierBotEnabled) {
-        require('./bots/courierBot');
-        console.log('Courier bot started');
+        require("./bots/courierBot");
+        console.log("Courier bot started");
       } else {
-        console.log('Courier bot NOT started (feature flag off)');
+        console.log("Courier bot NOT started (feature flag off)");
       }
       if (mainBotEnabled) {
-        require('./bots/mainBot');
-        console.log('Main bot started');
+        require("./bots/mainBot");
+        console.log("Main bot started");
       } else {
-        console.log('Main bot NOT started (feature flag off)');
+        console.log("Main bot NOT started (feature flag off)");
       }
     });
   })

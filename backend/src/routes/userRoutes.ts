@@ -4,31 +4,9 @@ import { parseQuery } from "../utils/queryHelper";
 import Shop from "../models/Shop";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import authMiddleware from "../utils/authMiddleware";
 
 const router = Router();
-
-// Simple JWT auth middleware
-const authMiddleware = (req: any, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({
-        success: false,
-        error: { code: 401, message: "No token provided" },
-      });
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "secret");
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res
-      .status(401)
-      .json({ success: false, error: { code: 401, message: "Invalid token" } });
-  }
-};
 
 // Move this block above all parameterized routes
 router.get(
