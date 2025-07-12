@@ -11,10 +11,9 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from zustand store if available, else from localStorage
+    // Only send JWT from localStorage
     let token;
     try {
-      // This will only work in React context, so fallback to localStorage for now
       token = localStorage.getItem('token');
     } catch {}
     if (token) {

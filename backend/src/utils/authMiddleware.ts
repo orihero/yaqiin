@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import fs from 'fs';
+import { validateInitData } from '@telegram-apps/init-data-node';
 
 const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
@@ -29,6 +30,22 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction): 
   } catch (err) {
     console.error('JWT verification error:', err);
     res.status(401).json({ success: false, error: { code: 401, message: 'Invalid token' } });
+  }
+};
+
+export const telegramAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('tma ')) {
+    res.status(401).json({ success: false, error: { code: 401, message: 'No Telegram init data provided' } });
+    return;
+  }
+  const initDataRaw = authHeader.slice(4);
+  try {
+    const initData = validateInitData(initDataRaw, process.env.TELEGRAM_BOT_TOKEN!);
+    (req as any).telegramUser = initData.user;
+    next();
+  } catch (err) {
+    res.status(401).json({ success: false, error: { code: 401, message: 'Invalid Telegram init data' } });
   }
 };
 

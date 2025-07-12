@@ -11,12 +11,11 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage (or sessionStorage if you prefer)
+    // Only send JWT from localStorage
     const auth = JSON.parse(localStorage.getItem(LOCALSTORAGE_AUTH_KEY) || '{}');
     if (auth.token) {
       config.headers['Authorization'] = `Bearer ${auth.token}`;
     }
-    // Do not handle navigation or throw errors here
     return config;
   },
   (error: any) => Promise.reject(error)
