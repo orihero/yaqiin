@@ -7,10 +7,11 @@ export interface ProductListResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-export const getProducts = async (page = 1, limit = 10, search = '', categoryId?: string): Promise<ProductListResponse> => {
+export const getProducts = async (page = 1, limit = 10, search = '', categoryId?: string, shopId?: string): Promise<ProductListResponse> => {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search) params.append('search', search);
   if (categoryId) params.append('categoryId', categoryId);
+  if (shopId) params.append('shopId', shopId);
   const response = await api.get(`/products?${params.toString()}`);
   return response.data;
 };

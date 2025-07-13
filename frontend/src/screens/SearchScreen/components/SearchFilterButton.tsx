@@ -6,7 +6,7 @@ interface SearchFilterButtonProps {
 }
 
 const SearchFilterButton: React.FC<SearchFilterButtonProps> = ({ onClick }) => (
-  <button type="button" className="ml-2" onClick={onClick} aria-label="Filter">
+  <button type="button" className="ml-2 flex items-center" onClick={onClick} aria-label="Filter">
     <Icon icon="mdi:tune-variant" className="text-xl text-gray-400" />
   </button>
 );

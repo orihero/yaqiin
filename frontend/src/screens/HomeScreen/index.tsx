@@ -2,19 +2,17 @@ import React from "react";
 import { Icon } from "@iconify/react";
 import { useHomeScreen } from "./hooks/useHomeScreen";
 import { useNavigate } from "react-router-dom";
-import Header from "../../components/Header";
 import TabBar from "../../components/TabBar";
 import { useCartStore } from "../../store/cartStore";
 import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
 import BottomSheet from "./components/BottomSheet";
 import { Product } from "@yaqiin/shared/types/product";
+import { useTranslation } from 'react-i18next';
 
 const HomeScreen = () => {
     const {
         activeCategory,
         setActiveCategory,
-        activeNav,
-        setActiveNav,
         products,
         isLoading,
         isError,
@@ -23,7 +21,11 @@ const HomeScreen = () => {
         isLoadingCategories,
         isCategoriesError,
         categoriesError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
     } = useHomeScreen();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { addToCart } = useCartStore();
 
@@ -48,27 +50,34 @@ const HomeScreen = () => {
         }
     };
 
-    const handleHeaderSearchClick = () => {
-        navigate("/search");
-    };
-    const handleTabChange = (tab: string) => {
-        if (tab === "Home") navigate("/");
-        else if (tab === "Search") navigate("/search");
-        else if (tab === "My Cart") navigate("/cart");
-        else if (tab === "Profile") navigate("/profile");
-    };
+    // Infinite scroll logic
+    const listRef = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const el = listRef.current;
+            if (!el || isLoading || isFetchingNextPage || !hasNextPage) return;
+            const { scrollTop, scrollHeight, clientHeight } = el;
+            if (scrollHeight - scrollTop - clientHeight < 200) {
+                fetchNextPage();
+            }
+        };
+        const el = listRef.current;
+        if (el) {
+            el.addEventListener('scroll', handleScroll);
+        }
+        return () => {
+            if (el) {
+                el.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
     return (
         <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
-            {/* Header */}
-            {/* <Header
-        title="Daily Grocery Food"
-        rightIcon="mdi:magnify"
-        onRightIconClick={handleHeaderSearchClick}
-      /> */}
             {/* Main Content Card */}
             <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
                 <div
+                    ref={listRef}
                     className="bg-white rounded-b-[52px] px-4  pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
                     style={{
                         minHeight: "calc(100vh - 70px)",
@@ -79,12 +88,12 @@ const HomeScreen = () => {
                     <div className="flex items-center justify-between mb-4 pt-6">
                         <div>
                             <h1 className="text-3xl font-bold text-[#232c43] leading-tight">
-                                Daily
+                                {t('home.title1')}
                                 <br />
-                                Grocery Food
+                                {t('home.title2')}
                             </h1>
                         </div>
-                        <div
+                        {/* <div
                             className="bg-white rounded-full p-3 shadow flex items-center justify-center"
                             style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
                         >
@@ -92,47 +101,49 @@ const HomeScreen = () => {
                                 icon="mdi:magnify"
                                 className="text-2xl text-[#232c43]"
                             />
-                        </div>
+                        </div> */}
                     </div>
                     {/* Category Tabs */}
                     <div className="flex gap-3 overflow-x-auto pl-1 pr-4 mb-4 scrollbar-hide items-center min-h-14 sticky top-0 bg-[#fff] z-45">
                         {isLoadingCategories && (
                             <span className="text-gray-400 text-sm">
-                                Loading categories...
+                                {t('home.loadingCategories')}
                             </span>
                         )}
                         {isCategoriesError && (
                             <span className="text-red-400 text-sm">
                                 {categoriesError instanceof Error
                                     ? categoriesError.message
-                                    : "Failed to load categories."}
+                                    : t('home.failedToLoadCategories')}
                             </span>
                         )}
                         {categories.map((cat) => {
                             // Support pseudo-category for 'All products'
-
                             const isAll = cat._id === "";
                             const key = isAll
                                 ? "all-products"
                                 : cat._id ||
-                                  cat.name?.uz ||
-                                  String(cat.name.uz) ||
-                                  "cat";
-                            const label = isAll
-                                ? cat.name?.uz || "Barcha mahsulotlar"
-                                : cat.name?.uz || String(cat.name.uz) || "";
+                                cat.name?.uz ||
+                                String(cat.name.uz) ||
+                                "cat";
+                            let label = t('home.allProducts');
+                            if (!isAll) {
+                                // Try to use the user's language, fallback to uz, ru, or any available
+                                const lang = i18n.language;
+                                const nameObj = cat.name as Record<string, string>;
+                                label = nameObj[lang] || nameObj.uz || nameObj.ru || Object.values(nameObj)[0] || "";
+                            }
                             return (
                                 <button
                                     key={key}
-                                    className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
-                                        (
-                                            isAll
-                                                ? activeCategory === ""
-                                                : activeCategory === label
-                                        )
-                                            ? "bg-[#232c43] text-white shadow"
-                                            : "bg-white text-[#232c43] border border-gray-200"
-                                    }`}
+                                    className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all ${(
+                                        isAll
+                                            ? activeCategory === ""
+                                            : activeCategory === label
+                                    )
+                                        ? "bg-[#232c43] text-white shadow"
+                                        : "bg-white text-[#232c43] border border-gray-200"
+                                        }`}
                                     onClick={() =>
                                         setActiveCategory(isAll ? "" : label)
                                     }
@@ -146,23 +157,21 @@ const HomeScreen = () => {
                     {/* Popular Fruits Section */}
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-lg font-bold text-[#232c43]">
-                            Popular Fruits
+                            {t('home.popularFruits')}
                         </h2>
-                        <button className="text-sm text-[#232c43] opacity-60">
-                            See all
-                        </button>
+                        {/* See all button removed */}
                     </div>
                     {/* Loading/Error States */}
                     {isLoading && (
                         <div className="text-center text-gray-400 py-8">
-                            Loading products...
+                            {t('home.loadingProducts')}
                         </div>
                     )}
                     {isError && (
                         <div className="text-center text-red-400 py-8">
                             {error instanceof Error
                                 ? error.message
-                                : "Failed to load products."}
+                                : t('home.failedToLoadProducts')}
                         </div>
                     )}
                     <div className="grid grid-cols-2 gap-4">
@@ -172,13 +181,9 @@ const HomeScreen = () => {
                                 product.name?.uz ||
                                 String(product.name) ||
                                 "product";
-                            const displayName =
-                                product.name?.uz ||
-                                product.name?.ru ||
-                                (typeof product.name === "string"
-                                    ? product.name
-                                    : "") ||
-                                "Product";
+                            const nameObj = product.name as unknown as Record<string, string>;
+                            const lang = i18n.language;
+                            const displayName = nameObj[lang] || nameObj.uz || nameObj.ru || Object.values(nameObj)[0] || "Product";
                             return (
                                 <div
                                     key={key}
@@ -235,10 +240,18 @@ const HomeScreen = () => {
                             );
                         })}
                     </div>
+                    {isFetchingNextPage && (
+                        <div className="flex justify-center items-center py-4">
+                            <Icon icon="mdi:loading" className="animate-spin text-2xl text-[#232c43]" />
+                        </div>
+                    )}
+                    {!hasNextPage && products.length > 0 && (
+                        <div className="text-center text-gray-400 py-4">{t('home.noMoreProducts')}</div>
+                    )}
                 </div>
             </div>
             {/* Bottom Navigation */}
-            <TabBar current="Home" onTabChange={handleTabChange} />
+            <TabBar current="Home" />
             <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
                 {selectedProduct && (
                     <div className="flex flex-col items-center">

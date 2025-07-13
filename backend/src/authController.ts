@@ -2,6 +2,7 @@ import { Request, Response, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import User from './models/User';
 import crypto from 'crypto';
+import { parse } from '@telegram-apps/init-data-node';
 
 // TODO: Move secret to env
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN';
@@ -41,28 +42,18 @@ function validateTelegramInitData(initData: string): any {
 }
 
 export const loginWithTelegram: RequestHandler = async (req, res) => {
-  const { initData } = req.body;
-  if (!initData) {
-    res.status(400).json({ success: false, error: { code: 'NO_INIT_DATA', message: 'initData is required' } });
+  const { telegramId } = req.body;
+  if (!telegramId) {
+    res.status(400).json({ success: false, error: { code: 'NO_TELEGRAM_ID', message: 'telegramId is required' } });
     return;
   }
-  const telegramUser = validateTelegramInitData(initData);
-  if (!telegramUser) {
-    res.status(401).json({ success: false, error: { code: 'INVALID_INIT_DATA', message: 'Invalid Telegram initData' } });
-    return;
-  }
-  // Find or create user
-  let user = await User.findOne({ telegramId: telegramUser.id });
+  // Find user by telegramId
+  const user = await User.findOne({ telegramId });
   if (!user) {
-    user = await User.create({
-      telegramId: telegramUser.id,
-      firstName: telegramUser.first_name,
-      lastName: telegramUser.last_name,
-      username: telegramUser.username,
-      photoUrl: telegramUser.photo_url,
-    });
+    res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User with this telegramId not found' } });
+    return;
   }
   // Issue JWT
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
   res.json({ success: true, data: { token, user } });
 }; 

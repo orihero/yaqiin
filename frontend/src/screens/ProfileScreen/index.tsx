@@ -7,39 +7,14 @@ import Header from '../../components/Header';
 import TabBar from '../../components/TabBar';
 import { useNavigate } from 'react-router-dom';
 import { useAuthCheck } from '../../hooks/useAuthCheck';
-
-const options = [
-  {
-    icon: 'mdi:account-circle',
-    label: 'Account Information',
-    onClick: () => {},
-  },
-  {
-    icon: 'mdi:map-marker',
-    label: 'Delivery Address',
-    onClick: () => {},
-  },
-  {
-    icon: 'mdi:credit-card',
-    label: 'Payment Method',
-    onClick: () => {},
-  },
-  {
-    icon: 'mdi:lock',
-    label: 'Password',
-    onClick: () => {},
-  },
-  {
-    icon: 'mdi:account-multiple',
-    label: 'Reference Friends',
-    onClick: () => {},
-  },
-];
+import { useCartStore } from '../../store/cartStore';
+import { useTranslation } from 'react-i18next';
 
 const ProfileScreen: React.FC = () => {
   const { authError } = useAuthCheck();
   const { data: user, isLoading, isError } = useQuery<User>({ queryKey: ['currentUser'], queryFn: fetchCurrentUser });
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const handleHeaderSearchClick = () => {
     navigate('/search');
   };
@@ -49,6 +24,7 @@ const ProfileScreen: React.FC = () => {
     else if (tab === 'My Cart') navigate('/cart');
     else if (tab === 'Profile') navigate('/profile');
   };
+  const cart = useCartStore(state => state.cart);
 
   if (authError) {
     return (
@@ -61,17 +37,40 @@ const ProfileScreen: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#232c43] flex items-center justify-center">
-        <span className="text-white text-lg">Loading...</span>
+        <span className="text-white text-lg">{t('profile.loading')}</span>
       </div>
     );
   }
   if (isError || !user) {
     return (
       <div className="min-h-screen bg-[#232c43] flex items-center justify-center">
-        <span className="text-white text-lg">Failed to load profile</span>
+        <span className="text-white text-lg">{t('profile.failedToLoad')}</span>
       </div>
     );
   }
+
+  const options = [
+    {
+      icon: 'mdi:account-circle',
+      label: t('profile.account'),
+      onClick: (navigate: (path: string) => void) => navigate('/account'),
+    },
+    {
+      icon: 'mdi:store',
+      label: t('profile.myShop'),
+      onClick: (navigate: (path: string) => void) => navigate('/my-shop'),
+    },
+    {
+      icon: 'mdi:clipboard-list',
+      label: t('profile.orders'),
+      onClick: (navigate: (path: string) => void) => navigate('/orders'),
+    },
+    {
+      icon: 'mdi:cog',
+      label: t('profile.settings'),
+      onClick: (navigate: (path: string) => void) => navigate('/settings'),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#232c43] flex flex-col items-center pt-6 pb-0">
@@ -79,7 +78,7 @@ const ProfileScreen: React.FC = () => {
       <div className="w-full max-w-md px-4">
         <Header
           title="Profile"
-          rightIcon="mdi:magnify"
+          // rightIcon="mdi:magnify"
           onRightIconClick={handleHeaderSearchClick}
         />
       </div>
@@ -97,7 +96,7 @@ const ProfileScreen: React.FC = () => {
             <button
               key={opt.label}
               className="flex items-center w-full bg-[#f3f4f6] rounded-xl px-4 py-3 text-left focus:outline-none hover:bg-gray-100 transition"
-              onClick={opt.onClick}
+              onClick={() => opt.onClick(navigate)}
             >
               <Icon icon={opt.icon} className="text-[#232c43] text-xl mr-4" />
               <span className="flex-1 text-base font-semibold text-[#232c43]">{opt.label}</span>
@@ -105,9 +104,9 @@ const ProfileScreen: React.FC = () => {
             </button>
           ))}
         </div>
-        <button className="w-full bg-[#232c43] text-white rounded-full py-4 text-lg font-bold shadow-md mt-2">Log Out</button>
+        {/* Logout button moved to settings page */}
       </div>
-      <TabBar current="Profile" onTabChange={handleTabChange} />
+      <TabBar current="Profile" />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { useUserStore } from '../store/userStore';
+import type { Shop } from '@yaqiin/shared/types/shop';
 
 const BASE_API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -36,4 +37,15 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default api;
+
+// shopService.ts
+export const getShopById = async (id: string): Promise<Shop> => {
+  const res = await api.get(`/shops/${id}`);
+  return res.data.data;
+};
+
+export const getShopByOwnerId = async (ownerId: string): Promise<Shop | null> => {
+  const res = await api.get(`/shops?ownerId=${ownerId}`);
+  return res.data.data?.[0] || null;
+}; 
