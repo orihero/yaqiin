@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import debounce from 'lodash/debounce';
+import debounce from 'lodash.debounce';
 import { Icon } from '@iconify/react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { formatPrice } from '@yaqiin/shared/utils/formatPrice';
