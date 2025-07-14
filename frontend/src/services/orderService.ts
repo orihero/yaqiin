@@ -23,6 +23,6 @@ export interface CreateOrderPayload {
 }
 
 export const createOrder = async (payload: CreateOrderPayload) => {
-  const response = await api.post('/orders', payload);
+  const response = await api.post('/orders/client', payload);
   return response.data;
 }; 

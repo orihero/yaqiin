@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User } from '@yaqiin/shared/types/user';
+import type { User } from '../services/userService';
 
 interface UserStore {
   user: User | null;

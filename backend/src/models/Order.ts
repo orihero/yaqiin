@@ -50,9 +50,9 @@ export interface IOrderAddress {
 
 const OrderAddressSchema = new Schema<IOrderAddress>({
   title: { type: String },
-  street: { type: String, required: true },
-  city: { type: String, required: true },
-  district: { type: String, required: true },
+  street: { type: String },
+  city: { type: String },
+  district: { type: String },
   coordinates: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
@@ -94,7 +94,7 @@ export interface IOrder extends Document {
   deliveryAddress: IOrderAddress;
   paymentMethod: 'cash_on_delivery' | 'bank_transfer';
   paymentStatus: 'pending' | 'paid' | 'failed';
-  status: 'created' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected';
+  status: 'created' | 'confirmed' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected';
   rejectionReason?: string;
   statusHistory?: IOrderStatusHistory[];
   scheduledDelivery?: IOrderScheduledDelivery;
@@ -120,7 +120,7 @@ const OrderSchema = new Schema<IOrder>({
   deliveryAddress: { type: OrderAddressSchema, required: true },
   paymentMethod: { type: String, enum: ['cash_on_delivery', 'bank_transfer'], required: true },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], required: true },
-  status: { type: String, enum: ['created', 'packing', 'packed', 'courier_picked', 'delivered', 'paid', 'rejected'], required: true },
+  status: { type: String, enum: ['created', 'confirmed', 'packing', 'packed', 'courier_picked', 'delivered', 'paid', 'rejected'], required: true },
   rejectionReason: { type: String },
   statusHistory: [OrderStatusHistorySchema],
   scheduledDelivery: { type: OrderScheduledDeliverySchema },

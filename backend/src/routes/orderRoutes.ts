@@ -5,9 +5,11 @@ import Order from "../models/Order";
 import Product from "../models/Product";
 import Shop from "../models/Shop";
 import User from "../models/User";
+import Setting from '../models/Setting';
 import authMiddleware from "../utils/authMiddleware";
 import { parseQuery } from "../utils/queryHelper";
 import { escapeMarkdownV2, escapeMarkdownV2Url } from "../utils/telegram";
+import { sendOrderCreatedTelegramNotification } from '../bots/controllers/telegramOrderNotification';
 
 const router = Router();
 
@@ -96,79 +98,40 @@ router.post(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       console.log("[Order Create] Incoming body:", req.body);
+      // Only use allowed fields from client
+      const { shopId, items, deliveryAddress, paymentMethod } = req.body;
+      // Calculate itemsTotal
+      const itemsTotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      // Fetch delivery_fee and service_fee from settings
+      const [deliveryFeeSetting, serviceFeeSetting] = await Promise.all([
+        Setting.findOne({ key: 'delivery_fee', isActive: true }),
+        Setting.findOne({ key: 'service_fee', isActive: true })
+      ]);
+      const deliveryFee = deliveryFeeSetting ? Number(deliveryFeeSetting.value) : 0;
+      const serviceFee = serviceFeeSetting ? Number(serviceFeeSetting.value) : 0;
+      const tax = 0;
+      const discount = 0;
+      const total = itemsTotal + deliveryFee + serviceFee + tax - discount;
+      const pricing = { itemsTotal, deliveryFee, serviceFee, tax, discount, total };
       // Always set status to 'created' on backend
-      const orderData = { ...req.body, status: "created" };
-      // Only set courierId if provided and not empty
-      if (!orderData.courierId) {
-        delete orderData.courierId;
-      }
+      const orderData = {
+        shopId,
+        items,
+        deliveryAddress,
+        paymentMethod,
+        pricing,
+        status: "created",
+        ...(req.body.courierId ? { courierId: req.body.courierId } : {})
+      };
       const order = new Order(orderData);
       await order.save();
       console.log("[Order Create] Saved order:", order);
 
       // --- Notification logic ---
-      // Find the shop
+      // Find the shop and client, then send Telegram notification
       const shop = await Shop.findById(order.shopId);
-      console.log("[Order Create] Shop:", shop);
-      if (shop) {
-        // Notify shop owner
-        const owner = await User.findById(shop.ownerId);
-        console.log("[Order Create] Shop owner:", owner);
-        // Notify shop group via orders_chat_id
-        if (shop.orders_chat_id) {
-          // Get client info
-          const client = await User.findById(order.customerId);
-          let clientName = client
-            ? `${client.firstName || ""} ${client.lastName || ""}`.trim()
-            : "Client";
-          let clientPhone = client?.phoneNumber || "";
-          // Compose order details
-          let orderText = `${escapeMarkdownV2('🆕🛒 Yangi buyurtma!')}\nOrder ID: ${escapeMarkdownV2(String(order._id))}\nMijoz: ${escapeMarkdownV2(clientName)}`;
-          if (clientPhone) {
-            const safePhone = clientPhone.replace(/[-()\s]/g, '');
-            // Only one plus, do not double-escape
-            orderText += `\nTelefon: [${escapeMarkdownV2('📞 ' + clientPhone)}](tel:${escapeMarkdownV2Url('+' + safePhone)})`;
-          }
-          orderText += `\n\n${escapeMarkdownV2('Mahsulotlar:')}`;
-          for (const item of order.items) {
-            const productLine = `- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
-            orderText += `\n${escapeMarkdownV2(productLine)}`;
-          }
-          orderText += `\n\n${escapeMarkdownV2('Umumiy:')} ${escapeMarkdownV2(String(order.pricing.total))}`;
-          // Buttons: Confirm/Accept
-          const callbackRow = [
-            Markup.button.callback(
-              "✅ Qabul qilish",
-              `order_accept_${order._id}`
-            ),
-          ];
-          // Remove the urlRow and only use callbackRow in the keyboard
-          const keyboard = [callbackRow];
-          const payload = {
-            chat_id: shop.orders_chat_id,
-            text: orderText,
-            parse_mode: 'MarkdownV2',
-            reply_markup: Markup.inlineKeyboard(keyboard).reply_markup,
-          };
-          console.log(
-            "[Order Create] Sending Telegram message to shop.orders_chat_id (order group):",
-            payload
-          );
-          try {
-            await courierBot.telegram.sendMessage(
-              shop.orders_chat_id,
-              orderText,
-              { reply_markup: payload.reply_markup, parse_mode: 'MarkdownV2' }
-            );
-          } catch (err: any) {
-            console.error(
-              "[Order Create] Telegram sendMessage error (order group):",
-              err
-            );
-            throw { on: { method: "sendMessage", payload }, response: err };
-          }
-        }
-      }
+      const client = await User.findById(order.customerId);
+      await sendOrderCreatedTelegramNotification(order, shop, client);
       // --- End notification logic ---
 
       res
@@ -176,6 +139,64 @@ router.post(
         .json({ success: true, data: order, message: "Order created" });
     } catch (err: any) {
       console.error("[Order Create] Error:", err);
+      next({ status: 400, message: "Failed to create order", details: err });
+    }
+  }
+);
+
+// Client order creation endpoint
+router.post(
+  "/client",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { shopId, items, deliveryAddress, paymentMethod } = req.body;
+      // Validate deliveryAddress coordinates
+      if (!deliveryAddress || !deliveryAddress.coordinates || typeof deliveryAddress.coordinates.lat !== 'number' || typeof deliveryAddress.coordinates.lng !== 'number') {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 400,
+            message: "Missing or invalid delivery address coordinates (lat, lng) required.",
+            details: { deliveryAddress }
+          }
+        });
+        return;
+      }
+      // Calculate itemsTotal
+      const itemsTotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      // Fetch delivery_fee and service_fee from settings
+      const [deliveryFeeSetting, serviceFeeSetting] = await Promise.all([
+        Setting.findOne({ key: 'delivery_fee', isActive: true }),
+        Setting.findOne({ key: 'service_fee', isActive: true })
+      ]);
+      const deliveryFee = deliveryFeeSetting ? Number(deliveryFeeSetting.value) : 0;
+      const serviceFee = serviceFeeSetting ? Number(serviceFeeSetting.value) : 0;
+      const tax = 0;
+      const discount = 0;
+      const total = itemsTotal + deliveryFee + serviceFee + tax - discount;
+      const pricing = { itemsTotal, deliveryFee, serviceFee, tax, discount, total };
+      // Always set status to 'created' and paymentStatus to 'pending' on backend
+      const orderData = {
+        shopId,
+        items,
+        deliveryAddress,
+        paymentMethod,
+        pricing,
+        status: "created",
+        paymentStatus: "pending",
+        customerId: (req as any).user._id,
+        ...(req.body.courierId ? { courierId: req.body.courierId } : {})
+      };
+      const order = new Order(orderData);
+      await order.save();
+      // Send Telegram notification to shop group
+      const shop = await Shop.findById(order.shopId);
+      const client = await User.findById(order.customerId);
+      await sendOrderCreatedTelegramNotification(order, shop, client);
+      res.status(201).json({ success: true, data: order, message: "Order created" });
+    } catch (err: any) {
+      console.error("[Order Create - Client] Error:", err);
       next({ status: 400, message: "Failed to create order", details: err });
     }
   }

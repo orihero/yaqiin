@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useProductDetails } from "./hooks/useProductDetails";
 import { useCartStore } from "../../store/cartStore";
 import { Icon } from "@iconify/react";
+import { useTranslation } from 'react-i18next';
 
 const ProductDetails: React.FC = () => {
     const { id: productId } = useParams<{ id: string }>();
@@ -15,12 +16,13 @@ const ProductDetails: React.FC = () => {
         error,
     } = useProductDetails(productId || "");
     const addToCart = useCartStore((state) => state.addToCart);
+    const { t } = useTranslation();
 
-    if (isLoading) return <div className="text-center py-12">Loading...</div>;
+    if (isLoading) return <div className="text-center py-12">{t('productDetails.loading')}</div>;
     if (isError || !product)
         return (
             <div className="text-center text-red-400 py-12">
-                {error instanceof Error ? error.message : "Product not found."}
+                {error instanceof Error ? error.message : t('productDetails.notFound')}
             </div>
         );
 
@@ -96,12 +98,12 @@ const ProductDetails: React.FC = () => {
                         </div>
                         <div className="text-sm text-gray-400 mb-4">
                             {product.isActive
-                                ? "Available in stock"
-                                : "Out of stock"}
+                                ? t('productDetails.available')
+                                : t('productDetails.outOfStock')}
                         </div>
                         <div className="mb-4">
                             <h2 className="font-bold text-[#232c43] mb-1">
-                                Product Description
+                                {t('productDetails.description')}
                             </h2>
                             <p className="text-gray-500 text-sm">
                                 {product.description?.uz || ""}
@@ -109,20 +111,20 @@ const ProductDetails: React.FC = () => {
                         </div>
                         <div className="mb-4">
                             <h2 className="font-bold text-[#232c43] mb-2">
-                                Product Reviews
+                                {t('productDetails.reviews')}
                             </h2>
                             {/* Placeholder for reviews */}
                             <div className="text-gray-400 text-sm">
-                                No reviews yet.
+                                {t('productDetails.noReviews')}
                             </div>
                         </div>
                         <div>
                             <h2 className="font-bold text-[#232c43] mb-2">
-                                Similar Products
+                                {t('productDetails.similar')}
                             </h2>
                             {/* Placeholder for similar products */}
                             <div className="text-gray-400 text-sm">
-                                No similar products yet.
+                                {t('productDetails.noSimilar')}
                             </div>
                         </div>
                     </div>
@@ -140,7 +142,7 @@ const ProductDetails: React.FC = () => {
                     className="bg-white text-[#232c43] font-bold py-3 px-8 rounded-full text-base shadow"
                     onClick={() => addToCart(product, quantity)}
                 >
-                    Add to cart
+                    {t('productCard.addToCart')}
                 </button>
             </div>
         </div>

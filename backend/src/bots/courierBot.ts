@@ -6,6 +6,7 @@ import Group from "../models/Group";
 import Order from "../models/Order";
 import User from "../models/User";
 import { t } from "../utils/i18n";
+import mongoose from "mongoose";
 
 const token = process.env.COURIER_BOT_TOKEN;
 if (!token) {
@@ -251,13 +252,23 @@ courierBot.on("text", async (ctx: CustomContext) => {
     if (!ctx.from) return;
     const order = await Order.findById(orderId);
     if (order) {
-      await Order.updateStatus(
-        orderId,
-        "rejected",
-        String(ctx.from.id),
-        customReason
-      );
-      await ctx.reply("Order rejected.");
+      if (role === "client_reject") {
+        await Order.updateStatus(
+          orderId,
+          "rejected",
+          String(ctx.from.id),
+          customReason
+        );
+        await ctx.reply(t(ctx, "orderRejectedFinal", { reason: customReason }));
+      } else {
+        await Order.updateStatus(
+          orderId,
+          "rejected",
+          String(ctx.from.id),
+          customReason
+        );
+        await ctx.reply(t(ctx, "orderRejected"));
+      }
     }
     customReasonMap.delete(userId);
     return;
@@ -286,35 +297,332 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
   if (acceptMatch) {
     const orderId = acceptMatch[1];
     const order = await Order.findById(orderId);
-    if (!order) return ctx.answerCbQuery("Order not found");
-    if (!ctx.from) return ctx.answerCbQuery("User not found");
-    if (order.status === "created") {
-      // Accept: set to packing, update statusHistory, send to shop group
-      await Order.updateStatus(orderId, "packing", String(ctx.from.id));
-      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.reply("Order accepted and sent to shop!");
-      // Send to shop group (if exists)
-      const Shop = require("../models/Shop").default;
-      const shop = await Shop.findById(order.shopId);
-      if (shop && shop.orders_chat_id) {
-        await ctx.telegram.sendMessage(
-          shop.orders_chat_id,
-          `🆕🛒 Yangi buyurtma!\nOrder ID: ${order._id}\nIltimos, buyurtmani ko'rib chiqing.`
-        );
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    // Fetch the user who pressed the button
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    // Check if user is admin or operator
+    if (user.role === "admin" || user.role === "operator") {
+      if (order.status === "created") {
+        // Accept: set to confirmed, update statusHistory
+        await Order.updateStatus(orderId, "confirmed", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "orderConfirmedSentToShop"));
+        // Send to shop owner with Accept/Reject buttons
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop && shop.ownerId) {
+          // Find shop owner user
+          const shopOwner = await User.findById(shop.ownerId);
+          if (shopOwner && shopOwner.telegramId && /^\d+$/.test(shopOwner.telegramId)) {
+            // Compose detailed order notification
+            let orderText = `🆕🛒 <b>${t(ctx, "newOrderLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+            orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+            orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
+            for (const item of order.items) {
+              orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+            }
+            orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+            orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "acceptOrRejectOrder")}`;
+            await ctx.telegram.sendMessage(
+              shopOwner.telegramId,
+              orderText,
+              {
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      { text: '✅ ' + t(ctx, "acceptBtn"), callback_data: `order_shop_accept_${order._id}` },
+                      { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_shop_reject_${order._id}` }
+                    ]
+                  ]
+                }
+              }
+            );
+          } else {
+            console.error('[Order Notify] Invalid or missing telegramId for shop owner:', shopOwner);
+          }
+        }
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeAccepted"));
+        return;
       }
+      return;
     } else {
-      await ctx.answerCbQuery("Order cannot be accepted in this status.");
+      // Default: courier accepts, send to shop group
+      if (order.status === "created") {
+        await Order.updateStatus(orderId, "packing", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "orderAcceptedSentToShop"));
+        // Send to shop group (if exists)
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop && shop.orders_chat_id) {
+          await ctx.telegram.sendMessage(
+            shop.orders_chat_id,
+            `${t(ctx, "newOrderLabel")}\n${t(ctx, "orderIdLabel")}: ${order._id}\n${t(ctx, "pleaseReviewOrder")}`
+          );
+        }
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeAccepted"));
+        return;
+      }
       return;
     }
-    return;
   }
   // Match reject for courier
   const rejectMatch = data.match(/^order_reject_(.+)_courier$/);
   if (rejectMatch) {
     const orderId = rejectMatch[1];
     // Show reason picker
-    await ctx.reply("Please provide a reason for rejection:");
+    await ctx.reply(t(ctx, "pleaseProvideRejectionReason"));
     customReasonMap.set(userId, { orderId, role: "courier" });
+    return;
+  }
+  // Match shop accept for shop owner
+  const shopAcceptMatch = data.match(/^order_shop_accept_(.+)$/);
+  if (shopAcceptMatch) {
+    const orderId = shopAcceptMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (user.role === "shop_owner") {
+      if (order.status === "confirmed") {
+        await Order.updateStatus(orderId, "packing", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "orderAcceptedPackingStage"));
+        // Update notification: show only 'Finish Packing' button
+        let orderText = `📦 <b>${t(ctx, "orderPackingStage")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+        orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressFinishPacking")}`;
+        await ctx.telegram.sendMessage(
+          user.telegramId,
+          orderText,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                 { text: '📦 ' + t(ctx, "finishPackingBtn"), callback_data: `order_shop_finish_packing_${order._id}` }
+                ]
+              ]
+            }
+          }
+        );
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeAccepted"));
+        return;
+      }
+      return;
+    }
+  }
+  // Match finish packing for shop owner
+  const finishPackingMatch = data.match(/^order_shop_finish_packing_(.+)$/);
+  if (finishPackingMatch) {
+    const orderId = finishPackingMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (user.role === "shop_owner") {
+      if (order.status === "packing") {
+        await Order.updateStatus(orderId, "packed", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "packingFinishedSentToCouriers"));
+        // Send to all couriers with 'Picked up' and 'Reject' buttons
+        const couriers = await User.find({ role: "courier" });
+        let orderText = `🚚 <b>${t(ctx, "orderReadyLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+        orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
+        for (const courier of couriers) {
+          if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
+            await ctx.telegram.sendMessage(
+              courier.telegramId,
+              orderText,
+              {
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                     { text: '🚚 ' + t(ctx, "pickedUpBtn"), callback_data: `order_courier_picked_${order._id}` },
+                     { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_courier_reject_${order._id}` }
+                    ]
+                  ]
+                }
+              }
+            );
+          } else {
+            console.error('[Order Notify] Invalid or missing telegramId for courier:', courier);
+          }
+        }
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeFinished"));
+        return;
+      }
+      return;
+    }
+  }
+  // Match shop reject for shop owner
+  const shopRejectMatch = data.match(/^order_shop_reject_(.+)$/);
+  if (shopRejectMatch) {
+    const orderId = shopRejectMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (user.role === "shop_owner") {
+      if (order.status === "confirmed") {
+        await Order.updateStatus(orderId, "rejected", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.answerCbQuery(t(ctx, "orderRejectedByShopOwner"));
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeRejected"));
+        return;
+      }
+      return;
+    }
+  }
+  // Match courier picked up
+  const courierPickedMatch = data.match(/^order_courier_picked_(.+)$/);
+  if (courierPickedMatch) {
+    const orderId = courierPickedMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (user.role === "courier") {
+      if (order.status === "packed") {
+        await Order.updateStatus(orderId, "courier_picked", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "orderPickedUp"));
+        // Update notification: show only 'Delivered' button
+        let orderText = `🚚 <b>${t(ctx, "orderOnTheWay")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+        orderText += `\n<b>${t(ctx, "productsLabel")}:</b>`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressDeliveredWhenDone")}`;
+        await ctx.telegram.sendMessage(
+          user.telegramId,
+          orderText,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: `📦 ${t(ctx, "deliveredBtn")}`, callback_data: `order_courier_delivered_${order._id}` }
+                ]
+              ]
+            }
+          }
+        );
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBePickedUp"));
+        return;
+      }
+      return;
+    }
+  }
+  // Match courier delivered
+  const courierDeliveredMatch = data.match(/^order_courier_delivered_(.+)$/);
+  if (courierDeliveredMatch) {
+    const orderId = courierDeliveredMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (user.role === "courier") {
+      if (order.status === "courier_picked") {
+        await Order.updateStatus(orderId, "delivered", (user._id as mongoose.Types.ObjectId).toString());
+        await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        await ctx.reply(t(ctx, "orderDelivered"));
+        // Send notification with 'Client paid' and 'Client rejected' buttons
+        let orderText = `✅ <b>${t(ctx, "orderDeliveredLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+        orderText += `\n<b>${t(ctx, "productsLabel")}:</b>`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPaidOrRejected")}`;
+        await ctx.telegram.sendMessage(
+          user.telegramId,
+          orderText,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: `💵 ${t(ctx, "clientPaidBtn")}`, callback_data: `order_client_paid_${order._id}` },
+                  { text: `❌ ${t(ctx, "clientRejectedBtn")}`, callback_data: `order_client_rejected_${order._id}` }
+                ]
+              ]
+            }
+          }
+        );
+      } else {
+        await ctx.answerCbQuery(t(ctx, "orderCannotBeDelivered"));
+        return;
+      }
+      return;
+    }
+  }
+  // Match client paid
+  const clientPaidMatch = data.match(/^order_client_paid_(.+)$/);
+  if (clientPaidMatch) {
+    const orderId = clientPaidMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    // Anyone pressing this is allowed to finish the order
+    if (order.status === "delivered") {
+      await Order.updateStatus(orderId, "paid", (user._id as mongoose.Types.ObjectId).toString());
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+      await ctx.reply(t(ctx, "orderPaidFinal"));
+      // Optionally, send a final notification to shop/courier/client
+    } else {
+      await ctx.answerCbQuery(t(ctx, "orderCannotBePaid"));
+      return;
+    }
+    return;
+  }
+  // Match client rejected
+  const clientRejectedMatch = data.match(/^order_client_rejected_(.+)$/);
+  if (clientRejectedMatch) {
+    const orderId = clientRejectedMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    if (order.status === "delivered") {
+      // Prompt for rejection reason
+      await ctx.reply(t(ctx, "pleaseProvideRejectionReason"));
+      customReasonMap.set(userId, { orderId, role: "client_reject" });
+    } else {
+      await ctx.answerCbQuery(t(ctx, "orderCannotBeRejected"));
+      return;
+    }
     return;
   }
 });

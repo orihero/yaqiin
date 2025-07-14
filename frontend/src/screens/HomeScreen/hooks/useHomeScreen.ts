@@ -4,6 +4,7 @@ import { getProducts } from '../../../services/productService';
 import { getAllCategories } from '../../../services/categoryService';
 import { Product } from '@yaqiin/shared/types/product';
 import type { ProductListResponse } from '../../../services/productService';
+import { useUserStore } from '../../../store/userStore';
 
 export interface CartItem {
   product: Product;
@@ -63,6 +64,10 @@ export function useHomeScreen() {
   const [activeCategory, setActiveCategory] = useState('');
   const [activeNav, setActiveNav] = useState('Home');
 
+  // Get user from store
+  const user = useUserStore(state => state.user);
+  const shopId = user?.shopId;
+
   // Fetch categories from backend
   const {
     data: categoriesData,
@@ -98,15 +103,15 @@ export function useHomeScreen() {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['products', selectedCategoryId],
-    queryFn: ({ pageParam = 1 }: { pageParam?: number }) => getProducts(pageParam, 8, '', selectedCategoryId),
+    queryKey: ['products', selectedCategoryId, shopId],
+    queryFn: ({ pageParam = 1 }: { pageParam?: number }) => getProducts(pageParam, 8, '', selectedCategoryId, shopId),
     getNextPageParam: (lastPage: ProductListResponse) => {
       if (!lastPage.meta) return undefined;
       const { page, totalPages } = lastPage.meta;
       return page < totalPages ? page + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: true,
+    enabled: !!shopId, // Only fetch if shopId is available
   });
   // Flatten products
   const products = data?.pages?.flatMap(page => page.data) ?? [];
