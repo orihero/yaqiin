@@ -87,10 +87,8 @@ const HomeScreen = () => {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-4 pt-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-[#232c43] leading-tight">
-                                {t('home.title1')}
-                                <br />
-                                {t('home.title2')}
+                            <h1 className="text-xl font-bold text-[#232c43] leading-tight">
+                                {t('home.title1')} {t('home.title2')}
                             </h1>
                         </div>
                         {/* <div

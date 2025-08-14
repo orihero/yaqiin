@@ -30,4 +30,10 @@ export const getProductById = async (id: string): Promise<Product> => {
 export const getProductsByIds = async (ids: string[]): Promise<Product[]> => {
   const res = await api.get(`/products/by-ids?ids=${ids.join(',')}`);
   return res.data.data;
+};
+
+// Get related products for a specific product
+export const getRelatedProducts = async (productId: string): Promise<Product[]> => {
+  const res = await api.get(`/products/${productId}/related`);
+  return res.data.data;
 }; 

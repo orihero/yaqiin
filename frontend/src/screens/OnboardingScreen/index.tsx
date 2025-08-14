@@ -143,8 +143,8 @@ const OnboardingScreen: React.FC = () => {
 
     return (
         <div
-            className="w-full flex flex-col items-center justify-center  px-0 sm:px-2 overflow-hidden overflow-x-hidden"
-            style={{ height: viewportHeight }}
+            className="w-full flex flex-col items-center justify-center px-0 sm:px-2 overflow-x-hidden overflow-y-auto min-h-screen"
+            style={{ minHeight: viewportHeight }}
         >
             <div className="flex flex-col w-full h-full flex-1 max-w-md mx-auto relative">
                 {/* Language Switcher */}
@@ -171,8 +171,6 @@ const OnboardingScreen: React.FC = () => {
                         style={{
                             borderBottomLeftRadius: 40,
                             borderBottomRightRadius: 40,
-                            minHeight: 500,
-                            maxHeight: 500,
                         }}
                         onScroll={handleScroll}
                     >
