@@ -9,7 +9,6 @@
 /frontend/tsconfig.node.json
 /frontend/tsconfig.app.json
 /frontend/tsconfig.spec.json
-/frontend/src/assets/images/
 /admin/node_modules
 /admin/yarn.lock
 /admin/package-lock.json
