@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProductDetails } from "./hooks/useProductDetails";
+import { useProductDetails, useRelatedProducts } from "./hooks/useProductDetails";
 import { useCartStore } from "../../store/cartStore";
 import { Icon } from "@iconify/react";
 import { useTranslation } from 'react-i18next';
+import ProductCard from "../../components/ProductCard";
 
 const ProductDetails: React.FC = () => {
     const { id: productId } = useParams<{ id: string }>();
@@ -15,6 +16,11 @@ const ProductDetails: React.FC = () => {
         isError,
         error,
     } = useProductDetails(productId || "");
+    const {
+        data: relatedProducts,
+        isLoading: isLoadingRelated,
+        isError: isRelatedError,
+    } = useRelatedProducts(productId || "");
     const addToCart = useCartStore((state) => state.addToCart);
     const { t } = useTranslation();
 
@@ -111,21 +117,34 @@ const ProductDetails: React.FC = () => {
                         </div>
                         <div className="mb-4">
                             <h2 className="font-bold text-[#232c43] mb-2">
-                                {t('productDetails.reviews')}
-                            </h2>
-                            {/* Placeholder for reviews */}
-                            <div className="text-gray-400 text-sm">
-                                {t('productDetails.noReviews')}
-                            </div>
-                        </div>
-                        <div>
-                            <h2 className="font-bold text-[#232c43] mb-2">
                                 {t('productDetails.similar')}
                             </h2>
-                            {/* Placeholder for similar products */}
-                            <div className="text-gray-400 text-sm">
-                                {t('productDetails.noSimilar')}
-                            </div>
+                            {isLoadingRelated && (
+                                <div className="text-gray-400 text-sm">
+                                    {t('productDetails.loading')}
+                                </div>
+                            )}
+                            {isRelatedError && (
+                                <div className="text-gray-400 text-sm">
+                                    {t('productDetails.failedToLoad')}
+                                </div>
+                            )}
+                            {relatedProducts && relatedProducts.length > 0 ? (
+                                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                                    {relatedProducts.map((relatedProduct) => (
+                                        <ProductCard
+                                            key={relatedProduct._id}
+                                            product={relatedProduct}
+                                            onAdd={(product) => addToCart(product, 1)}
+                                            onClick={(product) => navigate(`/product/${product._id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-gray-400 text-sm">
+                                    {t('productDetails.noSimilar')}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

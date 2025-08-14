@@ -11,6 +11,8 @@ import { createOrder } from '../../services/orderService';
 import type { CartItem as CartItemType } from "../../store/cartStore";
 import { useCartStore } from "../../store/cartStore";
 import { useUserStore } from '../../store/userStore';
+import Lottie from "lottie-react";
+import emptyBoxAnimation from '../../assets/animations/empty-box.json';
 
 type CartItemProps = {
     item: CartItemType;
@@ -107,8 +109,8 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
             {/* Delete button slides in from the right, tall rounded-rectangle, orange */}
             <div
                 className={`absolute top-0 right-0 h-full flex items-center pr-2 transition-all duration-300 ${showDelete
-                        ? "translate-x-0 opacity-100"
-                        : "translate-x-full opacity-0"
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-full opacity-0"
                     }`}
                 style={{ zIndex: 2 }}
             >
@@ -220,16 +222,6 @@ const MyCartScreen = () => {
         }
     };
 
-    const handleHeaderSearchClick = () => {
-        navigate("/search");
-    };
-    const handleTabChange = (tab: string) => {
-        if (tab === "Home") navigate("/");
-        else if (tab === "Search") navigate("/search");
-        else if (tab === "My Cart") navigate("/cart");
-        else if (tab === "Profile") navigate("/profile");
-    };
-
     return (
         <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
             {/* Main Content Card */}
@@ -241,27 +233,38 @@ const MyCartScreen = () => {
                         maxHeight: "calc(100vh - 70px)",
                     }}
                 >
-                    {/* Header */}
+                    {/* Header with Total and Checkout */}
                     <div className="flex items-center justify-between mb-6 pt-6 px-0">
-                        <h1 className="text-3xl font-bold text-[#232c43] leading-tight">
-                            {t('home.title1')}
-                            <br />
-                            {t('home.title2')}
-                        </h1>
-                        {/* <div
-                            className="bg-white rounded-full p-3 shadow flex items-center justify-center"
-                            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-                        >
-                            <Icon
-                                icon="mdi:magnify"
-                                className="text-2xl text-[#232c43]"
-                            />
-                        </div> */}
+                        <div className="flex-1">
+                            <h1 className="text-xl font-bold text-[#232c43] leading-tight">
+                                {t('home.title1')} {t('home.title2')}
+                            </h1>
+                        </div>
+                        {cart.length > 0 && (
+                            <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                    <div className="text-xs text-gray-500">
+                                        {t('cart.totalAmount')}
+                                    </div>
+                                    <div className="text-sm font-semibold text-[#232c43]">
+                                        {formatPrice(getTotal())}
+                                    </div>
+                                </div>
+                                <button
+                                    className="bg-[#232c43] text-white rounded-full px-4 py-2 text-sm font-semibold shadow-md disabled:opacity-60"
+                                    disabled={isCheckoutLoading || isUserLoading}
+                                    onClick={handleCheckout}
+                                >
+                                    {isCheckoutLoading ? t('cart.processing') || 'Processing...' : t('cart.checkout')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                     {/* Cart Items */}
                     <div className="flex flex-col gap-4 mb-6 p-4">
                         {cart.length === 0 && (
                             <div className="text-center text-gray-400 py-8">
+                                <Lottie animationData={emptyBoxAnimation} />
                                 {t('cart.empty')}
                             </div>
                         )}
@@ -274,27 +277,10 @@ const MyCartScreen = () => {
                             />
                         ))}
                     </div>
-                    {/* Total and Checkout */}
-                    <div className="mt-auto pt-4 bg-[#F6F6F6] p-4 rounded-4xl">
-                        <div className="flex justify-center items-center mb-4 gap-2">
-                            <span className="text-base text-gray-500">
-                                {t('cart.totalAmount')}
-                            </span>
-                            <span className="text-base text-gray-500">
-                                {formatPrice(getTotal())}
-                            </span>
-                        </div>
-                        {checkoutError && (
-                            <div className="text-center text-red-500 mb-2 text-sm">{checkoutError}</div>
-                        )}
-                        <button
-                            className="w-full bg-[#232c43] text-white rounded-full py-3 text-lg  shadow-md disabled:opacity-60"
-                            disabled={cart.length === 0 || isCheckoutLoading || isUserLoading}
-                            onClick={handleCheckout}
-                        >
-                            {isCheckoutLoading ? t('cart.processing') || 'Processing...' : t('cart.checkout')}
-                        </button>
-                    </div>
+                    {/* Error Message */}
+                    {checkoutError && cart.length > 0 && (
+                        <div className="text-center text-red-500 mb-2 text-sm px-4">{checkoutError}</div>
+                    )}
                 </div>
             </div>
             {/* Bottom Navigation */}

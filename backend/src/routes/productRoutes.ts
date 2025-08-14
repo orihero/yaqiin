@@ -51,6 +51,26 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+// Get related products (same category, excluding current product)
+router.get('/:id/related', async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return next({ status: 404, message: 'Product not found' });
+    
+    const relatedProducts = await Product.find({
+      categoryId: product.categoryId,
+      _id: { $ne: product._id },
+      isActive: true
+    })
+    .limit(10)
+    .select('_id name images price unit isActive');
+    
+    res.json({ success: true, data: relatedProducts });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', upload.array('images', 10), async (req: Request, res, next) => {
   try {
     const body = req.body;

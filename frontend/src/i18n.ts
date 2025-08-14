@@ -81,10 +81,9 @@ const resources = {
         available: 'Available in stock',
         outOfStock: 'Out of stock',
         description: 'Product Description',
-        reviews: 'Product Reviews',
-        noReviews: 'No reviews yet.',
         similar: 'Similar Products',
-        noSimilar: 'No similar products yet.'
+        noSimilar: 'No similar products yet.',
+        failedToLoad: 'Failed to load similar products.'
       },
       myShop: {
         title: 'My Shop',
@@ -112,7 +111,7 @@ const resources = {
         failedToLoad: 'Failed to load orders.'
       },
       loading: {
-        appName: 'Gronur'
+        appName: 'Yaqiin'
       }
     }
   },
@@ -195,10 +194,9 @@ const resources = {
         available: 'В наличии',
         outOfStock: 'Нет в наличии',
         description: 'Описание товара',
-        reviews: 'Отзывы о товаре',
-        noReviews: 'Пока нет отзывов.',
         similar: 'Похожие товары',
-        noSimilar: 'Похожих товаров пока нет.'
+        noSimilar: 'Похожих товаров пока нет.',
+        failedToLoad: 'Не удалось загрузить похожие товары.'
       },
       myShop: {
         title: 'Мой магазин',
@@ -226,7 +224,7 @@ const resources = {
         failedToLoad: 'Не удалось загрузить заказы.'
       },
       loading: {
-        appName: 'Гронур'
+        appName: 'Yaqiin'
       }
     }
   },
@@ -307,12 +305,11 @@ const resources = {
         loading: 'Yuklanmoqda...',
         notFound: 'Mahsulot topilmadi.',
         available: 'Omborda mavjud',
-        outOfStock: 'Omborda yo‘q',
+        outOfStock: 'Omborda yo\'q',
         description: 'Mahsulot tavsifi',
-        reviews: 'Mahsulot sharhlari',
-        noReviews: 'Hozircha sharhlar yo‘q.',
-        similar: 'O‘xshash mahsulotlar',
-        noSimilar: 'O‘xshash mahsulotlar yo‘q.'
+        similar: 'O\'xshash mahsulotlar',
+        noSimilar: 'O\'xshash mahsulotlar yo\'q.',
+        failedToLoad: 'O\'xshash mahsulotlarni yuklab bo\'lmadi.'
       },
       myShop: {
         title: 'Mening do‘konim',
@@ -340,7 +337,7 @@ const resources = {
         failedToLoad: 'Buyurtmalarni yuklab boʻlmadi.'
       },
       loading: {
-        appName: 'Gronur'
+        appName: 'Yaqiin'
       }
     }
   }
