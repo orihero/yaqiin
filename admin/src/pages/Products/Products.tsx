@@ -31,7 +31,7 @@ const Products: React.FC = () => {
 
   // Create product mutation
   const createMutation = useMutation({
-    mutationFn: async (input: Partial<Product>) => createProduct(input),
+    mutationFn: async (input: Partial<Product> & { images?: File[] | undefined; imageUrls?: string[] | undefined; }) => createProduct(input),
     onSuccess: () => {
       setShowModal(false);
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -40,7 +40,7 @@ const Products: React.FC = () => {
 
   // Update product mutation
   const updateMutation = useMutation({
-    mutationFn: async (input: Partial<Product> & { _id: string }) => updateProduct(input),
+    mutationFn: async (input: Partial<Product> & { _id: string; images?: File[] | undefined; imageUrls?: string[] | undefined; }) => updateProduct(input),
     onSuccess: () => {
       setShowModal(false);
       setEditProduct(null);
