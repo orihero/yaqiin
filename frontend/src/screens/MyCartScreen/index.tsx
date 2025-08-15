@@ -73,7 +73,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                             : ""}
                     </div>
                     <div className="text-[#ff7a00] font-bold text-base">
-                        {formatPrice(item.product.price)}
+                        {formatPrice(item.product.price || item.product.basePrice)}
                         <span className="text-xs font-normal text-gray-400">
                             /{t('productCard.kg')}
                         </span>
@@ -148,7 +148,7 @@ const MyCartScreen = () => {
     const [isCheckoutLoading, setCheckoutLoading] = React.useState(false);
     const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
 
-    const getTotal = () => cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const getTotal = () => cart.reduce((sum, item) => sum + (item.product.price || item.product.basePrice) * item.quantity, 0);
 
     // Helper: get default address
     const getDefaultAddress = (userObj: any) => {
@@ -165,15 +165,18 @@ const MyCartScreen = () => {
     };
 
     // Helper: build items array
-    const buildOrderItems = () => cart.map(item => ({
-        productId: item.product._id,
-        name: item.product.name.uz || item.product.name.ru || '',
-        price: item.product.price,
-        quantity: item.quantity,
-        unit: item.product.unit,
-        subtotal: item.product.price * item.quantity,
-        image: item.product.images?.[0] || '',
-    }));
+    const buildOrderItems = () => cart.map(item => {
+        const price = item.product.price || item.product.basePrice;
+        return {
+            productId: item.product._id,
+            name: item.product.name.uz || item.product.name.ru || '',
+            price: price,
+            quantity: item.quantity,
+            unit: item.product.unit,
+            subtotal: price * item.quantity,
+            image: item.product.images?.[0] || '',
+        };
+    });
 
     // Helper: build pricing
     const buildPricing = () => {

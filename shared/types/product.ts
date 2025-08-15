@@ -42,6 +42,14 @@ export interface Product {
   rating?: ProductRating;
   isActive: boolean;
   isFeatured?: boolean;
+  // Shop-specific fields (when returned with shopId)
+  price?: number; // Shop-specific price
+  stock?: ProductStock; // Shop-specific stock
+  isRefundable?: boolean; // Shop-specific refund policy
+  maxOrderQuantity?: number; // Maximum quantity that can be ordered
+  minOrderQuantity?: number; // Minimum quantity that can be ordered
+  deliveryTime?: number; // Shop-specific delivery time in minutes
+  specialNotes?: string; // Shop-specific notes about this product
   createdAt: Date;
   updatedAt: Date;
 }
