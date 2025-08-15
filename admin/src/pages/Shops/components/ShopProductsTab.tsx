@@ -2,6 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShopProductDisplay } from '@yaqiin/shared/types/product';
 import React, { useState } from 'react';
 import { getShopProducts, getAvailableProductsForShop, assignProductToShop, removeProductFromShop, ShopProductListResponse } from '../../../services/shopProductService';
+import MaskedInput from '../../../components/MaskedInput';
+import SearchableSelect from '../../../components/SearchableSelect';
+import { getUnitOptions } from '../../../utils/units';
+import { formatPriceWithCurrency, formatNumber } from '../../../utils/inputMasks';
 
 interface ShopProductsTabProps {
   shopId: string;
@@ -37,7 +41,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
     price: 0,
     stock: { quantity: 0, unit: 'pcs' },
     isActive: true,
-    isRefundable: false,
+    isRefundable: true,
     minOrderQuantity: 1,
   });
 
@@ -72,7 +76,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
         price: 0,
         stock: { quantity: 0, unit: 'pcs' },
         isActive: true,
-        isRefundable: false,
+        isRefundable: true,
         minOrderQuantity: 1,
       });
       refetchShopProducts();
@@ -116,7 +120,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
         unit: product.baseStock?.unit || 'pcs' 
       },
       isActive: true,
-      isRefundable: false,
+      isRefundable: true,
       minOrderQuantity: 1,
     });
     setShowAssignForm(true);
@@ -227,16 +231,16 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-medium">${shopProduct.price}</span>
+                      <span className="font-medium">{formatPriceWithCurrency(shopProduct.price.toString())}</span>
                       {shopProduct.product?.basePrice && shopProduct.price !== shopProduct.product.basePrice && (
                         <div className="text-xs text-gray-400">
-                          Base: ${shopProduct.product.basePrice}
+                          Base: {formatPriceWithCurrency(shopProduct.product.basePrice.toString())}
                         </div>
                       )}
                     </td>
                     <td className="py-3 px-4">
                       <div>
-                        <span className="font-medium">{shopProduct.stock?.quantity || 0}</span>
+                        <span className="font-medium">{formatNumber((shopProduct.stock?.quantity || 0).toString())}</span>
                         <span className="text-sm text-gray-400"> {shopProduct.stock?.unit || 'pcs'}</span>
                       </div>
                     </td>
@@ -354,7 +358,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
                         <tr key={product._id} className="border-b border-[#2e3650]">
                           <td className="py-2 px-4">{idx + 1}</td>
                           <td className="py-2 px-4">{getDisplayText(product.name)}</td>
-                          <td className="py-2 px-4">${product.basePrice}</td>
+                          <td className="py-2 px-4">{formatPriceWithCurrency(product.basePrice.toString())}</td>
                           <td className="py-2 px-4">
                             <button
                               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded font-semibold"
@@ -375,92 +379,81 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
                 {selectedProduct && (
                   <div className="bg-[#1a2236] p-4 rounded-lg mb-4">
                     <h3 className="font-semibold mb-2">Product: {getDisplayText(selectedProduct.name)}</h3>
-                    <p className="text-sm text-gray-400">Base Price: ${selectedProduct.basePrice}</p>
+                    <p className="text-sm text-gray-400">Base Price: {formatPriceWithCurrency(selectedProduct.basePrice.toString())}</p>
                   </div>
                 )}
                 
                 <div>
                   <label className="block text-sm font-medium mb-2">Shop Price 💰</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                  <MaskedInput
+                    type="price"
                     value={assignFormData.price}
-                    onChange={(e) => setAssignFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                    className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
+                    onChange={(value) => setAssignFormData(prev => ({ ...prev, price: value }))}
                     placeholder="Enter shop price"
+                    className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Stock Quantity 📦</label>
-                    <input
+                    <MaskedInput
                       type="number"
-                      min="0"
                       value={assignFormData.stock.quantity}
-                      onChange={(e) => setAssignFormData(prev => ({ 
+                      onChange={(value) => setAssignFormData(prev => ({ 
                         ...prev, 
-                        stock: { ...prev.stock, quantity: parseInt(e.target.value) || 0 }
+                        stock: { ...prev.stock, quantity: value }
                       }))}
-                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                       placeholder="Quantity"
+                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Unit 📏</label>
-                    <select
+                    <SearchableSelect
                       value={assignFormData.stock.unit}
-                      onChange={(e) => setAssignFormData(prev => ({ 
+                      onChange={(value) => setAssignFormData(prev => ({ 
                         ...prev, 
-                        stock: { ...prev.stock, unit: e.target.value }
+                        stock: { ...prev.stock, unit: value }
                       }))}
-                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
-                    >
-                      <option value="pcs">Pieces</option>
-                      <option value="kg">Kilograms</option>
-                      <option value="g">Grams</option>
-                      <option value="l">Liters</option>
-                      <option value="ml">Milliliters</option>
-                      <option value="pack">Pack</option>
-                    </select>
+                      options={getUnitOptions()}
+                      placeholder="Select unit"
+                      className="w-full"
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Min Order Quantity 📋</label>
-                    <input
+                    <MaskedInput
                       type="number"
-                      min="1"
                       value={assignFormData.minOrderQuantity}
-                      onChange={(e) => setAssignFormData(prev => ({ ...prev, minOrderQuantity: parseInt(e.target.value) || 1 }))}
-                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
+                      onChange={(value) => setAssignFormData(prev => ({ ...prev, minOrderQuantity: value }))}
                       placeholder="Min order"
+                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Max Order Quantity 📋</label>
-                    <input
+                    <MaskedInput
                       type="number"
-                      min="1"
-                      value={assignFormData.maxOrderQuantity || ''}
-                      onChange={(e) => setAssignFormData(prev => ({ ...prev, maxOrderQuantity: parseInt(e.target.value) || undefined }))}
-                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
+                      value={assignFormData.maxOrderQuantity || 0}
+                      onChange={(value) => setAssignFormData(prev => ({ ...prev, maxOrderQuantity: value || undefined }))}
                       placeholder="Max order (optional)"
+                      className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Delivery Time (minutes) ⏱️</label>
-                  <input
+                  <MaskedInput
                     type="number"
-                    min="0"
-                    value={assignFormData.deliveryTime || ''}
-                    onChange={(e) => setAssignFormData(prev => ({ ...prev, deliveryTime: parseInt(e.target.value) || undefined }))}
-                    className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
+                    value={assignFormData.deliveryTime || 0}
+                    onChange={(value) => setAssignFormData(prev => ({ ...prev, deliveryTime: value || undefined }))}
                     placeholder="Delivery time in minutes (optional)"
+                    className="bg-[#1a2236] text-white px-4 py-2 rounded-lg w-full focus:outline-none focus:ring"
                   />
                 </div>
 
