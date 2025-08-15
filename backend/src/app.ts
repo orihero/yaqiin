@@ -5,6 +5,7 @@ import userRoutes from "./routes/userRoutes";
 import shopRoutes from "./routes/shopRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
+import shopProductRoutes from "./routes/shopProductRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import deliveryRoutes from "./routes/deliveryRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
@@ -41,6 +42,7 @@ app.get("/health", (req, res) => {
 // Apply Telegram auth middleware to selected routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/shop-products", shopProductRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);

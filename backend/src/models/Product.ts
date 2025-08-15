@@ -59,12 +59,11 @@ const ProductRatingSchema = new Schema<IProductRating>({
 export interface IProduct extends Document {
   name: IProductNameDesc;
   description?: IProductNameDesc;
-  shopId: mongoose.Types.ObjectId;
   categoryId: mongoose.Types.ObjectId;
   images?: string[];
-  price: number;
+  basePrice: number; // Changed from price to basePrice
   unit: string;
-  stock: IProductStock;
+  baseStock: IProductStock; // Changed from stock to baseStock
   attributes?: IProductAttribute[];
   tags?: string[];
   nutritionalInfo?: IProductNutritionalInfo;
@@ -78,12 +77,11 @@ export interface IProduct extends Document {
 const ProductSchema = new Schema<IProduct>({
   name: { type: ProductNameDescSchema, required: true },
   description: { type: ProductNameDescSchema },
-  shopId: { type: Schema.Types.ObjectId, ref: 'Shop', required: true },
   categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   images: [{ type: String }],
-  price: { type: Number, required: true },
+  basePrice: { type: Number, required: true }, // Changed from price to basePrice
   unit: { type: String, required: true },
-  stock: { type: ProductStockSchema, required: true },
+  baseStock: { type: ProductStockSchema, required: true }, // Changed from stock to baseStock
   attributes: [ProductAttributeSchema],
   tags: [{ type: String }],
   nutritionalInfo: { type: ProductNutritionalInfoSchema },
