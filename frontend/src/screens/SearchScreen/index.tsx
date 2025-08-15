@@ -176,7 +176,7 @@ const SearchScreen: React.FC = () => {
                       </div>
                       <div className="flex items-center w-full justify-between mt-auto">
                         <span className="text-[#ff7a00] font-bold text-base">
-                          {formatPrice(product.price)}
+                          {formatPrice(product.price || product.basePrice)}
                           <span className="text-xs font-normal text-gray-400">
                             /{product.unit}
                           </span>

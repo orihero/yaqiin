@@ -1,5 +1,6 @@
 import { Router, Request } from 'express';
 import Product from '../models/Product';
+import ShopProduct from '../models/ShopProduct';
 import { parseQuery } from '../utils/queryHelper';
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
@@ -21,21 +22,110 @@ const upload = multer({ storage });
 // List all products with pagination, filtering, and search
 router.get('/', async (req, res, next) => {
   try {
-    const { filter, page, limit, skip } = parseQuery(req, ['name.uz', 'name.ru', 'description.uz', 'description.ru', 'tags']);
-    const [products, total] = await Promise.all([
-      Product.find(filter).skip(skip).limit(limit),
-      Product.countDocuments(filter)
-    ]);
-    res.json({
-      success: true,
-      data: products,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
+    const { shopId } = req.query;
+    
+    // If shopId is provided, return shop-specific products
+    if (shopId) {
+      const { page = 1, limit = 10, search = '', categoryId } = req.query;
+      
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const skip = (pageNum - 1) * limitNum;
+
+      // Build query for shop products
+      const query: any = { shopId, isActive: true };
+      
+      // Add search functionality
+      if (search) {
+        // Search in product names and descriptions
+        const productIds = await Product.find({
+          $or: [
+            { 'name.uz': { $regex: search, $options: 'i' } },
+            { 'name.ru': { $regex: search, $options: 'i' } },
+            { 'description.uz': { $regex: search, $options: 'i' } },
+            { 'description.ru': { $regex: search, $options: 'i' } },
+          ]
+        }).distinct('_id');
+        
+        query.productId = { $in: productIds };
       }
-    });
+
+      // Add category filter
+      if (categoryId) {
+        const categoryProductIds = await Product.find({ categoryId }).distinct('_id');
+        if (query.productId) {
+          // Intersect the existing productIds with category productIds
+          const existingProductIds = query.productId.$in;
+          query.productId = { $in: existingProductIds.filter((id: any) => categoryProductIds.includes(id)) };
+        } else {
+          query.productId = { $in: categoryProductIds };
+        }
+      }
+
+      const [shopProducts, total] = await Promise.all([
+        ShopProduct.find(query)
+          .skip(skip)
+          .limit(limitNum)
+          .populate('productId', 'name description categoryId images basePrice unit baseStock isActive isFeatured'),
+        ShopProduct.countDocuments(query)
+      ]);
+
+      // Transform the data to match the expected frontend structure
+      const transformedData = shopProducts.map(shopProduct => {
+        const product = shopProduct.productId as any;
+        return {
+          _id: product._id,
+          name: product.name,
+          description: product.description,
+          categoryId: product.categoryId,
+          images: product.images,
+          price: shopProduct.price, // Use shop-specific price
+          unit: product.unit,
+          stock: shopProduct.stock, // Use shop-specific stock
+          attributes: product.attributes,
+          tags: product.tags,
+          nutritionalInfo: product.nutritionalInfo,
+          rating: product.rating,
+          isActive: shopProduct.isActive, // Use shop-specific active status
+          isFeatured: product.isFeatured,
+          isRefundable: shopProduct.isRefundable,
+          maxOrderQuantity: shopProduct.maxOrderQuantity,
+          minOrderQuantity: shopProduct.minOrderQuantity,
+          deliveryTime: shopProduct.deliveryTime,
+          specialNotes: shopProduct.specialNotes,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
+        };
+      });
+
+      res.json({
+        success: true,
+        data: transformedData,
+        meta: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum)
+        }
+      });
+    } else {
+      // Original logic for getting all products (no shopId)
+      const { filter, page, limit, skip } = parseQuery(req, ['name.uz', 'name.ru', 'description.uz', 'description.ru', 'tags']);
+      const [products, total] = await Promise.all([
+        Product.find(filter).skip(skip).limit(limit),
+        Product.countDocuments(filter)
+      ]);
+      res.json({
+        success: true,
+        data: products,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+    }
   } catch (err) {
     next(err);
   }

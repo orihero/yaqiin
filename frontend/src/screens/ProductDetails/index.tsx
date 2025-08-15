@@ -152,7 +152,7 @@ const ProductDetails: React.FC = () => {
             {/* Bottom Bar */}
             <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-[#232c43] h-32  py-5 px-6 flex justify-between items-end z-10 mx-auto">
                 <span className="text-white text-2xl font-bold mb-1">
-                    {product.price}{" "}
+                    {product.price || product.basePrice}{" "}
                     <span className="text-base font-normal">
                         /{product.unit}
                     </span>

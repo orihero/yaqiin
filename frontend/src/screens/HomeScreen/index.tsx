@@ -153,12 +153,13 @@ const HomeScreen = () => {
                         })}
                     </div>
                     {/* Popular Fruits Section */}
+                    {/*
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-lg font-bold text-[#232c43]">
                             {t('home.popularFruits')}
                         </h2>
-                        {/* See all button removed */}
-                    </div>
+                        See all button removed 
+                    </div>*/}
                     {/* Loading/Error States */}
                     {isLoading && (
                         <div className="text-center text-gray-400 py-8">
@@ -211,7 +212,7 @@ const HomeScreen = () => {
                                         </div>
                                         <div className="flex items-center w-full justify-between mt-auto">
                                             <span className="text-[#ff7a00] font-bold text-base">
-                                                {formatPrice(product.price)}
+                                                {formatPrice(product.price || product.basePrice)}
                                                 <span className="text-xs font-normal text-gray-400">
                                                     /{product.unit}
                                                 </span>
@@ -243,9 +244,9 @@ const HomeScreen = () => {
                             <Icon icon="mdi:loading" className="animate-spin text-2xl text-[#232c43]" />
                         </div>
                     )}
-                    {!hasNextPage && products.length > 0 && (
+                    {/* {!hasNextPage && products.length > 0 && (
                         <div className="text-center text-gray-400 py-4">{t('home.noMoreProducts')}</div>
-                    )}
+                    )} */}
                 </div>
             </div>
             {/* Bottom Navigation */}

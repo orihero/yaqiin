@@ -42,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     : ""}
             </div>
             <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
-                ${product.price?.toFixed ? product.price.toFixed(2) : product.price}
+                ${(product.price || product.basePrice)?.toFixed ? (product.price || product.basePrice).toFixed(2) : (product.price || product.basePrice)}
                 <span className="text-xs font-normal text-gray-400">/{t('productCard.kg')}</span>
             </div>
             <button
