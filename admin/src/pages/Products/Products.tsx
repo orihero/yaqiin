@@ -8,6 +8,7 @@ import { Product } from '@yaqiin/shared/types/product';
 import { Icon } from '@iconify/react';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { Category } from '@yaqiin/shared/types/category';
+import { formatPriceWithCurrency, formatNumber } from '../../utils/inputMasks';
 
 const Products: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -30,7 +31,7 @@ const Products: React.FC = () => {
 
   // Create product mutation
   const createMutation = useMutation({
-    mutationFn: async (input: Partial<Product>) => createProduct(input),
+    mutationFn: async (input: Partial<Product> & { images?: File[] | undefined; imageUrls?: string[] | undefined; }) => createProduct(input),
     onSuccess: () => {
       setShowModal(false);
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -39,7 +40,7 @@ const Products: React.FC = () => {
 
   // Update product mutation
   const updateMutation = useMutation({
-    mutationFn: async (input: Partial<Product> & { _id: string }) => updateProduct(input),
+    mutationFn: async (input: Partial<Product> & { _id: string; images?: File[] | undefined; imageUrls?: string[] | undefined; }) => updateProduct(input),
     onSuccess: () => {
       setShowModal(false);
       setEditProduct(null);
@@ -127,8 +128,8 @@ const Products: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">{product.name.uz}</td>
                   <td className="py-3 px-4">{categories?.find(c => c._id === product.categoryId)?.name.uz || product.categoryId}</td>
-                  <td className="py-3 px-4">{product.basePrice}</td>
-                  <td className="py-3 px-4">{product.baseStock.quantity} {product.baseStock.unit}</td>
+                  <td className="py-3 px-4">{formatPriceWithCurrency(product.basePrice.toString())}</td>
+                  <td className="py-3 px-4">{formatNumber(product.baseStock.quantity.toString())} {product.baseStock.unit}</td>
                   <td className="py-3 px-4 text-center flex gap-3 justify-center">
                     <button className="hover:text-blue-400" title="Edit" onClick={() => handleEdit(product)}>
                       <Icon icon="mdi:pencil" width={18} height={18} />

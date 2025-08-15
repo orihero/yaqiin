@@ -3,6 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getAllCategories } from '../../../services/categoryService';
 import { Category } from '@yaqiin/shared/types/category';
 import { Product } from '@yaqiin/shared/types/product';
+import MaskedInput from '../../../components/MaskedInput';
+import SearchableSelect from '../../../components/SearchableSelect';
+import { getUnitOptions } from '../../../utils/units';
 
 // ProductFormModal: Right-side drawer modal for adding/editing products. Follows admin panel modal conventions.
 
@@ -260,33 +263,32 @@ export default function ProductFormModal({ open = true, product, loading = false
             </div>
             <div>
               <label className="block mb-1 text-white">💰 Base Price *</label>
-              <input 
-                type="number" 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                value={state.basePrice} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'basePrice', value: Number(e.target.value) })} 
-                required 
-                min={0} 
+              <MaskedInput
+                type="price"
+                value={state.basePrice}
+                onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'basePrice', value })}
+                placeholder="Enter price"
+                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white"
               />
             </div>
             <div>
               <label className="block mb-1 text-white">📦 Unit *</label>
-              <input 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                value={state.unit} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'unit', value: e.target.value })} 
-                required 
+              <SearchableSelect
+                value={state.unit}
+                onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'unit', value })}
+                options={getUnitOptions()}
+                placeholder="Select unit"
+                className="w-full"
               />
             </div>
             <div>
               <label className="block mb-1 text-white">📊 Base Stock Quantity *</label>
-              <input 
-                type="number" 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                value={state.baseStockQuantity} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'baseStockQuantity', value: Number(e.target.value) })} 
-                required 
-                min={0} 
+              <MaskedInput
+                type="number"
+                value={state.baseStockQuantity}
+                onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'baseStockQuantity', value })}
+                placeholder="Enter quantity"
+                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white"
               />
             </div>
             <div className="col-span-2">
