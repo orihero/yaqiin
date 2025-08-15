@@ -63,7 +63,7 @@ router.get('/:id/related', async (req, res, next) => {
       isActive: true
     })
     .limit(10)
-    .select('_id name images price unit isActive');
+    .select('_id name images basePrice unit isActive');
     
     res.json({ success: true, data: relatedProducts });
   } catch (err) {
@@ -77,7 +77,8 @@ router.post('/', upload.array('images', 10), async (req: Request, res, next) => 
     // Parse JSON fields if sent as strings
     if (typeof body.name === 'string') body.name = JSON.parse(body.name);
     if (typeof body.description === 'string') body.description = JSON.parse(body.description);
-    if (typeof body.stock === 'string') body.stock = JSON.parse(body.stock);
+    if (typeof body.baseStock === 'string') body.baseStock = JSON.parse(body.baseStock);
+    
     // Handle images
     const baseUrl = req.protocol + '://' + req.get('host');
     let imageUrls: string[] = [];
@@ -115,6 +116,7 @@ router.post('/', upload.array('images', 10), async (req: Request, res, next) => 
     }
     const allImages = [...imageUrls, ...urlImages];
     if (allImages.length) body.images = allImages;
+    
     const product = new Product(body);
     await product.save();
     res.status(201).json({ success: true, data: product, message: 'Product created' });
@@ -128,7 +130,8 @@ router.put('/:id', upload.array('images', 10), async (req: Request, res, next) =
     const body = req.body;
     if (typeof body.name === 'string') body.name = JSON.parse(body.name);
     if (typeof body.description === 'string') body.description = JSON.parse(body.description);
-    if (typeof body.stock === 'string') body.stock = JSON.parse(body.stock);
+    if (typeof body.baseStock === 'string') body.baseStock = JSON.parse(body.baseStock);
+    
     const baseUrl = req.protocol + '://' + req.get('host');
     let imageUrls: string[] = [];
     if (req.files && (req.files as Express.Multer.File[]).length > 0) {
@@ -163,6 +166,7 @@ router.put('/:id', upload.array('images', 10), async (req: Request, res, next) =
     }
     const allImages = [...imageUrls, ...urlImages];
     if (allImages.length) body.images = allImages;
+    
     const product = await Product.findByIdAndUpdate(req.params.id, body, { new: true });
     if (!product) return next({ status: 404, message: 'Product not found' });
     res.json({ success: true, data: product, message: 'Product updated' });

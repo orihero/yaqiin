@@ -26,16 +26,16 @@ export interface ProductRating {
   totalReviews: number;
 }
 
+// Updated Product model - now global, not tied to a specific shop
 export interface Product {
   _id: string;
   name: ProductNameDesc;
   description?: ProductNameDesc;
-  shopId: string;
   categoryId: string;
   images?: string[];
-  price: number;
+  basePrice: number; // Base price, can be overridden by shop
   unit: string;
-  stock: ProductStock;
+  baseStock: ProductStock; // Base stock info, can be overridden by shop
   attributes?: ProductAttribute[];
   tags?: string[];
   nutritionalInfo?: ProductNutritionalInfo;
@@ -44,4 +44,36 @@ export interface Product {
   isFeatured?: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// New ShopProduct model for shop-specific product data
+export interface ShopProduct {
+  _id: string;
+  shopId: string;
+  productId: string;
+  price: number; // Shop-specific price (can override base price)
+  stock: ProductStock; // Shop-specific stock
+  isActive: boolean; // Whether this product is active in this shop
+  isRefundable?: boolean; // Shop-specific refund policy
+  maxOrderQuantity?: number; // Maximum quantity that can be ordered
+  minOrderQuantity?: number; // Minimum quantity that can be ordered
+  deliveryTime?: number; // Shop-specific delivery time in minutes
+  specialNotes?: string; // Shop-specific notes about this product
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Combined interface for displaying products in shop context
+export interface ShopProductDisplay {
+  _id: string;
+  shopId: string;
+  product: Product;
+  price: number;
+  stock: ProductStock;
+  isActive: boolean;
+  isRefundable?: boolean;
+  maxOrderQuantity?: number;
+  minOrderQuantity?: number;
+  deliveryTime?: number;
+  specialNotes?: string;
 } 

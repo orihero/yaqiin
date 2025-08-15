@@ -3,12 +3,10 @@ import React, { useState } from 'react';
 import ProductFormModal from './components/ProductFormModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, createProduct, updateProduct, deleteProduct, ProductListResponse } from '../../services/productService';
-import { getAllShops } from '../../services/shopService';
 import { getAllCategories } from '../../services/categoryService';
 import { Product } from '@yaqiin/shared/types/product';
 import { Icon } from '@iconify/react';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import { Shop } from '@yaqiin/shared/types/shop';
 import { Category } from '@yaqiin/shared/types/category';
 
 const Products: React.FC = () => {
@@ -23,11 +21,6 @@ const Products: React.FC = () => {
   const { data, isLoading, isError } = useQuery<ProductListResponse>({
     queryKey: ['products', page, limit, search],
     queryFn: () => getProducts(page, limit, search),
-  });
-
-  const { data: shops } = useQuery<Shop[]>({
-    queryKey: ['shops'],
-    queryFn: getAllShops,
   });
 
   const { data: categories } = useQuery<Category[]>({
@@ -80,22 +73,22 @@ const Products: React.FC = () => {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold">📦 Products</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={handleAdd}
         >
-          <Icon icon="mdi:plus" className="inline-block mr-2" /> Add Product
+          <Icon icon="mdi:plus" className="inline-block mr-2" /> ➕ Add Product
         </button>
       </div>
       <div className="mb-4 flex items-center">
         <input
           className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder="Search Product"
+          placeholder="🔍 Search Product"
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
         />
-        <span className="ml-4 text-gray-400">Dashboard • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">Products</span></span>
+        <span className="ml-4 text-gray-400">📊 Dashboard • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">📦 Products</span></span>
       </div>
       <div className="bg-[#232b42] rounded-xl overflow-x-auto">
         <table className="min-w-full text-left">
@@ -104,23 +97,22 @@ const Products: React.FC = () => {
               <th className="py-3 px-4">Image</th>
               <th className="py-3 px-4">Name</th>
               <th className="py-3 px-4">Category</th>
-              <th className="py-3 px-4">Shop</th>
-              <th className="py-3 px-4">Price</th>
-              <th className="py-3 px-4">Stock</th>
+              <th className="py-3 px-4">Base Price</th>
+              <th className="py-3 px-4">Base Stock</th>
               <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={6} className="text-center py-8">⏳ Loading...</td></tr>
             ) : isError ? (
-              <tr><td colSpan={5} className="text-center py-8 text-red-400">Failed to load products.</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-red-400">❌ Failed to load products.</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={5} className="text-center py-16 text-gray-400">
+              <tr><td colSpan={6} className="text-center py-16 text-gray-400">
                 <div className="flex flex-col items-center">
                   <Icon icon="mdi:package-variant" className="text-5xl mb-4" />
-                  <div className="text-lg font-medium">No products found.</div>
-                  <div className="text-sm">Click <span className="font-semibold">Add Product</span> to create your first product.</div>
+                  <div className="text-lg font-medium">📭 No products found.</div>
+                  <div className="text-sm">Click <span className="font-semibold">➕ Add Product</span> to create your first product.</div>
                 </div>
               </td></tr>
             ) : (
@@ -135,9 +127,8 @@ const Products: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">{product.name.uz}</td>
                   <td className="py-3 px-4">{categories?.find(c => c._id === product.categoryId)?.name.uz || product.categoryId}</td>
-                  <td className="py-3 px-4">{shops?.find(s => s._id === product.shopId)?.name || product.shopId}</td>
-                  <td className="py-3 px-4">{product.price}</td>
-                  <td className="py-3 px-4">{product.stock.quantity}</td>
+                  <td className="py-3 px-4">{product.basePrice}</td>
+                  <td className="py-3 px-4">{product.baseStock.quantity} {product.baseStock.unit}</td>
                   <td className="py-3 px-4 text-center flex gap-3 justify-center">
                     <button className="hover:text-blue-400" title="Edit" onClick={() => handleEdit(product)}>
                       <Icon icon="mdi:pencil" width={18} height={18} />
@@ -196,17 +187,19 @@ const Products: React.FC = () => {
         error={createMutation.isError ? (createMutation.error as any)?.message : updateMutation.isError ? (updateMutation.error as any)?.message : null}
         onClose={() => { setShowModal(false); setEditProduct(null); }}
         onSubmit={(values) => {
-          let { images, ...rest } = values;
-          // Remove images if not a File[]
-          if (images && images.length > 0 && !(images[0] instanceof File)) {
-            delete rest.images;
-            images = undefined;
-          }
+          const { images, imageUrls, ...rest } = values;
+          // Handle images properly - only pass File[] if it exists and contains File objects
+          const hasFileImages = images && images.length > 0 && images[0] instanceof File;
+          
           if (editProduct) {
-            const payload = images && images[0] instanceof File ? { ...editProduct, ...rest, images } : { ...editProduct, ...rest };
+            const payload = hasFileImages 
+              ? { ...editProduct, ...rest, images: images as File[], imageUrls }
+              : { ...editProduct, ...rest, imageUrls };
             updateMutation.mutate(payload as any);
           } else {
-            const payload = images && images[0] instanceof File ? { ...rest, images } : rest;
+            const payload = hasFileImages 
+              ? { ...rest, images: images as File[], imageUrls }
+              : { ...rest, imageUrls };
             createMutation.mutate(payload as any);
           }
         }}
@@ -214,8 +207,8 @@ const Products: React.FC = () => {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Product"
-        description={deleteTarget ? `Are you sure you want to delete ${deleteTarget.name.uz}?` : ''}
+        title="🗑️ Delete Product"
+        description={deleteTarget ? `⚠️ Are you sure you want to delete ${deleteTarget.name.uz}?` : ''}
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}
