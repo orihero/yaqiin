@@ -75,6 +75,7 @@ router.get('/', async (req, res, next) => {
         const product = shopProduct.productId as any;
         return {
           _id: product._id,
+          shopId: shopProduct.shopId, // Add shopId to the product object
           name: product.name,
           description: product.description,
           categoryId: product.categoryId,
@@ -133,9 +134,53 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return next({ status: 404, message: 'Product not found' });
-    res.json({ success: true, data: product });
+    const { shopId } = req.query;
+    
+    if (shopId) {
+      // Return shop-specific product data
+      const shopProduct = await ShopProduct.findOne({ 
+        productId: req.params.id, 
+        shopId, 
+        isActive: true 
+      }).populate('productId');
+      
+      if (!shopProduct) {
+        return next({ status: 404, message: 'Product not found in this shop' });
+      }
+      
+      const product = shopProduct.productId as any;
+      const transformedData = {
+        _id: product._id,
+        shopId: shopProduct.shopId, // Add shopId to the product object
+        name: product.name,
+        description: product.description,
+        categoryId: product.categoryId,
+        images: product.images,
+        price: shopProduct.price, // Use shop-specific price
+        unit: product.unit,
+        stock: shopProduct.stock, // Use shop-specific stock
+        attributes: product.attributes,
+        tags: product.tags,
+        nutritionalInfo: product.nutritionalInfo,
+        rating: product.rating,
+        isActive: shopProduct.isActive, // Use shop-specific active status
+        isFeatured: product.isFeatured,
+        isRefundable: shopProduct.isRefundable,
+        maxOrderQuantity: shopProduct.maxOrderQuantity,
+        minOrderQuantity: shopProduct.minOrderQuantity,
+        deliveryTime: shopProduct.deliveryTime,
+        specialNotes: shopProduct.specialNotes,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt
+      };
+      
+      res.json({ success: true, data: transformedData });
+    } else {
+      // Return base product data (no shop-specific info)
+      const product = await Product.findById(req.params.id);
+      if (!product) return next({ status: 404, message: 'Product not found' });
+      res.json({ success: true, data: product });
+    }
   } catch (err) {
     next(err);
   }
@@ -144,18 +189,112 @@ router.get('/:id', async (req, res, next) => {
 // Get related products (same category, excluding current product)
 router.get('/:id/related', async (req, res, next) => {
   try {
+    const { shopId } = req.query;
+    
     const product = await Product.findById(req.params.id);
     if (!product) return next({ status: 404, message: 'Product not found' });
     
-    const relatedProducts = await Product.find({
-      categoryId: product.categoryId,
-      _id: { $ne: product._id },
-      isActive: true
-    })
-    .limit(10)
-    .select('_id name images basePrice unit isActive');
+    if (shopId) {
+      // Return shop-specific related products
+      const relatedShopProducts = await ShopProduct.find({
+        shopId,
+        isActive: true,
+        productId: {
+          $in: await Product.find({
+            categoryId: product.categoryId,
+            _id: { $ne: product._id },
+            isActive: true
+          }).distinct('_id')
+        }
+      })
+      .populate('productId', '_id name images basePrice unit isActive')
+      .limit(10);
+      
+      const transformedData = relatedShopProducts.map(shopProduct => {
+        const product = shopProduct.productId as any;
+        return {
+          _id: product._id,
+          shopId: shopProduct.shopId, // Add shopId to the product object
+          name: product.name,
+          images: product.images,
+          price: shopProduct.price, // Use shop-specific price
+          basePrice: product.basePrice,
+          unit: product.unit,
+          isActive: shopProduct.isActive, // Use shop-specific active status
+        };
+      });
+      
+      res.json({ success: true, data: transformedData });
+    } else {
+      // Return base related products (no shop-specific info)
+      const relatedProducts = await Product.find({
+        categoryId: product.categoryId,
+        _id: { $ne: product._id },
+        isActive: true
+      })
+      .limit(10)
+      .select('_id name images basePrice unit isActive');
+      
+      res.json({ success: true, data: relatedProducts });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Bulk fetch products by IDs
+router.get('/by-ids', async (req, res, next) => {
+  try {
+    const { ids, shopId } = req.query;
     
-    res.json({ success: true, data: relatedProducts });
+    if (!ids) {
+      return next({ status: 400, message: 'Product IDs are required' });
+    }
+    
+    const productIds = (ids as string).split(',').map(id => id.trim());
+    
+    if (shopId) {
+      // Return shop-specific products
+      const shopProducts = await ShopProduct.find({
+        shopId,
+        isActive: true,
+        productId: { $in: productIds }
+      }).populate('productId');
+      
+      const transformedData = shopProducts.map(shopProduct => {
+        const product = shopProduct.productId as any;
+        return {
+          _id: product._id,
+          shopId: shopProduct.shopId, // Add shopId to the product object
+          name: product.name,
+          description: product.description,
+          categoryId: product.categoryId,
+          images: product.images,
+          price: shopProduct.price, // Use shop-specific price
+          unit: product.unit,
+          stock: shopProduct.stock, // Use shop-specific stock
+          attributes: product.attributes,
+          tags: product.tags,
+          nutritionalInfo: product.nutritionalInfo,
+          rating: product.rating,
+          isActive: shopProduct.isActive, // Use shop-specific active status
+          isFeatured: product.isFeatured,
+          isRefundable: shopProduct.isRefundable,
+          maxOrderQuantity: shopProduct.maxOrderQuantity,
+          minOrderQuantity: shopProduct.minOrderQuantity,
+          deliveryTime: shopProduct.deliveryTime,
+          specialNotes: shopProduct.specialNotes,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
+        };
+      });
+      
+      res.json({ success: true, data: transformedData });
+    } else {
+      // Return base products (no shop-specific info)
+      const products = await Product.find({ _id: { $in: productIds } });
+      res.json({ success: true, data: products });
+    }
   } catch (err) {
     next(err);
   }

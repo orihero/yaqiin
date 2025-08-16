@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { getSupportTickets, createSupportTicket, updateSupportTicket, deleteSupportTicket } from '../../services/supportTicketService';
 import { SupportTicket } from '@yaqiin/shared/types/supportTicket';
 import { Icon } from '@iconify/react';
@@ -7,6 +8,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import SupportTicketFormModal from './components/SupportTicketFormModal';
 
 const SupportTickets: React.FC = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
@@ -62,47 +64,47 @@ const SupportTickets: React.FC = () => {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Support Tickets</h1>
+        <h1 className="text-2xl font-bold">{t('navigation.supportTickets')}</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={handleAdd}
         >
-          <Icon icon="mdi:plus" className="inline-block mr-2" /> Add Ticket
+          <Icon icon="mdi:plus" className="inline-block mr-2" /> {t('supportTickets.addTicket')}
         </button>
       </div>
       <div className="mb-4 flex items-center">
         <input
           className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder="Search Ticket"
+          placeholder={t('supportTickets.searchTicket')}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
         />
-        <span className="ml-4 text-gray-400">Dashboard • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">Support Tickets</span></span>
+        <span className="ml-4 text-gray-400">{t('navigation.dashboard')} • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">{t('navigation.supportTickets')}</span></span>
       </div>
       <div className="bg-[#232b42] rounded-xl overflow-x-auto">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[#2e3650]">
               <th className="py-3 px-4">#</th>
-              <th className="py-3 px-4">Title</th>
-              <th className="py-3 px-4">User Role</th>
-              <th className="py-3 px-4">Priority</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Created At</th>
-              <th className="py-3 px-4 text-center">Actions</th>
+              <th className="py-3 px-4">{t('supportTickets.title')}</th>
+              <th className="py-3 px-4">{t('supportTickets.userRole')}</th>
+              <th className="py-3 px-4">{t('supportTickets.priority')}</th>
+              <th className="py-3 px-4">{t('supportTickets.status')}</th>
+              <th className="py-3 px-4">{t('supportTickets.createdAt')}</th>
+              <th className="py-3 px-4 text-center">{t('supportTickets.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">{t('common.loading')}</td></tr>
             ) : isError ? (
-              <tr><td colSpan={7} className="text-center py-8 text-red-400">Failed to load tickets.</td></tr>
+              <tr><td colSpan={7} className="text-center py-8 text-red-400">{t('supportTickets.failedToLoad')}</td></tr>
             ) : !data?.data?.length ? (
               <tr><td colSpan={7} className="text-center py-16 text-gray-400">
                 <div className="flex flex-col items-center">
                   <Icon icon="mdi:lifebuoy" className="text-5xl mb-4" />
-                  <div className="text-lg font-medium">No tickets found.</div>
-                  <div className="text-sm">Click <span className="font-semibold">Add Ticket</span> to create your first support ticket.</div>
+                  <div className="text-lg font-medium">{t('supportTickets.noTicketsFound')}</div>
+                  <div className="text-sm">{t('supportTickets.clickAddTicketToCreate')}</div>
                 </div>
               </td></tr>
             ) : (
@@ -115,10 +117,10 @@ const SupportTickets: React.FC = () => {
                   <td className="py-3 px-4">{ticket.status}</td>
                   <td className="py-3 px-4">{new Date(ticket.createdAt).toLocaleString()}</td>
                   <td className="py-3 px-4 text-center flex gap-3 justify-center">
-                    <button className="hover:text-blue-400" title="Edit" onClick={() => handleEdit(ticket)}>
+                    <button className="hover:text-blue-400" title={t('common.edit')} onClick={() => handleEdit(ticket)}>
                       <Icon icon="mdi:pencil" width={18} height={18} />
                     </button>
-                    <button className="hover:text-red-400" title="Delete" onClick={() => handleDelete(ticket)}>
+                    <button className="hover:text-red-400" title={t('common.delete')} onClick={() => handleDelete(ticket)}>
                       <Icon icon="mdi:delete" width={18} height={18} />
                     </button>
                   </td>
@@ -131,7 +133,7 @@ const SupportTickets: React.FC = () => {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>{t('common.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -145,23 +147,23 @@ const SupportTickets: React.FC = () => {
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(1)}
             disabled={page === 1}
-          >{'<<'}</button>
+          >{t('common.pagination.first')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-          >{'<'}</button>
+          >{t('common.pagination.previous')}</button>
           <span className="mx-2">{page} / {data?.meta?.totalPages ?? 1}</span>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.min((data?.meta?.totalPages ?? 1), p + 1))}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>'}</button>
+          >{t('common.pagination.next')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(data?.meta?.totalPages ?? 1)}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>>'}</button>
+          >{t('common.pagination.last')}</button>
         </div>
       </div>
       {/* Support Ticket Modal (Add/Edit) */}
@@ -182,8 +184,8 @@ const SupportTickets: React.FC = () => {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Ticket"
-        description={deleteTarget ? `Are you sure you want to delete ticket #${deleteTarget.ticketNumber}?` : ''}
+        title={t('supportTickets.deleteTicket')}
+        description={deleteTarget ? t('supportTickets.deleteTicketConfirmation', { ticketNumber: deleteTarget.ticketNumber }) : ''}
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}

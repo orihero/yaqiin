@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import CourierFormModal from './components/CourierFormModal';
 import { Courier } from '@yaqiin/shared/types/courier';
 import { getCouriers, createCourier, updateCourier, deleteCourier as deleteCourierApi } from '../../services/courierService';
@@ -7,6 +8,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { toast } from 'react-toastify';
 
 export default function CouriersPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [search, setSearch] = useState('');
@@ -25,10 +27,10 @@ export default function CouriersPage() {
     onSuccess: () => {
       setShowModal(false);
       queryClient.invalidateQueries({ queryKey: ['couriers'] });
-      toast.success('Courier created successfully');
+      toast.success(t('couriers.createdSuccessfully'));
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to create courier');
+      toast.error(error?.message || t('couriers.failedToCreate'));
     },
   });
 
@@ -38,10 +40,10 @@ export default function CouriersPage() {
       setShowModal(false);
       setEditCourier(null);
       queryClient.invalidateQueries({ queryKey: ['couriers'] });
-      toast.success('Courier updated successfully');
+      toast.success(t('couriers.updatedSuccessfully'));
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to update courier');
+      toast.error(error?.message || t('couriers.failedToUpdate'));
     },
   });
 
@@ -53,28 +55,28 @@ export default function CouriersPage() {
     onSuccess: () => {
       setDeleteCourier(null);
       queryClient.invalidateQueries({ queryKey: ['couriers'] });
-      toast.success('Courier deleted successfully');
+      toast.success(t('couriers.deletedSuccessfully'));
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to delete courier');
+      toast.error(error?.message || t('couriers.failedToDelete'));
     },
   });
 
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Couriers</h1>
+        <h1 className="text-2xl font-bold">{t('navigation.couriers')}</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={() => { setEditCourier(null); setShowModal(true); }}
         >
-          Add Courier
+          {t('couriers.addCourier')}
         </button>
       </div>
       <div className="mb-4 flex items-center">
         <input
           className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder="Search Courier"
+          placeholder={t('couriers.searchCourier')}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -84,21 +86,21 @@ export default function CouriersPage() {
           <thead>
             <tr className="border-b border-[#2e3650]">
               <th className="py-3 px-4">#</th>
-              <th className="py-3 px-4">Vehicle</th>
-              <th className="py-3 px-4">License</th>
-              <th className="py-3 px-4">Availability</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Created</th>
-              <th className="py-3 px-4">Action</th>
+              <th className="py-3 px-4">{t('couriers.vehicle')}</th>
+              <th className="py-3 px-4">{t('couriers.license')}</th>
+              <th className="py-3 px-4">{t('couriers.availability')}</th>
+              <th className="py-3 px-4">{t('couriers.status')}</th>
+              <th className="py-3 px-4">{t('couriers.created')}</th>
+              <th className="py-3 px-4">{t('couriers.action')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">{t('common.loading')}</td></tr>
             ) : error ? (
               <tr><td colSpan={7} className="text-center py-8 text-red-400">{String(error.message)}</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={7} className="text-center py-8">No couriers found.</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">{t('couriers.noCouriersFound')}</td></tr>
             ) : (
               data.data.map((courier: Courier, idx: number) => (
                 <tr key={courier._id} className="border-b border-[#2e3650] hover:bg-[#202840] transition">
@@ -106,11 +108,11 @@ export default function CouriersPage() {
                   <td className="py-3 px-4">{courier.vehicleType}</td>
                   <td className="py-3 px-4">{courier.licenseNumber}</td>
                   <td className="py-3 px-4 capitalize">{courier.availability}</td>
-                  <td className="py-3 px-4">{courier.isActive ? 'Active' : 'Inactive'}</td>
+                  <td className="py-3 px-4">{courier.isActive ? t('common.active') : t('common.inactive')}</td>
                   <td className="py-3 px-4">{new Date(courier.createdAt).toLocaleDateString()}</td>
                   <td className="py-3 px-4 flex gap-3">
-                    <button onClick={() => { setEditCourier(courier); setShowModal(true); }} className="hover:text-blue-400" title="Edit">Edit</button>
-                    <button onClick={() => setDeleteCourier(courier)} className="hover:text-red-400" title="Delete">Delete</button>
+                    <button onClick={() => { setEditCourier(courier); setShowModal(true); }} className="hover:text-blue-400" title={t('common.edit')}>{t('common.edit')}</button>
+                    <button onClick={() => setDeleteCourier(courier)} className="hover:text-red-400" title={t('common.delete')}>{t('common.delete')}</button>
                   </td>
                 </tr>
               ))
@@ -121,7 +123,7 @@ export default function CouriersPage() {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>{t('common.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -135,23 +137,23 @@ export default function CouriersPage() {
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(1)}
             disabled={page === 1}
-          >{'<<'}</button>
+          >{t('common.pagination.first')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-          >{'<'}</button>
+          >{t('common.pagination.previous')}</button>
           <span className="mx-2">{page} / {data?.meta?.totalPages ?? 1}</span>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.min((data?.meta?.totalPages ?? 1), p + 1))}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>'}</button>
+          >{t('common.pagination.next')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(data?.meta?.totalPages ?? 1)}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>>'}</button>
+          >{t('common.pagination.last')}</button>
         </div>
       </div>
       {/* Courier Modal (Add/Edit) */}
@@ -174,8 +176,8 @@ export default function CouriersPage() {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteCourier}
-        title="Delete Courier"
-        description={`Are you sure you want to delete this courier? This action cannot be undone.`}
+        title={t('couriers.deleteCourier')}
+        description={t('couriers.deleteCourierConfirmation')}
         loading={deleteCourierMutation.status === 'pending'}
         onCancel={() => setDeleteCourier(null)}
         onConfirm={() => deleteCourier && deleteCourierMutation.mutate(deleteCourier)}

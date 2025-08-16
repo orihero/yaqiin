@@ -1,24 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-
-const navItems = [
-  { name: 'Dashboard', to: '/dashboard', icon: 'mdi:view-dashboard-outline' },
-  { name: 'Users', to: '/users', icon: 'mdi:account-group-outline' },
-  { name: 'Shops', to: '/shops', icon: 'mdi:storefront-outline' },
-  { name: 'Categories', to: '/categories', icon: 'mdi:shape-outline' },
-  { name: 'Products', to: '/products', icon: 'mdi:package-variant-closed' },
-  { name: 'Orders', to: '/orders', icon: 'mdi:cart-outline' },
-  { name: 'Support Tickets', to: '/support-tickets', icon: 'mdi:lifebuoy' },
-  { name: 'Settings', to: '/settings', icon: 'mdi:cog-outline' },
-];
+import { useTranslation } from 'react-i18next';
 
 function Sidebar() {
+  const { t } = useTranslation();
+
+      const navItems = [
+      { name: t('navigation.dashboard'), to: '/dashboard', icon: 'mdi:view-dashboard-outline' },
+      { name: t('navigation.users'), to: '/users', icon: 'mdi:account-group-outline' },
+      { name: t('navigation.shops'), to: '/shops', icon: 'mdi:storefront-outline' },
+      { name: t('navigation.categories'), to: '/categories', icon: 'mdi:shape-outline' },
+      { name: t('navigation.products'), to: '/products', icon: 'mdi:package-variant-closed' },
+      { name: t('navigation.orders'), to: '/orders', icon: 'mdi:cart-outline' },
+      { name: t('navigation.couriers'), to: '/couriers', icon: 'mdi:truck-delivery-outline' },
+      { name: t('navigation.supportTickets'), to: '/support-tickets', icon: 'mdi:lifebuoy' },
+      { name: t('navigation.settings'), to: '/settings', icon: 'mdi:cog-outline' },
+    ];
+
   return (
     <aside className="h-[92vh] w-64 bg-[#181e2a] rounded-3xl shadow-xl flex flex-col py-8 px-4 fixed top-4 left-4 z-20 border-4 border-[#232c43]">
       <div className="mb-10 flex items-center gap-2 justify-center">
-        <span className="text-cyan-400 text-3xl font-bold"><Icon icon="mdi:alpha-m-circle" /></span>
-        <span className="text-gray-100 text-xl font-semibold tracking-wide">Admin</span>
+        <span className="text-cyan-400 text-3xl font-bold">🏢</span>
+        <span className="text-gray-100 text-xl font-semibold tracking-wide">{t('navigation.admin')}</span>
       </div>
       <nav className="flex-1">
         <ul className="space-y-2">

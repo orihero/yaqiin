@@ -21,19 +21,26 @@ export const getAllProducts = async (): Promise<Product[]> => {
   return res.data.data;
 };
 
-export const getProductById = async (id: string): Promise<Product> => {
-  const res = await api.get(`/products/${id}`);
+export const getProductById = async (id: string, shopId?: string): Promise<Product> => {
+  const params = new URLSearchParams();
+  if (shopId) params.append('shopId', shopId);
+  const res = await api.get(`/products/${id}?${params.toString()}`);
   return res.data.data;
 };
 
 // Bulk fetch products by IDs (if backend supports it)
-export const getProductsByIds = async (ids: string[]): Promise<Product[]> => {
-  const res = await api.get(`/products/by-ids?ids=${ids.join(',')}`);
+export const getProductsByIds = async (ids: string[], shopId?: string): Promise<Product[]> => {
+  const params = new URLSearchParams();
+  params.append('ids', ids.join(','));
+  if (shopId) params.append('shopId', shopId);
+  const res = await api.get(`/products/by-ids?${params.toString()}`);
   return res.data.data;
 };
 
 // Get related products for a specific product
-export const getRelatedProducts = async (productId: string): Promise<Product[]> => {
-  const res = await api.get(`/products/${productId}/related`);
+export const getRelatedProducts = async (productId: string, shopId?: string): Promise<Product[]> => {
+  const params = new URLSearchParams();
+  if (shopId) params.append('shopId', shopId);
+  const res = await api.get(`/products/${productId}/related?${params.toString()}`);
   return res.data.data;
 }; 

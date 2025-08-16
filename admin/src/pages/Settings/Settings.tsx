@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSettings, updateSetting, createSetting, deleteSetting } from '../../services/settingService';
 import type { Setting } from '@yaqiin/shared/types/setting';
@@ -21,12 +22,13 @@ const Switch = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   </button>
 );
 
-const TABS = [
-  { key: 'featureFlags', label: 'Feature Flags' },
-  // Future tabs can be added here
-];
-
 const Settings: React.FC = () => {
+  const { t } = useTranslation();
+  
+  const TABS = [
+    { key: 'featureFlags', label: t('settings.featureFlags') },
+    // Future tabs can be added here
+  ];
   const [currentTab, setCurrentTab] = useState('featureFlags');
   const [showModal, setShowModal] = useState(false);
   const [editFlag, setEditFlag] = useState<Setting | null>(null);
@@ -95,7 +97,7 @@ const Settings: React.FC = () => {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('navigation.settings')}</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={handleAdd}

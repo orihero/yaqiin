@@ -126,7 +126,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
 }
 
 const MyCartScreen = () => {
-    const { cart, addToCart, removeFromCart, updateQuantity, clearCart } = useCartStore();
+    const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getShopId, hasMultipleShops } = useCartStore();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const user = useUserStore(state => state.user);
@@ -157,11 +157,8 @@ const MyCartScreen = () => {
     };
 
     // Helper: get shopId (all items must be from same shop)
-    const getShopId = () => {
-        if (cart.length === 0) return null;
-        const shopId = cart[0].product.shopId;
-        if (cart.some(item => item.product.shopId !== shopId)) return null;
-        return shopId;
+    const getShopIdFromCart = () => {
+        return getShopId();
     };
 
     // Helper: build items array
@@ -197,7 +194,10 @@ const MyCartScreen = () => {
             if (!userObj) throw new Error(t('cart.userNotLoaded') || 'User not loaded');
             const address = getDefaultAddress(userObj);
             if (!address) throw new Error(t('cart.noAddress') || 'No delivery address found.');
-            const shopId = getShopId();
+            const shopId = getShopIdFromCart();
+            console.log('====================================');
+            console.log(JSON.stringify({ userObj, address, shopId }, null, 2));
+            console.log('====================================');
             if (!shopId) throw new Error(t('cart.multipleShops') || 'All items must be from the same shop.');
             const items = buildOrderItems();
             const payload: any = {

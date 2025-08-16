@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 
 interface Option {
   value: string;
@@ -19,10 +20,12 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   value,
   onChange,
   options,
-  placeholder = 'Select...',
+  placeholder,
   className = '',
   disabled = false
 }) => {
+  const { t } = useTranslation();
+  const defaultPlaceholder = placeholder || t('common.select');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState(options);
@@ -64,7 +67,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         disabled={disabled}
       >
         <span className={selectedOption ? 'text-white' : 'text-gray-400'}>
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption.label : defaultPlaceholder}
         </span>
         <Icon 
           icon={isOpen ? "mdi:chevron-up" : "mdi:chevron-down"} 
@@ -77,7 +80,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           <div className="p-2 border-b border-[#2e3650]">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={t('common.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-[#1a2236] text-white px-3 py-2 rounded focus:outline-none focus:ring text-sm"
@@ -86,7 +89,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           </div>
           <div className="max-h-48 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-2 text-gray-400 text-sm">No options found</div>
+              <div className="px-4 py-2 text-gray-400 text-sm">{t('common.noOptionsFound')}</div>
             ) : (
               filteredOptions.map((option) => (
                 <button

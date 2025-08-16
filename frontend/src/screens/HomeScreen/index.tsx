@@ -44,9 +44,16 @@ const HomeScreen = () => {
     // Confirm add/update
     const handleConfirm = () => {
         if (selectedProduct) {
-            addToCart(selectedProduct, quantity);
-            setSheetOpen(false);
-            setSelectedProduct(null);
+            try {
+                addToCart(selectedProduct, quantity);
+                setSheetOpen(false);
+                setSelectedProduct(null);
+            } catch (error: any) {
+                // Show error message to user
+                console.error('Failed to add to cart:', error);
+                // You can add a toast notification here if you have a toast system
+                alert(error.message || 'Failed to add product to cart');
+            }
         }
     };
 

@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './i18n'; // Initialize i18n
 
 const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'));
 const Login = React.lazy(() => import('./pages/Login/Login'));

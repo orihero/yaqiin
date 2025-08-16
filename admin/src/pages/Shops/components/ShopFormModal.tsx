@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Shop } from '@yaqiin/shared/types/shop';
 import { useQuery } from '@tanstack/react-query';
 import { getAvailableOwners, getUserById } from '../../../services/userService';
@@ -45,6 +46,7 @@ function renderDetails(details: any) {
 }
 
 export default function ShopFormModal({ open, mode, initialValues, loading, error, details, onClose, onSubmit }: ShopFormModalProps) {
+  const { t } = useTranslation();
   const isEdit = mode === 'edit';
   const defaultAddress = {
     street: '',
@@ -139,7 +141,7 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
         onClick={onClose}
       />
       <div className="fixed top-0 right-0 h-full w-full max-w-xl bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0 z-[99999]">
-        <h2 className="text-xl font-bold mb-4">{isEdit ? 'Edit Shop' : 'Add Shop'}</h2>
+        <h2 className="text-xl font-bold mb-4">{isEdit ? t('shops.editShop') : t('shops.addShop')}</h2>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         {renderDetails(details)}
         <form onSubmit={handleSubmit((values) => {
@@ -161,19 +163,19 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
         })}>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block mb-1">Shop Name</label>
-              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('name', { required: 'Shop name is required' })} />
+              <label className="block mb-1">{t('shops.shopName')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('name', { required: t('forms.validation.required') })} />
               {errors.name && <span className="text-red-400 text-xs">{errors.name.message as string}</span>}
             </div>
             <div>
-              <label className="block mb-1">Owner</label>
+              <label className="block mb-1">{t('shops.owner')}</label>
               {ownersLoading ? (
-                <div className="text-gray-400 text-xs">Loading owners...</div>
+                <div className="text-gray-400 text-xs">{t('common.loading')}</div>
               ) : ownersError ? (
-                <div className="text-red-400 text-xs">{ownersError instanceof Error ? ownersError.message : 'Failed to load owners'}</div>
+                <div className="text-red-400 text-xs">{ownersError instanceof Error ? ownersError.message : t('shops.failedToLoadOwners', 'Failed to load owners')}</div>
               ) : (
-                <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('ownerId', { required: 'Owner is required' })}>
-                  <option value="" disabled>Select owner</option>
+                <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('ownerId', { required: t('forms.validation.required') })}>
+                  <option value="" disabled>{t('common.select')} {t('shops.owner').toLowerCase()}</option>
                   {ownerOptions.map((owner: any) => (
                     <option key={owner._id} value={owner._id}>
                       {owner.firstName || ''} {owner.lastName || ''} {owner.username ? `(@${owner.username})` : ''} {owner.phoneNumber ? `- ${owner.phoneNumber}` : ''}
@@ -185,14 +187,14 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
             </div>
             {/* Orders Chat ID field */}
             <div>
-              <label className="block mb-1">Telegram Orders Chat Group</label>
+              <label className="block mb-1">{t('shops.telegramOrdersChatGroup', 'Telegram Orders Chat Group')}</label>
               {groupsLoading ? (
-                <div className="text-gray-400 text-xs">Loading groups...</div>
+                <div className="text-gray-400 text-xs">{t('common.loading')}</div>
               ) : groupsError ? (
-                <div className="text-red-400 text-xs">Failed to load groups</div>
+                <div className="text-red-400 text-xs">{t('shops.failedToLoadGroups', 'Failed to load groups')}</div>
               ) : (
                 <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('orders_chat_id')} defaultValue={initialValues?.orders_chat_id || ''}>
-                  <option value="">Select group</option>
+                  <option value="">{t('common.select')} {t('common.group', 'group')}</option>
                   {groupsData && groupsData.map((group: any) => (
                     <option key={group.chatId} value={group.chatId}>
                       {group.title || group.chatId} ({group.chatId})
@@ -202,50 +204,50 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
                   {isEdit && initialValues?.orders_chat_id &&
                     !groupsData?.some((g: any) => String(g.chatId) === String(initialValues.orders_chat_id)) && (
                       <option value={initialValues.orders_chat_id}>
-                        {initialValues.orders_chat_id} (currently assigned)
+                        {initialValues.orders_chat_id} ({t('shops.currentlyAssigned', 'currently assigned')})
                       </option>
                     )}
                 </select>
               )}
-              <span className="text-gray-400 text-xs">Select the Telegram group chat for this shop's orders.</span>
+              <span className="text-gray-400 text-xs">{t('shops.telegramGroupDescription', 'Select the Telegram group chat for this shop\'s orders.')}</span>
               {errors.orders_chat_id && <span className="text-red-400 text-xs">{errors.orders_chat_id.message as string}</span>}
             </div>
             <div>
-              <label className="block mb-1">Phone Number</label>
-              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('contactInfo.phoneNumber', { required: 'Phone number is required' })} />
+              <label className="block mb-1">{t('common.phone')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('contactInfo.phoneNumber', { required: t('forms.validation.required') })} />
               {errors.contactInfo?.phoneNumber && <span className="text-red-400 text-xs">{errors.contactInfo.phoneNumber.message as string}</span>}
             </div>
             <div>
-              <label className="block mb-1">City</label>
-              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.city', { required: 'City is required' })} />
+              <label className="block mb-1">{t('users.city')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.city', { required: t('forms.validation.required') })} />
               {errors.address?.city && <span className="text-red-400 text-xs">{errors.address.city.message as string}</span>}
             </div>
             <div>
-              <label className="block mb-1">Street</label>
-              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.street', { required: 'Street is required' })} />
+              <label className="block mb-1">{t('shops.street', 'Street')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.street', { required: t('forms.validation.required') })} />
               {errors.address?.street && <span className="text-red-400 text-xs">{errors.address.street.message as string}</span>}
             </div>
             <div>
-              <label className="block mb-1">District</label>
-              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.district', { required: 'District is required' })} />
+              <label className="block mb-1">{t('shops.district', 'District')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.district', { required: t('forms.validation.required') })} />
               {errors.address?.district && <span className="text-red-400 text-xs">{errors.address.district.message as string}</span>}
             </div>
             <div className="col-span-2">
-              <label className="block mb-1">Operating Hours</label>
+              <label className="block mb-1">{t('shops.openingHours')}</label>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr>
-                      <th className="p-1">Day</th>
-                      <th className="p-1">Open?</th>
-                      <th className="p-1">Open Time</th>
-                      <th className="p-1">Close Time</th>
+                      <th className="p-1">{t('shops.day', 'Day')}</th>
+                      <th className="p-1">{t('shops.open', 'Open?')}</th>
+                      <th className="p-1">{t('shops.openTime', 'Open Time')}</th>
+                      <th className="p-1">{t('shops.closeTime', 'Close Time')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {daysOfWeek.map((day) => (
                       <tr key={day}>
-                        <td className="p-1 capitalize">{day}</td>
+                        <td className="p-1 capitalize">{t(`shops.days.${day}`, day)}</td>
                         <td className="p-1">
                           <input
                             type="checkbox"
@@ -287,21 +289,21 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
               </div>
             </div>
             <div className="col-span-2">
-              <label className="block mb-1">Description</label>
+              <label className="block mb-1">{t('common.description')}</label>
               <textarea className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" rows={2} {...register('description')} />
             </div>
             <div>
-              <label className="block mb-1">Status</label>
+              <label className="block mb-1">{t('common.status')}</label>
               <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('status', { required: true })}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="suspended">Suspended</option>
+                <option value="active">{t('common.active')}</option>
+                <option value="inactive">{t('common.inactive')}</option>
+                <option value="suspended">{t('shops.suspended', 'Suspended')}</option>
               </select>
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-6">
-            <button type="button" className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={onClose}>Cancel</button>
-            <button type="submit" className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600" disabled={loading}>{loading ? (isEdit ? 'Saving...' : 'Creating...') : 'Save'}</button>
+            <button type="button" className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={onClose}>{t('common.cancel')}</button>
+            <button type="submit" className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600" disabled={loading}>{loading ? (isEdit ? t('common.saving', 'Saving...') : t('common.creating', 'Creating...')) : t('common.save')}</button>
           </div>
         </form>
       </div>

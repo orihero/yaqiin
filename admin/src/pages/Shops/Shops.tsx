@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { getShops, createShop, updateShop, deleteShop as deleteShopApi } from '../../services/shopService';
 import { getUsers } from '../../services/userService';
 import ShopFormModal from './components/ShopFormModal';
@@ -28,6 +29,7 @@ const fetchShops = async (page: number, limit: number, search: string) => {
 };
 
 export default function ShopsPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [search, setSearch] = useState('');
@@ -91,50 +93,50 @@ export default function ShopsPage() {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Shops</h1>
+        <h1 className="text-2xl font-bold">{t('shops.title')}</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={() => { setEditShop(null); setShowModal(true); }}
         >
-          Add Shop
+          {t('shops.addShop')}
         </button>
       </div>
       <div className="mb-4 flex items-center">
         <input
           className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder="Search Shop"
+          placeholder={t('shops.searchShop', 'Search Shop')}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <span className="ml-4 text-gray-400">Dashboard • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">Shops</span></span>
+        <span className="ml-4 text-gray-400">{t('navigation.dashboard')} • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">{t('shops.title')}</span></span>
       </div>
       <div className="bg-[#232b42] rounded-xl overflow-x-auto">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[#2e3650]">
               <th className="py-3 px-4">#</th>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Owner</th>
-              <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">City</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Action</th>
+              <th className="py-3 px-4">{t('common.name')}</th>
+              <th className="py-3 px-4">{t('shops.owner')}</th>
+              <th className="py-3 px-4">{t('common.phone')}</th>
+              <th className="py-3 px-4">{t('users.city')}</th>
+              <th className="py-3 px-4">{t('common.status')}</th>
+              <th className="py-3 px-4">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">{t('common.loading')}</td></tr>
             ) : error ? (
               <tr><td colSpan={7} className="text-center py-8 text-red-400">{String(error.message)}</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={7} className="text-center py-8">No shops found.</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">{t('shops.noShopsFound', 'No shops found.')}</td></tr>
             ) : (
               data.data.map((shop: Shop, idx: number) => (
                 <tr
                   key={shop._id}
                   className="border-b border-[#2e3650] hover:bg-[#202840] transition cursor-pointer"
                   onClick={() => navigate(`/shops/${shop._id}`)}
-                  title="View shop details"
+                  title={t('shops.viewShopDetails', 'View shop details')}
                 >
                   <td className="py-3 px-4">{(page - 1) * limit + idx + 1}</td>
                   <td className="py-3 px-4 font-semibold">{shop.name}</td>
@@ -145,12 +147,12 @@ export default function ShopsPage() {
                   }</td>
                   <td className="py-3 px-4">{shop.contactInfo?.phoneNumber}</td>
                   <td className="py-3 px-4">{shop.address?.city}</td>
-                  <td className="py-3 px-4 capitalize">{shop.status}</td>
+                  <td className="py-3 px-4 capitalize">{t(`common.${shop.status}`)}</td>
                   <td className="py-3 px-4 flex gap-3" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => { setEditShop(shop); setShowModal(true); }} className="hover:text-blue-400" title="Edit">
+                    <button onClick={() => { setEditShop(shop); setShowModal(true); }} className="hover:text-blue-400" title={t('common.edit')}>
                       <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z"/></svg>
                     </button>
-                    <button onClick={() => setDeleteShop(shop)} className="hover:text-red-400" title="Delete">
+                    <button onClick={() => setDeleteShop(shop)} className="hover:text-red-400" title={t('common.delete')}>
                       <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                     </button>
                   </td>
@@ -163,7 +165,7 @@ export default function ShopsPage() {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>{t('users.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -222,8 +224,8 @@ export default function ShopsPage() {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteShop}
-        title="Delete Shop"
-        description={deleteShop ? `Are you sure you want to delete ${deleteShop.name}?` : ''}
+        title={t('shops.deleteShop')}
+        description={deleteShop ? t('modals.confirmDeleteShop', 'Are you sure you want to delete {{shopName}}?', { shopName: deleteShop.name }) : ''}
         loading={deleteShopMutation.status === 'pending'}
         onCancel={() => setDeleteShop(null)}
         onConfirm={() => { if (deleteShop) deleteShopMutation.mutate(deleteShop); }}

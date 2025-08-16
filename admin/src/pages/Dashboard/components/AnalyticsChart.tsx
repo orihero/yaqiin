@@ -2,23 +2,25 @@ import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import type { DashboardStats } from '../../../../../shared/types/analytics';
 
 interface AnalyticsChartProps {
   stats?: DashboardStats;
 }
 
-const mockData = [
-  { day: 'Mon', value1: 0, value2: 0 },
-  { day: 'Tue', value1: 18, value2: 12 },
-  { day: 'Wed', value1: 14, value2: 20 },
-  { day: 'Thu', value1: 17, value2: 13 },
-  { day: 'Fri', value1: 23, value2: 25 },
-  { day: 'Sat', value1: 27, value2: 20 },
-  { day: 'Sun', value1: 30, value2: 24 },
-];
-
 function AnalyticsChart({ stats }: AnalyticsChartProps) {
+  const { t } = useTranslation();
+  
+  const mockData = [
+    { day: t('common.weekDays.mon'), value1: 0, value2: 0 },
+    { day: t('common.weekDays.tue'), value1: 18, value2: 12 },
+    { day: t('common.weekDays.wed'), value1: 14, value2: 20 },
+    { day: t('common.weekDays.thu'), value1: 17, value2: 13 },
+    { day: t('common.weekDays.fri'), value1: 23, value2: 25 },
+    { day: t('common.weekDays.sat'), value1: 27, value2: 20 },
+    { day: t('common.weekDays.sun'), value1: 30, value2: 24 },
+  ];
   // You can use stats here as needed
   return (
     <div className="h-64">

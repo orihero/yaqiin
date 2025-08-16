@@ -26,6 +26,19 @@ const translations: Record<string, Record<string, string>> = {
     noFurtherAction: 'Boshqa amal yo‘q.',
     orderNotFound: 'Buyurtma topilmadi',
     courierAccountConfigured: '✅ Hisob sozlandi!',
+    // Menu translations
+    greeting: '👋 Xush kelibsiz! Quyidagi menyudan tanlang:',
+    myOrders: '📋 Mening buyurtmalarim',
+    settings: '⚙️ Sozlamalar',
+    changeLocation: '📍 Joylashuvni o\'zgartirish',
+    changeLanguage: '🌍 Tilni o\'zgartirish',
+    locationUpdated: '✅ Joylashuv muvaffaqiyatli yangilandi!',
+    languageUpdated: '✅ Til muvaffaqiyatli o\'zgartirildi!',
+    unknownCommand: '❓ Noma\'lum buyruq. Iltimos, menyudan tanlang:',
+    noOrdersYet: '📋 Sizda hali buyurtmalar yo\'q. Ilovani ochib buyurtma bering!',
+    recentOrders: '📋 Sizning so\'nggi buyurtmalaringiz:\n\n',
+    orderNumber: 'Buyurtma #',
+    back: 'Orqaga',
   },
   ru: {
     alreadyRegistered: '✅ Вы уже зарегистрированы!',
@@ -54,6 +67,19 @@ const translations: Record<string, Record<string, string>> = {
     noFurtherAction: 'Нет дальнейших действий.',
     orderNotFound: 'Заказ не найден',
     courierAccountConfigured: '✅ Аккаунт настроен!',
+    // Menu translations
+    greeting: '👋 Добро пожаловать! Выберите из меню ниже:',
+    myOrders: '📋 Мои заказы',
+    settings: '⚙️ Настройки',
+    changeLocation: '📍 Изменить местоположение',
+    changeLanguage: '🌍 Изменить язык',
+    locationUpdated: '✅ Местоположение успешно обновлено!',
+    languageUpdated: '✅ Язык успешно изменен!',
+    unknownCommand: '❓ Неизвестная команда. Пожалуйста, выберите из меню:',
+    noOrdersYet: '📋 У вас пока нет заказов. Откройте приложение и сделайте заказ!',
+    recentOrders: '📋 Ваши последние заказы:\n\n',
+    orderNumber: 'Заказ #',
+    back: 'Назад',
   },
   en: {
     alreadyRegistered: '✅ You are already registered!',
@@ -82,6 +108,19 @@ const translations: Record<string, Record<string, string>> = {
     noFurtherAction: 'No further action available.',
     orderNotFound: 'Order not found',
     courierAccountConfigured: '✅ Account configured!',
+    // Menu translations
+    greeting: '👋 Welcome! Please select from the menu below:',
+    myOrders: '📋 My Orders',
+    settings: '⚙️ Settings',
+    changeLocation: '📍 Change Location',
+    changeLanguage: '🌍 Change Language',
+    locationUpdated: '✅ Location updated successfully!',
+    languageUpdated: '✅ Language changed successfully!',
+    unknownCommand: '❓ Unknown command. Please select from the menu:',
+    noOrdersYet: '📋 You don\'t have any orders yet. Open the app and place an order!',
+    recentOrders: '📋 Your recent orders:\n\n',
+    orderNumber: 'Order #',
+    back: 'Back',
   },
 };
 
@@ -89,20 +128,20 @@ const translations: Record<string, Record<string, string>> = {
 Object.assign(translations.uz, {
   courierWelcome: '👋 Xush kelibsiz! Bu bot orqali siz buyurtmalarni boshqarishingiz mumkin. Operator yoki administrator yuborgan kodni kiriting.',
   courierAskCode: 'Iltimos, operator yoki administrator yuborgan kodni kiriting.',
-  courierInvalidCode: '❌ Kod noto‘g‘ri. Iltimos, to‘g‘ri kod kiriting.',
+  courierInvalidCode: '❌ Kod noto\'g\'ri. Iltimos, to\'g\'ri kod kiriting.',
   courierAskLanguage: '🌍 Iltimos, tilni tanlang:',
   courierConfiguredCourier: '🚚 Sizning hisobingiz kuryer sifatida sozlandi. Endi buyurtmalarni qabul qilishingiz mumkin!',
-  courierConfiguredShopOwner: '🏪 Sizning hisobingiz do‘kon egasi sifatida sozlandi. Endi buyurtmalarni boshqarishingiz mumkin!',
+  courierConfiguredShopOwner: '🏪 Sizning hisobingiz do\'kon egasi sifatida sozlandi. Endi buyurtmalarni boshqarishingiz mumkin!',
   courierSuccess: '✅ Xush kelibsiz, {name}! Tilni tanlang:',
   courierOrderPicked: '🚚 Buyurtma kuryerda!',
   courierOrderDelivered: '📦 Buyurtma yetkazib berildi!',
   courierOrderRejected: '❌ Buyurtma rad etildi!',
   courierRejectReasonPrompt: '❌ Buyurtmani rad etish sababi:',
-  courierReasonNoContact: 'Mijoz bilan bog‘lanib bo‘lmadi',
+  courierReasonNoContact: 'Mijoz bilan bog\'lanib bo\'lmadi',
   courierReasonNoAddress: 'Manzil topilmadi',
   courierReasonOther: 'Boshqa sabab',
   courierEnterCustomReason: 'Sababni yozing:',
-  courierNoFurtherAction: 'Boshqa amal yo‘q.',
+  courierNoFurtherAction: 'Boshqa amal yo\'q.',
   courierOrderNotFound: 'Buyurtma topilmadi',
 });
 Object.assign(translations.ru, {
@@ -148,20 +187,36 @@ function getLang(ctx: any, fallback = 'en') {
   // Try to extract language from registration state, session, or fallback
   if (ctx) {
     const telegramId = ctx.from && ctx.from.id ? String(ctx.from.id) : undefined;
+    
+    // First priority: Check registration state (for users in registration process)
     if (telegramId && ctx.registrationState && ctx.registrationState.get) {
       const state = ctx.registrationState.get(telegramId);
-      if (state && state.language) return state.language;
+      if (state && state.language) {
+        console.log("[i18n] Language from registration state:", state.language);
+        return state.language;
+      }
     }
+    
+    // Second priority: Check session user (for registered users)
     if (ctx.sessionUserMap && ctx.sessionUserMap.get) {
       const user = ctx.sessionUserMap.get(ctx);
-      if (user && user.preferences && user.preferences.language) return user.preferences.language;
+      if (user && user.preferences && user.preferences.language) {
+        console.log("[i18n] Language from session user:", user.preferences.language);
+        return user.preferences.language;
+      }
     }
+    
+    // Third priority: Check Telegram language code
     if (ctx.from && ctx.from.language_code) {
-      // Telegram language code
       const code = ctx.from.language_code.split('-')[0];
-      if (translations[code]) return code;
+      if (translations[code]) {
+        console.log("[i18n] Language from Telegram:", code);
+        return code;
+      }
     }
   }
+  
+  console.log("[i18n] Using fallback language:", fallback);
   return fallback;
 }
 

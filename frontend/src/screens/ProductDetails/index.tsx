@@ -135,7 +135,14 @@ const ProductDetails: React.FC = () => {
                                         <ProductCard
                                             key={relatedProduct._id}
                                             product={relatedProduct}
-                                            onAdd={(product) => addToCart(product, 1)}
+                                            onAdd={(product) => {
+                                                try {
+                                                    addToCart(product, 1);
+                                                } catch (error: any) {
+                                                    console.error('Failed to add to cart:', error);
+                                                    alert(error.message || 'Failed to add product to cart');
+                                                }
+                                            }}
                                             onClick={(product) => navigate(`/product/${product._id}`)}
                                         />
                                     ))}
@@ -159,7 +166,16 @@ const ProductDetails: React.FC = () => {
                 </span>
                 <button
                     className="bg-white text-[#232c43] font-bold py-3 px-8 rounded-full text-base shadow"
-                    onClick={() => addToCart(product, quantity)}
+                    onClick={() => {
+                        try {
+                            addToCart(product, quantity);
+                        } catch (error: any) {
+                            // Show error message to user
+                            console.error('Failed to add to cart:', error);
+                            // You can add a toast notification here if you have a toast system
+                            alert(error.message || 'Failed to add product to cart');
+                        }
+                    }}
                 >
                     {t('productCard.addToCart')}
                 </button>

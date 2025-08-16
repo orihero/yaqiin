@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import { getAllUsers } from '../../services/userService';
 import { getAllShops } from '../../services/shopService';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -10,6 +11,7 @@ import OrderFormModal from './components/OrderFormModal';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table';
 
 const Orders: React.FC = () => {
+  const { t } = useTranslation();
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
@@ -64,17 +66,17 @@ const Orders: React.FC = () => {
   // Table columns definition for react-table
   const columns = React.useMemo<ColumnDef<Order, any>[]>(() => [
     {
-      header: 'Order #',
+      header: t('orders.orderNumber'),
       accessorKey: 'orderNumber',
       cell: info => info.getValue(),
       enableSorting: true,
       filterFn: (row, columnId, value) => String(row.getValue(columnId)).toLowerCase().includes(String(value).toLowerCase()),
     },
     {
-      header: 'Customer',
+      header: t('orders.customer'),
       accessorKey: 'customerId',
       cell: info => {
-        if (loadingUsers) return 'Loading...';
+        if (loadingUsers) return t('common.loading');
         const user = users?.find((u: any) => u._id === info.getValue());
         return user ? `${user.firstName} ${user.lastName}` : info.getValue();
       },
@@ -86,10 +88,10 @@ const Orders: React.FC = () => {
       },
     },
     {
-      header: 'Shop',
+      header: t('orders.shop'),
       accessorKey: 'shopId',
       cell: info => {
-        if (loadingShops) return 'Loading...';
+        if (loadingShops) return t('common.loading');
         const shop = shops?.find((s: any) => s._id === info.getValue());
         return shop ? shop.name : info.getValue();
       },
@@ -101,13 +103,13 @@ const Orders: React.FC = () => {
       },
     },
     {
-      header: 'Total',
+      header: t('orders.total'),
       accessorKey: 'pricing.total',
       cell: info => info.row.original.pricing.total,
       enableSorting: true,
     },
     {
-      header: 'Status',
+      header: t('orders.status'),
       accessorKey: 'status',
       cell: info => {
         const status = info.getValue();
@@ -131,34 +133,34 @@ const Orders: React.FC = () => {
       enableSorting: true,
     },
     {
-      header: 'Created',
+      header: t('orders.created'),
       accessorKey: 'createdAt',
       cell: info => new Date(info.getValue()).toLocaleDateString(),
       enableSorting: true,
     },
     {
-      header: 'Time',
+      header: t('orders.time'),
       id: 'createdTime',
       accessorFn: row => row.createdAt,
       cell: info => new Date(info.getValue()).toLocaleTimeString(),
       enableSorting: true,
     },
     {
-      header: 'Actions',
+      header: t('orders.actions'),
       id: 'actions',
       cell: info => (
         <div className="flex gap-3 justify-center">
-          <button className="hover:text-blue-400" title="Edit" onClick={() => { setEditOrder(info.row.original); setDrawerOpen(true); }}>
+          <button className="hover:text-blue-400" title={t('common.edit')} onClick={() => { setEditOrder(info.row.original); setDrawerOpen(true); }}>
             <Icon icon="mdi:pencil" width={18} height={18} />
           </button>
-          <button className="hover:text-red-400" title="Delete" onClick={() => setDeleteTarget(info.row.original)}>
+          <button className="hover:text-red-400" title={t('common.delete')} onClick={() => setDeleteTarget(info.row.original)}>
             <Icon icon="mdi:delete" width={18} height={18} />
           </button>
         </div>
       ),
       enableSorting: false,
     },
-  ], [users, shops, loadingUsers, loadingShops]);
+  ], [users, shops, loadingUsers, loadingShops, t]);
 
   const table = useReactTable({
     data: orders,
@@ -181,31 +183,31 @@ const Orders: React.FC = () => {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Orders</h1>
+        <h1 className="text-2xl font-bold">{t('navigation.orders')}</h1>
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={() => setDrawerOpen(true)}
         >
-          <Icon icon="mdi:plus" className="inline-block mr-2" /> Add Order
+          <Icon icon="mdi:plus" className="inline-block mr-2" /> {t('orders.addOrder')}
         </button>
       </div>
       {/* Filters */}
       <div className="flex gap-4 mb-4">
         <input
           className="bg-[#232b42] text-white px-3 py-2 rounded"
-          placeholder="Filter Order #"
+          placeholder={t('orders.filterOrderNumber')}
           value={String(table.getColumn('orderNumber')?.getFilterValue() ?? '')}
           onChange={e => table.getColumn('orderNumber')?.setFilterValue(e.target.value)}
         />
         <input
           className="bg-[#232b42] text-white px-3 py-2 rounded"
-          placeholder="Filter Customer"
+          placeholder={t('orders.filterCustomer')}
           value={String(table.getColumn('customerId')?.getFilterValue() ?? '')}
           onChange={e => table.getColumn('customerId')?.setFilterValue(e.target.value)}
         />
         <input
           className="bg-[#232b42] text-white px-3 py-2 rounded"
-          placeholder="Filter Shop"
+          placeholder={t('orders.filterShop')}
           value={String(table.getColumn('shopId')?.getFilterValue() ?? '')}
           onChange={e => table.getColumn('shopId')?.setFilterValue(e.target.value)}
         />
@@ -230,15 +232,15 @@ const Orders: React.FC = () => {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={columns.length} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={columns.length} className="text-center py-8">{t('common.loading')}</td></tr>
             ) : isError ? (
-              <tr><td colSpan={columns.length} className="text-center py-8 text-red-400">Failed to load orders.</td></tr>
+              <tr><td colSpan={columns.length} className="text-center py-8 text-red-400">{t('orders.failedToLoad')}</td></tr>
             ) : !orders?.length ? (
               <tr><td colSpan={columns.length} className="text-center py-16 text-gray-400">
                 <div className="flex flex-col items-center">
                   <Icon icon="mdi:package-variant" className="text-5xl mb-4" />
-                  <div className="text-lg font-medium">No orders found.</div>
-                  <div className="text-sm">Click <span className="font-semibold">Add Order</span> to create your first order.</div>
+                  <div className="text-lg font-medium">{t('orders.noOrdersFound')}</div>
+                  <div className="text-sm">{t('orders.clickAddOrderToCreate')}</div>
                 </div>
               </td></tr>
             ) : (
@@ -258,7 +260,7 @@ const Orders: React.FC = () => {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>{t('common.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -272,23 +274,23 @@ const Orders: React.FC = () => {
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(1)}
             disabled={page === 1}
-          >{'<<'}</button>
+          >{t('common.pagination.first')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-          >{'<'}</button>
+          >{t('common.pagination.previous')}</button>
           <span className="mx-2">{page} / {totalPages}</span>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-          >{'>'}</button>
+          >{t('common.pagination.next')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(totalPages)}
             disabled={page === totalPages}
-          >{'>>'}</button>
+          >{t('common.pagination.last')}</button>
         </div>
       </div>
       {isDrawerOpen && (
@@ -309,8 +311,8 @@ const Orders: React.FC = () => {
       {deleteTarget && (
         <ConfirmDialog
           open={!!deleteTarget}
-          title="Delete Order"
-          description="Are you sure you want to delete this order? This action cannot be undone."
+          title={t('orders.deleteOrder')}
+          description={t('orders.deleteOrderConfirmation')}
           loading={deleteOrderMutation.isPending}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={() => deleteOrderMutation.mutate(deleteTarget._id)}

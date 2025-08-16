@@ -43,6 +43,7 @@ export interface Product {
   isActive: boolean;
   isFeatured?: boolean;
   // Shop-specific fields (when returned with shopId)
+  shopId?: string; // Shop ID when product is fetched in shop context
   price?: number; // Shop-specific price
   stock?: ProductStock; // Shop-specific stock
   isRefundable?: boolean; // Shop-specific refund policy

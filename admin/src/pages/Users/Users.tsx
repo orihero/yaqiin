@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import UserFormModal from './components/UserFormModal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { User } from '@yaqiin/shared/types/user';
 import { getUsers, createUser, updateUser, deleteUser as deleteUserApi } from '../../services/userService';
 
 export default function UsersPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [search, setSearch] = useState('');
@@ -80,44 +82,45 @@ export default function UsersPage() {
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Datatable</h1>
+        <h1 className="text-2xl font-bold">👥 {t('users.title')}</h1>
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2"
           onClick={() => { setEditUser(null); setShowModal(true); }}
         >
-          Add User
+          <span>➕</span>
+          {t('users.addUser')}
         </button>
       </div>
       <div className="mb-4 flex items-center">
         <input
           className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder="Search User"
+          placeholder={`🔍 ${t('common.search')} ${t('users.title').toLowerCase()}`}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <span className="ml-4 text-gray-400">Dashboard • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">Datatable</span></span>
+        <span className="ml-4 text-gray-400">📊 {t('navigation.dashboard')} • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">👥 {t('users.title')}</span></span>
       </div>
       <div className="bg-[#232b42] rounded-xl overflow-x-auto">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[#2e3650]">
               <th className="py-3 px-4">#</th>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Mobile</th>
-              <th className="py-3 px-4">Date of Joining</th>
-              <th className="py-3 px-4">Role</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Action</th>
+              <th className="py-3 px-4">👤 {t('users.name', 'Name')}</th>
+              <th className="py-3 px-4">📧 {t('users.email')}</th>
+              <th className="py-3 px-4">📱 {t('users.phoneNumber')}</th>
+              <th className="py-3 px-4">📅 {t('users.registrationDate')}</th>
+              <th className="py-3 px-4">🎭 {t('users.role')}</th>
+              <th className="py-3 px-4">📊 {t('common.status')}</th>
+              <th className="py-3 px-4">⚙️ {t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={8} className="text-center py-8">Loading...</td></tr>
+              <tr><td colSpan={8} className="text-center py-8">🔄 {t('common.loading')}</td></tr>
             ) : error ? (
-              <tr><td colSpan={8} className="text-center py-8 text-red-400">{String(error.message)}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-red-400">❌ {String(error.message)}</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={8} className="text-center py-8">No users found.</td></tr>
+              <tr><td colSpan={8} className="text-center py-8">📭 {t('users.noUsersFound', 'No users found.')}</td></tr>
             ) : (
               data.data.map((user: User, idx: number) => (
                 <tr key={user._id} className="border-b border-[#2e3650] hover:bg-[#202840] transition">
@@ -129,25 +132,25 @@ export default function UsersPage() {
                       </div>
                       <div>
                         <div className="font-semibold">{user.firstName} {user.lastName}</div>
-                        <div className="text-xs text-gray-400">{user.username}</div>
+                        <div className="text-xs text-gray-400">@{user.username}</div>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 px-4">{user.email}</td>
                   <td className="py-3 px-4">{user.phoneNumber}</td>
                   <td className="py-3 px-4">{new Date(user.createdAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
-                  <td className="py-3 px-4 capitalize">{user.role}</td>
-                  <td className="py-3 px-4 capitalize">{user.status}</td>
+                  <td className="py-3 px-4 capitalize">{t(`users.roles.${user.role}`, user.role)}</td>
+                  <td className="py-3 px-4 capitalize">{t(`common.${user.status}`, user.status)}</td>
                   <td className="py-3 px-4 flex gap-3">
-                    <button onClick={() => { setEditUser(user); setShowModal(true); }} className="hover:text-blue-400" title="Edit">
-                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z"/></svg>
+                    <button onClick={() => { setEditUser(user); setShowModal(true); }} className="hover:text-blue-400" title={t('common.edit')}>
+                      ✏️
                     </button>
-                    <button onClick={() => setDeleteUser(user)} className="hover:text-red-400" title="Delete">
-                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    <button onClick={() => setDeleteUser(user)} className="hover:text-red-400" title={t('common.delete')}>
+                      🗑️
                     </button>
                     <button
                       className="hover:text-green-400"
-                      title="Copy User ID"
+                      title={t('users.copyUserId', 'Copy User ID')}
                       onClick={async () => {
                         await navigator.clipboard.writeText(user._id);
                         setCopiedUserId(user._id);
@@ -157,7 +160,7 @@ export default function UsersPage() {
                       📋
                     </button>
                     {copiedUserId === user._id && (
-                      <span className="ml-2 text-green-400 text-xs">Copied!</span>
+                      <span className="ml-2 text-green-400 text-xs">✅ {t('users.copied', 'Copied!')}</span>
                     )}
                   </td>
                 </tr>
@@ -169,7 +172,7 @@ export default function UsersPage() {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>📄 {t('users.itemsPerPage', 'Items per page')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -183,23 +186,23 @@ export default function UsersPage() {
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(1)}
             disabled={page === 1}
-          >{'<<'}</button>
+          >{t('common.pagination.first')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-          >{'<'}</button>
+          >{t('common.pagination.previous')}</button>
           <span className="mx-2">{page} / {data?.meta?.totalPages ?? 1}</span>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(p => Math.min((data?.meta?.totalPages ?? 1), p + 1))}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>'}</button>
+          >{t('common.pagination.next')}</button>
           <button
             className="px-2 py-1 mx-1 rounded disabled:opacity-50"
             onClick={() => setPage(data?.meta?.totalPages ?? 1)}
             disabled={page === (data?.meta?.totalPages ?? 1)}
-          >{'>>'}</button>
+          >{t('common.pagination.last')}</button>
         </div>
       </div>
       {/* User Modal (Add) */}
@@ -228,8 +231,8 @@ export default function UsersPage() {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteUser}
-        title="Delete User"
-        description={deleteUser ? `Are you sure you want to delete ${deleteUser.firstName} ${deleteUser.lastName}?` : ''}
+        title={`🗑️ ${t('users.deleteUser')}`}
+        description={deleteUser ? `${t('modals.confirmDelete')} ${deleteUser.firstName} ${deleteUser.lastName}?` : ''}
         loading={deleteUserMutation.status === 'pending'}
         onCancel={() => setDeleteUser(null)}
         onConfirm={() => { if (deleteUser) deleteUserMutation.mutate(deleteUser); }}

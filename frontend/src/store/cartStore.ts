@@ -12,6 +12,8 @@ interface CartState {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  getShopId: () => string | null;
+  hasMultipleShops: () => boolean;
 }
 
 const CART_KEY = 'yaqiin_cart';
@@ -32,6 +34,12 @@ function saveCart(cart: CartItem[]) {
 export const useCartStore = create<CartState>((set, get) => ({
   cart: loadCart(),
   addToCart: (product, quantity = 1) => {
+    // Validate that product has shopId
+    if (!product.shopId) {
+      console.error('Product must have shopId to be added to cart:', product);
+      throw new Error('Product must have shopId to be added to cart');
+    }
+    
     set(state => {
       const idx = state.cart.findIndex(item => item.product._id === product._id);
       let newCart;
@@ -39,6 +47,10 @@ export const useCartStore = create<CartState>((set, get) => ({
         newCart = [...state.cart];
         newCart[idx].quantity += quantity;
       } else {
+        // Check if adding this product would create multiple shops
+        if (state.cart.length > 0 && state.cart[0].product.shopId !== product.shopId) {
+          throw new Error('All items in cart must be from the same shop');
+        }
         newCart = [...state.cart, { product, quantity }];
       }
       saveCart(newCart);
@@ -64,5 +76,16 @@ export const useCartStore = create<CartState>((set, get) => ({
   clearCart: () => {
     saveCart([]);
     set({ cart: [] });
+  },
+  getShopId: () => {
+    const state = get();
+    if (state.cart.length === 0) return null;
+    return state.cart[0].product.shopId || null;
+  },
+  hasMultipleShops: () => {
+    const state = get();
+    if (state.cart.length <= 1) return false;
+    const firstShopId = state.cart[0].product.shopId;
+    return state.cart.some(item => item.product.shopId !== firstShopId);
   },
 })); 

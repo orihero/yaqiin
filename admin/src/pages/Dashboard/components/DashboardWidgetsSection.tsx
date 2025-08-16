@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar, YAxis, Cell, PieChart, Pie } from 'recharts';
 import type { DashboardStats } from '../../../../../shared/types/analytics';
 
@@ -16,6 +17,8 @@ const productsData = [
 ];
 
 const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }) => {
+  const { t } = useTranslation();
+  
   // Map usersTimeSeries to recharts format
   const customersData = (stats?.usersTimeSeries || []).map((item: { _id: string; count: number }) => ({
     day: item._id.slice(5), // MM-DD for display
@@ -38,14 +41,17 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
       {/* Latest Deal Widget */}
       <div className="bg-[#232c43] rounded-2xl p-6 shadow flex flex-col min-h-[240px] relative">
         <div className="flex items-center justify-between mb-1">
-          <div className="text-lg font-semibold">Average Delivery</div>
+          <div className="text-lg font-semibold">🚚 {t('dashboard.stats.averageDelivery', 'Average Delivery')}</div>
           <span className="bg-[#223b5b] text-blue-300 text-xs font-semibold px-3 py-1 rounded-full">
-            {stats?.averageDeliveryTime != null ? `${stats.averageDeliveryTime.toFixed(1)} min` : 'N/A'}
+            {stats?.averageDeliveryTime != null ? `${stats.averageDeliveryTime.toFixed(1)} min` : t('common.notAvailable')}
           </span>
         </div>
-        <div className="text-xs text-gray-400 mb-4">Longest: {stats?.longestDeliveryTime != null ? `${stats.longestDeliveryTime.toFixed(1)} min` : 'N/A'} | Shortest: {stats?.shortestDeliveryTime != null ? `${stats.shortestDeliveryTime.toFixed(1)} min` : 'N/A'}</div>
-        <div className="text-xs text-gray-400 mb-4">Coupons used: 18/22</div>
-        <div className="text-xs font-semibold text-gray-200 mb-1">Recent Purchasers</div>
+        <div className="text-xs text-gray-400 mb-4">
+          🕐 {t('dashboard.stats.longestDelivery', 'Longest')}: {stats?.longestDeliveryTime != null ? `${stats.longestDeliveryTime.toFixed(1)} min` : t('common.notAvailable')} | 
+          ⚡ {t('dashboard.stats.shortestDelivery', 'Shortest')}: {stats?.shortestDeliveryTime != null ? `${stats.shortestDeliveryTime.toFixed(1)} min` : t('common.notAvailable')}
+        </div>
+        <div className="text-xs text-gray-400 mb-4">🎫 {t('dashboard.stats.couponsUsed', 'Coupons used')}: 18/22</div>
+        <div className="text-xs font-semibold text-gray-200 mb-1">👥 {t('dashboard.stats.recentPurchasers', 'Recent Purchasers')}</div>
         <div className="flex items-center mt-1">
           {recentPurchasers.map((user: { name: string; avatar: string }, idx: number) => (
             <img
@@ -62,10 +68,10 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
       {/* Customers Widget */}
       <div className="bg-[#232c43] rounded-2xl p-6 shadow flex flex-col min-h-[240px]">
         <div className="flex items-center justify-between mb-1">
-          <div className="text-lg font-semibold">Customers</div>
+          <div className="text-lg font-semibold">👥 {t('dashboard.stats.totalUsers')}</div>
           <span className="text-green-200 bg-[#1e3a2f] text-xs font-semibold px-3 py-1 rounded-full">+26.5%</span>
         </div>
-        <div className="text-xs text-gray-400 mb-2">Last 7 days</div>
+        <div className="text-xs text-gray-400 mb-2">📅 {t('dashboard.stats.last7Days', 'Last 7 days')}</div>
         <div className="flex items-end justify-between mb-2">
           <span className="text-2xl font-bold text-gray-100">6,380</span>
         </div>
@@ -87,11 +93,11 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
         <div className="flex items-center gap-4 mt-2">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>
-            <span className="text-xs text-gray-200">Apr 07 - Apr 14</span>
+            <span className="text-xs text-gray-200">{t('common.thisWeek')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-gray-500 inline-block"></span>
-            <span className="text-xs text-gray-400">Last Week</span>
+            <span className="text-xs text-gray-400">{t('common.lastWeek')}</span>
           </div>
           <div className="ml-auto text-xs text-gray-400">6,380</div>
           <div className="text-xs text-gray-600">4,298</div>
@@ -100,10 +106,10 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
       {/* Payments Widget */}
       <div className="bg-[#232c43] rounded-2xl p-6 shadow flex flex-col min-h-[240px]">
         <div className="flex items-center justify-between mb-1">
-          <div className="text-lg font-semibold">Payments</div>
+          <div className="text-lg font-semibold">💳 {t('dashboard.stats.payments', 'Payments')}</div>
           <span className="text-red-200 bg-[#3b263a] text-xs font-semibold px-3 py-1 rounded-full">-3.8%</span>
         </div>
-        <div className="text-xs text-gray-400 mb-2">Last 7 days</div>
+        <div className="text-xs text-gray-400 mb-2">📅 {t('dashboard.stats.last7Days', 'Last 7 days')}</div>
         <div className="flex items-end justify-between mb-2">
           <span className="text-2xl font-bold text-gray-100">12,389</span>
         </div>
@@ -129,12 +135,12 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
         <div className="flex items-center gap-4 mt-2">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>
-            <span className="text-xs text-gray-200">Paypal</span>
+            <span className="text-xs text-gray-200">{t('common.paypal')}</span>
             <span className="text-xs text-gray-400 ml-1">52%</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-gray-500 inline-block"></span>
-            <span className="text-xs text-gray-400">Credit Card</span>
+            <span className="text-xs text-gray-400">{t('common.creditCard')}</span>
             <span className="text-xs text-gray-400 ml-1">48%</span>
           </div>
         </div>
@@ -142,13 +148,13 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
       {/* Products Widget */}
       <div className="bg-[#232c43] rounded-2xl p-6 shadow flex flex-col min-h-[240px] items-center justify-center">
         <div className="flex items-center justify-between w-full mb-1">
-          <div className="text-lg font-semibold">Products</div>
+          <div className="text-lg font-semibold">📦 {t('dashboard.stats.totalProducts')}</div>
           <span className="text-green-200 bg-[#1e3a2f] text-xs font-semibold px-3 py-1 rounded-full">
-            {stats?.totalProducts != null ? stats.totalProducts : 'N/A'}
+            {stats?.totalProducts != null ? stats.totalProducts : t('common.notAvailable')}
           </span>
         </div>
-        <div className="text-xs text-gray-400 w-full mb-2">Total Products</div>
-        <div className="text-2xl font-bold text-gray-100 mb-2 w-full">{stats?.totalProducts != null ? stats.totalProducts : 'N/A'}</div>
+        <div className="text-xs text-gray-400 w-full mb-2">{t('dashboard.stats.totalProducts')}</div>
+        <div className="text-2xl font-bold text-gray-100 mb-2 w-full">{stats?.totalProducts != null ? stats.totalProducts : t('common.notAvailable')}</div>
         <div className="flex-1 flex items-center justify-center w-full h-24 mb-2">
           <ResponsiveContainer width={100} height={100}>
             <PieChart>
@@ -171,7 +177,7 @@ const DashboardWidgetsSection: React.FC<{ stats?: DashboardStats }> = ({ stats }
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="text-xs text-gray-400 w-full text-center">Profit more than last month</div>
+        <div className="text-xs text-gray-400 w-full text-center">📈 {t('dashboard.stats.profitMore', 'Profit more than last month')}</div>
       </div>
     </div>
   );
