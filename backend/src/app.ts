@@ -32,7 +32,7 @@ app.set("etag", false);
 
 app.use(express.json());
 app.use(morgan("dev"));
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "*", credentials: true }));
 
 // Health check
 app.get("/health", (req, res) => {
