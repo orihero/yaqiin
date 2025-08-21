@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthCheck } from '../../hooks/useAuthCheck';
 import { useCartStore } from '../../store/cartStore';
 import { useTranslation } from 'react-i18next';
+import Avatar from './components/Avatar';
 
 const ProfileScreen: React.FC = () => {
   const { authError } = useAuthCheck();
@@ -77,18 +78,22 @@ const ProfileScreen: React.FC = () => {
       {/* Header */}
       <div className="w-full max-w-md px-4">
         <Header
-          title="Profile"
+          title={t('profile.title')}
           // rightIcon="mdi:magnify"
           onRightIconClick={handleHeaderSearchClick}
         />
       </div>
       {/* Card */}
       <div className="w-full max-w-md bg-white rounded-3xl shadow-lg px-6 pt-8 pb-6 flex flex-col items-center relative z-10 mx-4">
-        <img
-          src={'https://via.placeholder.com/96x96?text=Avatar'}
-          alt="Profile"
-          className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md -mt-16 mb-2"
-        />
+        <div className="-mt-16 mb-2">
+          <Avatar
+            src=""
+            alt="Profile"
+            name={user.firstName || user.username || 'User'}
+            size="xl"
+            className="border-4 border-white shadow-md"
+          />
+        </div>
         <div className="text-xl font-bold text-[#232c43] text-center mt-2">{user.firstName || user.username || 'User'}</div>
         <div className="text-sm text-gray-400 text-center mb-6">{user.email || ''}</div>
         <div className="w-full flex flex-col gap-3 mb-8">

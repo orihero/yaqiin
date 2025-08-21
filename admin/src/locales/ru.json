@@ -84,7 +84,41 @@
     "theme": "Тема",
     "dark": "Темная",
     "light": "Светлая",
-    "system": "Системная"
+    "system": "Системная",
+    "saving": "Сохранение...",
+    "creating": "Создание...",
+    "deleting": "Удаление...",
+    "itemsPerPage": "Элементов на странице",
+    "panel": "Панель",
+    "adminUser": "Администратор",
+    "select": "Выбрать...",
+    "search": "Поиск...",
+    "noOptionsFound": "Варианты не найдены",
+    "thisWeek": "Эта неделя",
+    "lastWeek": "Прошлая неделя",
+    "last7Days": "Последние 7 дней",
+    "notAvailable": "Н/Д",
+    "paypal": "PayPal",
+    "creditCard": "Кредитная карта",
+    "weekDays": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    },
+    "sampleProducts": {
+      "organicBananas": "Органические бананы",
+      "wholeWheatBread": "Цельнозерновой хлеб"
+    },
+    "pagination": {
+      "first": "<<",
+      "previous": "<",
+      "next": ">",
+      "last": ">>"
+    }
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -95,6 +129,7 @@
     "orders": "Заказы",
     "couriers": "Курьеры",
     "supportTickets": "Тикеты поддержки",
+    "outreach": "Рассылка",
     "settings": "Настройки",
     "admin": "Админ"
   },
@@ -153,7 +188,10 @@
     "notifications": "Уведомления",
     "emailNotifications": "Уведомления по email",
     "smsNotifications": "SMS уведомления",
-    "pushNotifications": "Push уведомления"
+    "pushNotifications": "Push уведомления",
+    "noUsersFound": "Пользователи не найдены.",
+    "copyUserId": "Копировать ID пользователя",
+    "copied": "Скопировано!"
   },
   "shops": {
     "title": "Магазины",
@@ -216,7 +254,15 @@
     "totalSubcategories": "Всего подкатегорий",
     "searchCategory": "Поиск категории",
     "noCategoriesFound": "Категории не найдены.",
-    "confirmDeleteCategory": "Вы уверены, что хотите удалить эту категорию? Это действие нельзя отменить."
+    "confirmDeleteCategory": "Вы уверены, что хотите удалить эту категорию? Это действие нельзя отменить.",
+    "nameUzbek": "Название (узбекский)",
+    "nameRussian": "Название (русский)",
+    "nameUzbekRequired": "Название на узбекском языке обязательно",
+    "nameRussianRequired": "Название на русском языке обязательно",
+    "descriptionUzbek": "Описание (узбекский)",
+    "descriptionRussian": "Описание (русский)",
+    "iconName": "Иконка (имя Iconify)",
+    "iconPlaceholder": "например mdi:food-apple"
   },
   "products": {
     "title": "Товары",
@@ -260,7 +306,16 @@
     "shippingInfo": "Информация о доставке",
     "freeShipping": "Бесплатная доставка",
     "shippingWeight": "Вес для доставки",
-    "shippingDimensions": "Размеры для доставки"
+    "shippingDimensions": "Размеры для доставки",
+    "searchProduct": "Поиск товара",
+    "image": "Изображение",
+    "name": "Название",
+    "category": "Категория",
+    "basePrice": "Базовая цена",
+    "baseStock": "Базовый запас",
+    "noProductsFound": "Товары не найдены.",
+    "clickAddProductToCreate": "Нажмите 'Добавить товар' чтобы создать первый товар.",
+    "failedToLoadProducts": "Не удалось загрузить товары."
   },
   "orders": {
     "title": "Заказы",
@@ -307,7 +362,14 @@
       "cancelled": "Отменен",
       "returned": "Возвращен",
       "refunded": "Возвращен"
-    }
+    },
+    "filterOrderNumber": "Фильтр по номеру заказа",
+    "filterCustomer": "Фильтр по клиенту",
+    "filterShop": "Фильтр по магазину",
+    "failedToLoad": "Не удалось загрузить заказы.",
+    "noOrdersFound": "Заказы не найдены.",
+    "clickAddOrderToCreate": "Нажмите 'Добавить заказ' чтобы создать первый заказ.",
+    "deleteOrderConfirmation": "Вы уверены, что хотите удалить этот заказ? Это действие нельзя отменить."
   },
   "couriers": {
     "title": "Курьеры",
@@ -351,7 +413,22 @@
       "online": "Онлайн",
       "busy": "Занят",
       "available": "Доступен"
-    }
+    },
+    "vehicle": "Транспорт",
+    "license": "Лицензия",
+    "availability": "Доступность",
+    "status": "Статус",
+    "created": "Создан",
+    "action": "Действие",
+    "searchCourier": "Поиск курьера",
+    "noCouriersFound": "Курьеры не найдены.",
+    "createdSuccessfully": "Курьер успешно создан",
+    "updatedSuccessfully": "Курьер успешно обновлен",
+    "deletedSuccessfully": "Курьер успешно удален",
+    "failedToCreate": "Не удалось создать курьера",
+    "failedToUpdate": "Не удалось обновить курьера",
+    "failedToDelete": "Не удалось удалить курьера",
+    "deleteCourierConfirmation": "Вы уверены, что хотите удалить этого курьера? Это действие нельзя отменить."
   },
   "supportTickets": {
     "title": "Тикеты поддержки",
@@ -396,6 +473,57 @@
       "general": "Общий",
       "bug": "Сообщение об ошибке",
       "feature": "Запрос функции"
+    },
+    "userRole": "Роль пользователя",
+    "priority": "Приоритет",
+    "status": "Статус",
+    "createdAt": "Создан",
+    "actions": "Действия",
+    "searchTicket": "Поиск тикета",
+    "failedToLoad": "Не удалось загрузить тикеты.",
+    "noTicketsFound": "Тикеты не найдены.",
+    "clickAddTicketToCreate": "Нажмите 'Добавить тикет' чтобы создать первый тикет поддержки.",
+    "deleteTicketConfirmation": "Вы уверены, что хотите удалить тикет #{{ticketNumber}}?"
+  },
+  "outreach": {
+    "title": "Рассылка",
+    "createOutreach": "Создать рассылку",
+    "editOutreach": "Редактировать рассылку",
+    "history": "История рассылок",
+    "message": "Сообщение",
+    "targetType": "Тип аудитории",
+    "status": "Статус",
+    "recipients": "Получатели",
+    "createdAt": "Дата создания",
+    "sentAt": "Дата отправки",
+    "total": "всего",
+    "successful": "успешно",
+    "failed": "неудачно",
+    "sendMessage": "Отправить сообщение",
+    "sendImmediately": "Отправить немедленно",
+    "preview": "Предварительный просмотр",
+    "titlePlaceholder": "Введите заголовок рассылки...",
+    "messagePlaceholder": "Введите ваше сообщение здесь...",
+    "targetTypeDescription": "Выберите целевую аудиторию для этого сообщения",
+    "noOutreachFound": "Сообщения рассылки не найдены",
+    "clickCreateOutreachToStart": "Нажмите Создать рассылку, чтобы отправить первое сообщение",
+    "createdSuccessfully": "Сообщение рассылки успешно создано",
+    "failedToCreate": "Не удалось создать сообщение рассылки",
+    "targetTypes": {
+      "all": "Все пользователи",
+      "customers": "Только клиенты",
+      "shopOwners": "Только владельцы магазинов",
+      "couriers": "Только курьеры"
+    },
+    "statuses": {
+      "draft": "Черновик",
+      "sent": "Отправлено",
+      "failed": "Неудачно"
+    },
+    "validation": {
+      "titleRequired": "Заголовок обязателен",
+      "messageRequired": "Сообщение обязательно",
+      "messageTooLong": "Сообщение не может превышать 1000 символов"
     }
   },
   "settings": {
@@ -428,7 +556,17 @@
     "exportData": "Экспорт данных",
     "importData": "Импорт данных",
     "clearCache": "Очистить кэш",
-    "resetSettings": "Сбросить настройки"
+    "resetSettings": "Сбросить настройки",
+    "featureFlags": "Флаги функций",
+    "addFeatureFlag": "Добавить флаг функции",
+    "deleteFeatureFlag": "Удалить флаг функции",
+    "deleteFeatureFlagConfirmation": "Вы уверены, что хотите удалить флаг функции \"{{key}}\"? Это действие нельзя отменить.",
+    "loadingFeatureFlags": "Загрузка флагов функций...",
+    "failedToLoadFeatureFlags": "Не удалось загрузить флаги функций.",
+    "key": "Ключ",
+    "type": "Тип",
+    "value": "Значение",
+    "options": "Опции"
   },
   "modals": {
     "confirmDelete": "Вы уверены, что хотите удалить этот элемент?",
@@ -465,92 +603,6 @@
     "uz": "O'zbekcha",
     "ru": "Русский"
   },
-  "orders": {
-    "orderNumber": "Заказ #",
-    "customer": "Клиент",
-    "shop": "Магазин",
-    "total": "Итого",
-    "status": "Статус",
-    "created": "Создан",
-    "time": "Время",
-    "actions": "Действия",
-    "addOrder": "Добавить заказ",
-    "filterOrderNumber": "Фильтр по номеру заказа",
-    "filterCustomer": "Фильтр по клиенту",
-    "filterShop": "Фильтр по магазину",
-    "failedToLoad": "Не удалось загрузить заказы.",
-    "noOrdersFound": "Заказы не найдены.",
-    "clickAddOrderToCreate": "Нажмите 'Добавить заказ' чтобы создать первый заказ.",
-    "deleteOrder": "Удалить заказ",
-    "deleteOrderConfirmation": "Вы уверены, что хотите удалить этот заказ? Это действие нельзя отменить."
-  },
-  "couriers": {
-    "vehicle": "Транспорт",
-    "license": "Лицензия",
-    "availability": "Доступность",
-    "status": "Статус",
-    "created": "Создан",
-    "action": "Действие",
-    "addCourier": "Добавить курьера",
-    "searchCourier": "Поиск курьера",
-    "noCouriersFound": "Курьеры не найдены.",
-    "createdSuccessfully": "Курьер успешно создан",
-    "updatedSuccessfully": "Курьер успешно обновлен",
-    "deletedSuccessfully": "Курьер успешно удален",
-    "failedToCreate": "Не удалось создать курьера",
-    "failedToUpdate": "Не удалось обновить курьера",
-    "failedToDelete": "Не удалось удалить курьера",
-    "deleteCourier": "Удалить курьера",
-    "deleteCourierConfirmation": "Вы уверены, что хотите удалить этого курьера? Это действие нельзя отменить."
-  },
-  "supportTickets": {
-    "title": "Заголовок",
-    "userRole": "Роль пользователя",
-    "priority": "Приоритет",
-    "status": "Статус",
-    "createdAt": "Создан",
-    "actions": "Действия",
-    "addTicket": "Добавить тикет",
-    "searchTicket": "Поиск тикета",
-    "failedToLoad": "Не удалось загрузить тикеты.",
-    "noTicketsFound": "Тикеты не найдены.",
-    "clickAddTicketToCreate": "Нажмите 'Добавить тикет' чтобы создать первый тикет поддержки.",
-    "deleteTicket": "Удалить тикет",
-    "deleteTicketConfirmation": "Вы уверены, что хотите удалить тикет #{{ticketNumber}}?"
-  },
-  "common": {
-    "panel": "Панель",
-    "adminUser": "Администратор",
-    "language": "Язык",
-    "select": "Выбрать...",
-    "search": "Поиск...",
-    "noOptionsFound": "Варианты не найдены",
-    "thisWeek": "Эта неделя",
-    "lastWeek": "Прошлая неделя",
-    "last7Days": "Последние 7 дней",
-    "notAvailable": "Н/Д",
-    "paypal": "PayPal",
-    "creditCard": "Кредитная карта",
-    "weekDays": {
-      "mon": "Пн",
-      "tue": "Вт",
-      "wed": "Ср",
-      "thu": "Чт",
-      "fri": "Пт",
-      "sat": "Сб",
-      "sun": "Вс"
-    },
-    "sampleProducts": {
-      "organicBananas": "Органические бананы",
-      "wholeWheatBread": "Цельнозерновой хлеб"
-    },
-    "pagination": {
-      "first": "<<",
-      "previous": "<",
-      "next": ">",
-      "last": ">>"
-    }
-  },
   "login": {
     "welcomeTitle": "Добро пожаловать в MDash",
     "welcomeSubtitle": "MDash помогает разработчикам создавать организованные и хорошо структурированные панели управления с красивыми и богатыми модулями.",
@@ -580,15 +632,5 @@
       "payments": "Платежи",
       "profitMore": "Прибыль больше чем в прошлом месяце"
     }
-  },
-  "products": {
-    "addProduct": "Добавить товар",
-    "searchProduct": "Поиск товара",
-    "image": "Изображение",
-    "name": "Название",
-    "category": "Категория"
-  },
-  "settings": {
-    "featureFlags": "Флаги функций"
   }
 }

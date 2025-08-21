@@ -1,9 +1,9 @@
 const translations: Record<string, Record<string, string>> = {
   uz: {
-    alreadyRegistered: '✅ Siz allaqachon ro‘yxatdan o‘tgansiz!',
+    alreadyRegistered: '✅ Siz allaqachon ro\'yxatdan o\'tgansiz!',
     openMiniApp: '🚀 Mini ilovani ochish:',
     openMiniAppBtn: '🌐 Mini ilova',
-    welcome: '👋 Xush kelibsiz! Ro‘yxatdan o‘tish uchun kontaktni ulashing.',
+    welcome: '👋 Xush kelibsiz! Ro\'yxatdan o\'tish uchun kontaktni ulashing.',
     shareContact: '📱 Kontaktni ulashish',
     selectLanguage: '🌍 Iltimos, tilni tanlang:',
     shareLocation: '📍 Iltimos, joylashuvingizni ulashing:',
@@ -11,19 +11,19 @@ const translations: Record<string, Record<string, string>> = {
     enterApartment: '🏢 Iltimos, kvartira raqamingizni kiriting:',
     enterBlock: '🏢 Iltimos, blok/binoni kiriting:',
     enterEntrance: '🚪 Iltimos, kirish raqamini kiriting:',
-    registrationComplete: '🎉 Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi! Rahmat.',
-    shopArea: '🏪 Siz {shop} do‘konining hududidasiz! Buyurtmalar shu do‘kondan yetkaziladi. 😊',
-    outOfService: '🚫 Afsuski, sizning hududingizda xizmat ko‘rsatmaymiz. Yangiliklar uchun ijtimoiy tarmoqlarimizni kuzatib boring! 📱\nInstagram, Telegram, Facebook: @yaqiin',
+    registrationComplete: '🎉 Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi! Rahmat.',
+    shopArea: '🏪 Siz {shop} do\'konining hududidasiz! Buyurtmalar shu do\'kondan yetkaziladi. 😊',
+    outOfService: '🚫 Afsuski, sizning hududingizda xizmat ko\'rsatmaymiz. Yangiliklar uchun ijtimoiy tarmoqlarimizni kuzatib boring! 📱\nInstagram, Telegram, Facebook: @yaqiin',
     orderPacked: '📦 Buyurtma qadoqlanmoqda!',
     orderPicked: '🚚 Kuryer buyurtmani oldi!',
     orderRejected: '❌ Buyurtma rad etildi!',
     rejectReasonPrompt: '❌ Buyurtmani rad etish sababi:',
-    reasonOutOfStock: 'Tovar yo‘q',
-    reasonClosed: 'Do‘kon yopiq',
+    reasonOutOfStock: 'Tovar yo\'q',
+    reasonClosed: 'Do\'kon yopiq',
     reasonOutOfArea: 'Xizmat hududidan tashqarida',
     reasonOther: 'Boshqa sabab',
     enterCustomReason: 'Sababni yozing:',
-    noFurtherAction: 'Boshqa amal yo‘q.',
+    noFurtherAction: 'Boshqa amal yo\'q.',
     orderNotFound: 'Buyurtma topilmadi',
     courierAccountConfigured: '✅ Hisob sozlandi!',
     // Menu translations
@@ -123,7 +123,6 @@ const translations: Record<string, Record<string, string>> = {
     back: 'Back',
   },
 };
-
 // Courier bot translations
 Object.assign(translations.uz, {
   courierWelcome: '👋 Xush kelibsiz! Bu bot orqali siz buyurtmalarni boshqarishingiz mumkin. Operator yoki administrator yuborgan kodni kiriting.',
@@ -182,12 +181,185 @@ Object.assign(translations.en, {
   courierNoFurtherAction: 'No further action available.',
   courierOrderNotFound: 'Order not found',
 });
-
+// Additional order/courier flow translations used by bots and notifications
+Object.assign(translations.uz, {
+  newOrderLabel: '🆕 Yangi buyurtma!',
+  orderIdLabel: 'Buyurtma ID:',
+  clientLabel: 'Mijoz:',
+  productsLabel: 'Mahsulotlar',
+  totalLabel: 'Umumiy:',
+  nextStepLabel: 'Keyingi bosqich:',
+  acceptOrRejectOrder: 'Buyurtmani qabul qiling yoki rad eting',
+  acceptBtn: 'Qabul qilish',
+  rejectBtn: 'Rad etish',
+  orderConfirmedSentToShop: 'Buyurtma tasdiqlandi va do\'konga yuborildi',
+  orderAcceptedSentToShop: 'Buyurtma qabul qilindi va do\'konga yuborildi',
+  pleaseReviewOrder: 'Iltimos, buyurtmani ko\'rib chiqing',
+  orderCannotBeAccepted: 'Bu buyurtmani qabul qilib bo\'lmaydi',
+  orderPackingStage: 'Buyurtma qadoqlash bosqichida',
+  finishPackingBtn: 'Qadoqlash tugadi',
+  pressFinishPacking: 'Tayyor bo\'lganda "Qadoqlash tugadi" tugmasini bosing',
+  orderAcceptedPackingStage: 'Buyurtma qadoqlash bosqichiga o\'tkazildi',
+  orderCannotBeFinished: 'Qadoqlashni tugatib bo\'lmaydi',
+  orderReadyLabel: 'Buyurtma tayyor',
+  pickedUpBtn: 'Olib ketdim',
+  orderOnTheWay: 'Buyurtma yo\'lda',
+  pressPickedUpOrReject: 'Iltimos, "Olib ketdim" yoki "Rad etish" tugmasini bosing',
+  orderCannotBePickedUp: 'Buyurtmani olib ketib bo\'lmaydi',
+  pressDeliveredWhenDone: 'Yetkazilganda "Yetkazildi" tugmasini bosing',
+  deliveredBtn: 'Yetkazildi',
+  orderCannotBeDelivered: 'Buyurtmani yetkazilgan deb belgilab bo\'lmaydi',
+  orderDeliveredLabel: 'Buyurtma yetkazildi',
+  clientPaidBtn: 'Mijoz to\'ladi',
+  clientRejectedBtn: 'Mijoz rad etdi',
+  pressPaidOrRejected: 'Iltimos, "Mijoz to\'ladi" yoki "Mijoz rad etdi" tugmasini bosing',
+  orderCannotBePaid: 'Buyurtmani to\'langan deb belgilab bo\'lmaydi',
+  orderPaidFinal: 'Buyurtma to\'landi',
+  pleaseProvideRejectionReason: 'Iltimos, rad etish sababini yozing:',
+  orderRejectedFinal: 'Buyurtma rad etildi.',
+  orderPickedUp: 'Buyurtma olib ketildi',
+  orderDelivered: 'Buyurtma yetkazildi',
+  orderRejectedByShopOwner: 'Buyurtma do\'kon egasi tomonidan rad etildi',
+  userNotFound: 'Foydalanuvchi topilmadi',
+  userNotFoundInDB: 'Foydalanuvchi bazada topilmadi',
+  orderCannotBeRejected: 'Buyurtmani rad etib bo\'lmaydi',
+  // Additional hardcoded strings found in bots
+  orderPacked: 'Buyurtma qadoqlandi!',
+  orderPickedByCourier: 'Kuryer buyurtmani oldi!',
+  noFurtherAction: 'Boshqa amal yo\'q.',
+  packingFinishedSentToCouriers: 'Qadoqlash tugallandi va buyurtma kuryerlarga yuborildi!',
+  orderStatusChanged: 'Buyurtma holati "{status}" ga o\'zgartirildi',
+  noPermissionToChangeStatus: 'Sizda buyurtma holatini o\'zgartirish huquqi yo\'q',
+  enterRejectionReason: 'Rad etish sababini kiriting:',
+  // Status translations
+  statusCreated: '🆕 Yangi',
+  statusPacking: '📦 Tayyorlanmoqda',
+  statusCourierPicked: '🚚 Yo\'lda',
+  statusDelivered: '✅ Yetkazildi',
+  statusCompleted: '✅ Tugallandi',
+  statusRejected: '❌ Rad etildi',
+  currency: 'so\'m',
+});
+Object.assign(translations.ru, {
+  newOrderLabel: '🆕 Новый заказ!',
+  orderIdLabel: 'ID заказа:',
+  clientLabel: 'Клиент:',
+  productsLabel: 'Товары',
+  totalLabel: 'Итого:',
+  nextStepLabel: 'Следующий шаг:',
+  acceptOrRejectOrder: 'Примите или отклоните заказ',
+  acceptBtn: 'Принять',
+  rejectBtn: 'Отклонить',
+  orderConfirmedSentToShop: 'Заказ подтверждён и отправлен в магазин',
+  orderAcceptedSentToShop: 'Заказ принят и отправлен в магазин',
+  pleaseReviewOrder: 'Пожалуйста, проверьте заказ',
+  orderCannotBeAccepted: 'Этот заказ нельзя принять',
+  orderPackingStage: 'Заказ на этапе упаковки',
+  finishPackingBtn: 'Упаковка завершена',
+  pressFinishPacking: 'Когда готово, нажмите «Упаковка завершена»',
+  orderAcceptedPackingStage: 'Заказ переведён на этап упаковки',
+  orderCannotBeFinished: 'Нельзя завершить упаковку',
+  orderReadyLabel: 'Заказ готов',
+  pickedUpBtn: 'Забрал',
+  orderOnTheWay: 'Заказ в пути',
+  pressPickedUpOrReject: 'Нажмите «Забрал» или «Отклонить»',
+  orderCannotBePickedUp: 'Нельзя забрать заказ',
+  pressDeliveredWhenDone: 'Когда доставите, нажмите «Доставлен»',
+  deliveredBtn: 'Доставлен',
+  orderCannotBeDelivered: 'Нельзя отметить как доставленный',
+  orderDeliveredLabel: 'Заказ доставлен',
+  clientPaidBtn: 'Клиент оплатил',
+  clientRejectedBtn: 'Клиент отказался',
+  pressPaidOrRejected: 'Нажмите «Клиент оплатил» или «Клиент отказался»',
+  orderCannotBePaid: 'Нельзя отметить как оплаченный',
+  orderPaidFinal: 'Заказ оплачен',
+  pleaseProvideRejectionReason: 'Пожалуйста, укажите причину отказа:',
+  orderRejectedFinal: 'Заказ отклонён.',
+  orderPickedUp: 'Заказ забран',
+  orderDelivered: 'Заказ доставлен',
+  orderRejectedByShopOwner: 'Заказ отклонён владельцем магазина',
+  userNotFound: 'Пользователь не найден',
+  userNotFoundInDB: 'Пользователь не найден в базе',
+  orderCannotBeRejected: 'Нельзя отклонить заказ',
+  // Additional hardcoded strings found in bots
+  orderPacked: 'Заказ упакован!',
+  orderPickedByCourier: 'Курьер забрал заказ!',
+  noFurtherAction: 'Нет дальнейших действий.',
+  packingFinishedSentToCouriers: 'Упаковка завершена и заказ отправлен курьерам!',
+  orderStatusChanged: 'Статус заказа изменён на "{status}"',
+  noPermissionToChangeStatus: 'У вас нет прав для изменения статуса заказа',
+  enterRejectionReason: 'Укажите причину отказа:',
+  // Status translations
+  statusCreated: '🆕 Новый',
+  statusPacking: '📦 Готовится',
+  statusCourierPicked: '🚚 В пути',
+  statusDelivered: '✅ Доставлен',
+  statusCompleted: '✅ Завершен',
+  statusRejected: '❌ Отклонен',
+  currency: 'сум',
+});
+Object.assign(translations.en, {
+  newOrderLabel: '🆕 New order!',
+  orderIdLabel: 'Order ID:',
+  clientLabel: 'Client:',
+  productsLabel: 'Products',
+  totalLabel: 'Total:',
+  nextStepLabel: 'Next step:',
+  acceptOrRejectOrder: 'Accept or reject the order',
+  acceptBtn: 'Accept',
+  rejectBtn: 'Reject',
+  orderConfirmedSentToShop: 'Order confirmed and sent to the shop',
+  orderAcceptedSentToShop: 'Order accepted and sent to the shop',
+  pleaseReviewOrder: 'Please review the order',
+  orderCannotBeAccepted: 'This order cannot be accepted',
+  orderPackingStage: 'Order packing stage',
+  finishPackingBtn: 'Finish packing',
+  pressFinishPacking: 'When ready, press "Finish packing"',
+  orderAcceptedPackingStage: 'Order moved to packing stage',
+  orderCannotBeFinished: 'Cannot finish packing',
+  orderReadyLabel: 'Order is ready',
+  pickedUpBtn: 'Picked up',
+  orderOnTheWay: 'Order on the way',
+  pressPickedUpOrReject: 'Press "Picked up" or "Reject"',
+  orderCannotBePickedUp: 'Cannot mark as picked up',
+  pressDeliveredWhenDone: 'Press "Delivered" when done',
+  deliveredBtn: 'Delivered',
+  orderCannotBeDelivered: 'Cannot mark as delivered',
+  orderDeliveredLabel: 'Order delivered',
+  clientPaidBtn: 'Client paid',
+  clientRejectedBtn: 'Client rejected',
+  pressPaidOrRejected: 'Press "Client paid" or "Client rejected"',
+  orderCannotBePaid: 'Cannot mark as paid',
+  orderPaidFinal: 'Order paid',
+  pleaseProvideRejectionReason: 'Please provide a reason for rejection:',
+  orderRejectedFinal: 'Order rejected.',
+  orderPickedUp: 'Order picked up',
+  orderDelivered: 'Order delivered',
+  orderRejectedByShopOwner: 'Order rejected by shop owner',
+  userNotFound: 'User not found',
+  userNotFoundInDB: 'User not found in DB',
+  orderCannotBeRejected: 'Cannot reject order',
+  // Additional hardcoded strings found in bots
+  orderPacked: 'Order packed!',
+  orderPickedByCourier: 'Order picked by courier!',
+  noFurtherAction: 'No further action.',
+  packingFinishedSentToCouriers: 'Packing finished and order sent to couriers!',
+  orderStatusChanged: 'Order status changed to "{status}"',
+  noPermissionToChangeStatus: 'You do not have permission to change order status',
+  enterRejectionReason: 'Please provide a reason for rejection:',
+  // Status translations
+  statusCreated: '🆕 New',
+  statusPacking: '📦 Packing',
+  statusCourierPicked: '🚚 On the way',
+  statusDelivered: '✅ Delivered',
+  statusCompleted: '✅ Completed',
+  statusRejected: '❌ Rejected',
+  currency: 'sum',
+});
 function getLang(ctx: any, fallback = 'en') {
   // Try to extract language from registration state, session, or fallback
   if (ctx) {
     const telegramId = ctx.from && ctx.from.id ? String(ctx.from.id) : undefined;
-    
     // First priority: Check registration state (for users in registration process)
     if (telegramId && ctx.registrationState && ctx.registrationState.get) {
       const state = ctx.registrationState.get(telegramId);
@@ -196,7 +368,6 @@ function getLang(ctx: any, fallback = 'en') {
         return state.language;
       }
     }
-    
     // Second priority: Check session user (for registered users)
     if (ctx.sessionUserMap && ctx.sessionUserMap.get) {
       const user = ctx.sessionUserMap.get(ctx);
@@ -205,7 +376,6 @@ function getLang(ctx: any, fallback = 'en') {
         return user.preferences.language;
       }
     }
-    
     // Third priority: Check Telegram language code
     if (ctx.from && ctx.from.language_code) {
       const code = ctx.from.language_code.split('-')[0];
@@ -215,11 +385,9 @@ function getLang(ctx: any, fallback = 'en') {
       }
     }
   }
-  
   console.log("[i18n] Using fallback language:", fallback);
   return fallback;
 }
-
 function t(ctx: any, key: string, params?: Record<string, string | number>) {
   const lang = getLang(ctx);
   let str = translations[lang]?.[key] || translations['en'][key] || key;
@@ -230,5 +398,4 @@ function t(ctx: any, key: string, params?: Record<string, string | number>) {
   }
   return str;
 }
-
 export { t, getLang, translations }; 

@@ -22,7 +22,7 @@ const authMiddleware = async (
   const token = authHeader.split(" ")[1];
   console.log("Token received:", token);
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "secret");
     console.log("Decoded token:", decoded);
     const user = await User.findById(decoded.id);
     if (!user) {

@@ -5,11 +5,11 @@ import { useCartStore } from "../../store/cartStore";
 import { Icon } from "@iconify/react";
 import { useTranslation } from 'react-i18next';
 import ProductCard from "../../components/ProductCard";
+import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
 
 const ProductDetails: React.FC = () => {
     const { id: productId } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [quantity, setQuantity] = useState(1);
     const {
         data: product,
         isLoading,
@@ -21,8 +21,13 @@ const ProductDetails: React.FC = () => {
         isLoading: isLoadingRelated,
         isError: isRelatedError,
     } = useRelatedProducts(productId || "");
-    const addToCart = useCartStore((state) => state.addToCart);
+    const { cart, addToCart, updateQuantity, removeFromCart } = useCartStore();
     const { t } = useTranslation();
+
+    // Check if product is in cart and get its quantity
+    const cartItem = cart.find(item => item.product._id === productId);
+    const isInCart = !!cartItem;
+    const cartQuantity = cartItem?.quantity || 0;
 
     if (isLoading) return <div className="text-center py-12">{t('productDetails.loading')}</div>;
     if (isError || !product)
@@ -32,19 +37,36 @@ const ProductDetails: React.FC = () => {
             </div>
         );
 
+    const handleAddToCart = () => {
+        try {
+            addToCart(product, 1);
+        } catch (error: any) {
+            console.error('Failed to add to cart:', error);
+            alert(error.message || t('common.addToCartFailed'));
+        }
+    };
+
+    const handleUpdateQuantity = (newQuantity: number) => {
+        if (newQuantity <= 0) {
+            removeFromCart(productId!);
+        } else {
+            updateQuantity(productId!, newQuantity);
+        }
+    };
+
     return (
-        <div className="min-h-screen flex flex-col relative">
+        <div className="min-h-screen flex flex-col relative pb-20">
             {/* Product Image */}
             <div
-                className="bg-[#fff] z-45 rounded-[54px]"
+                className="bg-[#fff] rounded-[54px]"
                 style={{
-                    minHeight: "calc(100vh - 80px)",
-                    maxHeight: "calc(100vh - 80px)",
+                    minHeight: "calc(100vh - 100px)",
+                    maxHeight: "calc(100vh - 100px)",
                 }}
             >
                 <div className="w-full bg-[#F6F6F6] h-70 rounded-b-[60px] flex flex-col items-center overflow-hidden">
                     <button
-                        className="absolute top-6 left-4 bg-white rounded-full p-2"
+                        className="absolute top-6 left-4 bg-white rounded-full p-2 z-20"
                         onClick={() => navigate(-1)}
                     >
                         <Icon
@@ -55,52 +77,24 @@ const ProductDetails: React.FC = () => {
                     <img
                         src={
                             product.images?.[0] ||
-                            "https://via.placeholder.com/200x200?text=No+Image"
+                            "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                         }
                         alt={product.name.uz}
                         className="w-full h-70 object-cover"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                                "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
+                        }}
                     />
                 </div>
                 {/* Product Info */}
-                <div className="max-w-md mx-auto w-full  flex-1 flex flex-col  z-10">
+                <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
                     <div className="bg-white px-4 pt-6 pb-8 flex-1 flex flex-col">
                         <div className="flex items-center justify-between mb-2">
                             <h1 className="text-2xl font-bold text-[#232c43]">
                                 {product.name.uz}
                             </h1>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    className="w-8 h-8 rounded-full bg-[#f3f4f6] flex items-center justify-center text-xl font-bold text-[#232c43]"
-                                    onClick={() =>
-                                        setQuantity((q) => Math.max(1, q - 1))
-                                    }
-                                >
-                                    –
-                                </button>
-                                <span className="font-semibold text-lg text-[#232c43]">
-                                    {/* {quantity}{" "} */}
-                                    <input
-                                        type="text"
-                                        value={quantity}
-                                        className="min-w-4 max-w-20 outline-none text-right"
-                                        onChange={(e) =>
-                                            setQuantity(() =>
-                                                Number(e.target.value || 1)
-                                            )
-                                        }
-                                    />
-                                    <span className="text-base font-normal">
-                                        {" "}
-                                        {product.unit}
-                                    </span>
-                                </span>
-                                <button
-                                    className="w-8 h-8 rounded-full bg-[#f3f4f6] flex items-center justify-center text-xl font-bold text-[#232c43]"
-                                    onClick={() => setQuantity((q) => q + 1)}
-                                >
-                                    +
-                                </button>
-                            </div>
                         </div>
                         <div className="text-sm text-gray-400 mb-4">
                             {product.isActive
@@ -132,19 +126,52 @@ const ProductDetails: React.FC = () => {
                             {relatedProducts && relatedProducts.length > 0 ? (
                                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
                                     {relatedProducts.map((relatedProduct) => (
-                                        <ProductCard
+                                        <div
                                             key={relatedProduct._id}
-                                            product={relatedProduct}
-                                            onAdd={(product) => {
-                                                try {
-                                                    addToCart(product, 1);
-                                                } catch (error: any) {
-                                                    console.error('Failed to add to cart:', error);
-                                                    alert(error.message || 'Failed to add product to cart');
+                                            className="bg-white rounded-2xl shadow-md p-4 flex flex-col items-center relative min-w-[150px] cursor-pointer hover:shadow-lg transition"
+                                            onClick={() => navigate(`/product/${relatedProduct._id}`)}
+                                        >
+                                            <img
+                                                src={
+                                                    relatedProduct.images?.[0] ||
+                                                    "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                                                 }
-                                            }}
-                                            onClick={(product) => navigate(`/product/${product._id}`)}
-                                        />
+                                                alt={relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
+                                                className="w-24 h-24 rounded-2xl object-cover mb-2 shadow-sm"
+                                                onError={(e) => {
+                                                    e.currentTarget.onerror = null;
+                                                    e.currentTarget.src =
+                                                        "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
+                                                }}
+                                            />
+                                            <div className="font-bold text-base text-[#232c43] text-center mb-0.5">
+                                                {relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
+                                            </div>
+                                            <div className="text-xs text-gray-400 mb-1 text-center">
+                                                {relatedProduct.nutritionalInfo?.calories
+                                                    ? `${relatedProduct.nutritionalInfo.calories} cal`
+                                                    : ""}
+                                            </div>
+                                            <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
+                                                {formatPrice(relatedProduct.price || relatedProduct.basePrice)}
+                                                <span className="text-xs font-normal text-gray-400">/{relatedProduct.unit}</span>
+                                            </div>
+                                            <button
+                                                className="absolute -bottom-3 -right-3 bg-[#ff7a00] rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-4 border-white"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    try {
+                                                        addToCart(relatedProduct, 1);
+                                                    } catch (error: any) {
+                                                        console.error('Failed to add to cart:', error);
+                                                        alert(error.message || t('common.addToCartFailed'));
+                                                    }
+                                                }}
+                                                aria-label={t('productCard.addToCart')}
+                                            >
+                                                <Icon icon="mdi:plus" className="text-white text-xl" />
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
@@ -157,28 +184,40 @@ const ProductDetails: React.FC = () => {
                 </div>
             </div>
             {/* Bottom Bar */}
-            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-[#232c43] h-32  py-5 px-6 flex justify-between items-end z-10 mx-auto">
-                <span className="text-white text-2xl font-bold mb-1">
-                    {product.price || product.basePrice}{" "}
-                    <span className="text-base font-normal">
+            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 h-20 py-3 px-6 flex justify-between items-center z-50 mx-auto shadow-lg">
+                <span className="text-[#232c43] text-xl font-bold">
+                    {formatPrice(product.price || product.basePrice)}{" "}
+                    <span className="text-sm font-normal text-gray-500">
                         /{product.unit}
                     </span>
                 </span>
-                <button
-                    className="bg-white text-[#232c43] font-bold py-3 px-8 rounded-full text-base shadow"
-                    onClick={() => {
-                        try {
-                            addToCart(product, quantity);
-                        } catch (error: any) {
-                            // Show error message to user
-                            console.error('Failed to add to cart:', error);
-                            // You can add a toast notification here if you have a toast system
-                            alert(error.message || 'Failed to add product to cart');
-                        }
-                    }}
-                >
-                    {t('productCard.addToCart')}
-                </button>
+                
+                {!isInCart ? (
+                    <button
+                        className="bg-[#ff7a00] text-white font-bold py-2 px-6 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
+                        onClick={handleAddToCart}
+                    >
+                        {t('productCard.addToCart')}
+                    </button>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <button
+                            className="w-7 h-7 rounded-full bg-[#ff7a00] flex items-center justify-center text-lg font-bold text-white hover:bg-[#e66a00] transition-colors"
+                            onClick={() => handleUpdateQuantity(cartQuantity - 1)}
+                        >
+                            –
+                        </button>
+                        <span className="font-semibold text-base text-[#232c43] min-w-6 text-center">
+                            {cartQuantity}
+                        </span>
+                        <button
+                            className="w-7 h-7 rounded-full bg-[#ff7a00] flex items-center justify-center text-lg font-bold text-white hover:bg-[#e66a00] transition-colors"
+                            onClick={() => handleUpdateQuantity(cartQuantity + 1)}
+                        >
+                            +
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

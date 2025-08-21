@@ -9,6 +9,30 @@ import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
 
 // If you have a getOrderById, use it. Otherwise, fetch all and filter by id for now.
 
+function getGroupForStatus(status: string): 'in_progress' | 'finished' {
+  const inProgressStatuses = new Set([
+    'created',
+    'operator_confirmed',
+    'confirmed',
+    'packing',
+    'packed',
+    'courier_picked',
+  ]);
+  const finishedStatuses = new Set([
+    'delivered',
+    'paid',
+    'rejected',
+    'rejected_by_shop',
+    'rejected_by_courier',
+    'cancelled_by_client',
+  ]);
+
+  if (finishedStatuses.has(status)) return 'finished';
+  if (inProgressStatuses.has(status)) return 'in_progress';
+  // Default unknowns to in_progress to avoid hiding orders
+  return 'in_progress';
+}
+
 const OrderDetailsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -45,7 +69,7 @@ const OrderDetailsScreen: React.FC = () => {
           <div className="flex items-center justify-between w-full mb-2">
             <span className="text-sm text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
             <span className={`px-4 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600`}>
-              {t(`order.${order.status.toLowerCase()}`)}
+              {t(`order.${getGroupForStatus(order.status)}`) || (getGroupForStatus(order.status) === 'in_progress' ? 'In Progress' : 'Finished')}
             </span>
           </div>
           {/* Items List */}

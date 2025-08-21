@@ -119,7 +119,7 @@ export default function CategoriesPage() {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>{t('users.itemsPerPage')}:</span>
+          <span>{t('common.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}

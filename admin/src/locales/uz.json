@@ -84,7 +84,41 @@
     "theme": "Mavzu",
     "dark": "Qorong'i",
     "light": "Yorug'",
-    "system": "Tizim"
+    "system": "Tizim",
+    "saving": "Saqlash...",
+    "creating": "Yaratish...",
+    "deleting": "O'chirish...",
+    "itemsPerPage": "Sahifadagi elementlar",
+    "panel": "Panel",
+    "adminUser": "Admin foydalanuvchi",
+    "select": "Tanlang...",
+    "search": "Qidirish...",
+    "noOptionsFound": "Variantlar topilmadi",
+    "thisWeek": "Bu hafta",
+    "lastWeek": "O'tgan hafta",
+    "last7Days": "So'nggi 7 kun",
+    "notAvailable": "Mavjud emas",
+    "paypal": "PayPal",
+    "creditCard": "Kredit karta",
+    "weekDays": {
+      "mon": "Dush",
+      "tue": "Sesh",
+      "wed": "Chor",
+      "thu": "Pay",
+      "fri": "Jum",
+      "sat": "Shan",
+      "sun": "Yak"
+    },
+    "sampleProducts": {
+      "organicBananas": "Organik bananlar",
+      "wholeWheatBread": "To'liq bug'doy noni"
+    },
+    "pagination": {
+      "first": "<<",
+      "previous": "<",
+      "next": ">",
+      "last": ">>"
+    }
   },
   "navigation": {
     "dashboard": "Boshqaruv paneli",
@@ -95,6 +129,7 @@
     "orders": "Buyurtmalar",
     "couriers": "Kuryerlar",
     "supportTickets": "Qo'llab-quvvatlash biletlari",
+    "outreach": "Xabar yuborish",
     "settings": "Sozlamalar",
     "admin": "Admin"
   },
@@ -153,7 +188,10 @@
     "notifications": "Bildirishnomalar",
     "emailNotifications": "Elektron pochta bildirishnomalari",
     "smsNotifications": "SMS bildirishnomalari",
-    "pushNotifications": "Push bildirishnomalari"
+    "pushNotifications": "Push bildirishnomalari",
+    "noUsersFound": "Foydalanuvchilar topilmadi.",
+    "copyUserId": "Foydalanuvchi ID'sini nusxalash",
+    "copied": "Nusxalandi!"
   },
   "shops": {
     "title": "Do'konlar",
@@ -216,7 +254,15 @@
     "totalSubcategories": "Jami past kategoriyalar",
     "searchCategory": "Kategoriya qidirish",
     "noCategoriesFound": "Kategoriyalar topilmadi.",
-    "confirmDeleteCategory": "Ushbu kategoriyani o'chirishni xohlaysizmi? Ushbu amalni qaytarib bo'lmaydi."
+    "confirmDeleteCategory": "Ushbu kategoriyani o'chirishni xohlaysizmi? Ushbu amalni qaytarib bo'lmaydi.",
+    "nameUzbek": "Nomi (o'zbekcha)",
+    "nameRussian": "Nomi (ruscha)",
+    "nameUzbekRequired": "O'zbekcha nomi majburiy",
+    "nameRussianRequired": "Ruscha nomi majburiy",
+    "descriptionUzbek": "Tavsif (o'zbekcha)",
+    "descriptionRussian": "Tavsif (ruscha)",
+    "iconName": "Ikonka (Iconify nomi)",
+    "iconPlaceholder": "masalan mdi:food-apple"
   },
   "products": {
     "title": "Mahsulotlar",
@@ -260,7 +306,16 @@
     "shippingInfo": "Yetkazib berish ma'lumotlari",
     "freeShipping": "Bepul yetkazib berish",
     "shippingWeight": "Yetkazib berish og'irligi",
-    "shippingDimensions": "Yetkazib berish o'lchamlari"
+    "shippingDimensions": "Yetkazib berish o'lchamlari",
+    "searchProduct": "Mahsulot qidirish",
+    "image": "Rasm",
+    "name": "Nomi",
+    "category": "Kategoriya",
+    "basePrice": "Asosiy narx",
+    "baseStock": "Asosiy zaxira",
+    "noProductsFound": "Mahsulotlar topilmadi.",
+    "clickAddProductToCreate": "Birinchi mahsulotni yaratish uchun 'Mahsulot qo'shish' tugmasini bosing.",
+    "failedToLoadProducts": "Mahsulotlarni yuklashda xatolik yuz berdi."
   },
   "orders": {
     "title": "Buyurtmalar",
@@ -307,7 +362,26 @@
       "cancelled": "Bekor qilingan",
       "returned": "Qaytarilgan",
       "refunded": "Qaytarilgan"
-    }
+    },
+    "filterOrderNumber": "Buyurtma raqami bo'yicha filtrlash",
+    "filterCustomer": "Mijoz bo'yicha filtrlash",
+    "filterShop": "Do'kon bo'yicha filtrlash",
+    "failedToLoad": "Buyurtmalarni yuklashda xatolik yuz berdi.",
+    "noOrdersFound": "Buyurtmalar topilmadi.",
+    "clickAddOrderToCreate": "Birinchi buyurtmani yaratish uchun 'Buyurtma qo'shish' tugmasini bosing.",
+    "deleteOrderConfirmation": "Bu buyurtmani o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi."
+  },
+  "outreach": {
+    "title": "Outreach",
+    "addOutreach": "Outreach qo'shish",
+    "editOutreach": "Outreachni tahrirlash",
+    "deleteOutreach": "Outreachni o'chirish",
+    "outreachDetails": "Outreach ma'lumotlari",
+    "outreachName": "Outreach nomi",
+    "outreachDescription": "Outreach tavsifi",
+    "outreachImage": "Outreach rasmi",
+    "outreachLink": "Outreach havolasi",
+    "outreachStatus": "Outreach holati"
   },
   "couriers": {
     "title": "Kuryerlar",
@@ -351,7 +425,22 @@
       "online": "Onlayn",
       "busy": "Band",
       "available": "Mavjud"
-    }
+    },
+    "vehicle": "Transport",
+    "license": "Litsenziya",
+    "availability": "Mavjudlik",
+    "status": "Holat",
+    "created": "Yaratilgan",
+    "action": "Amal",
+    "searchCourier": "Kuryer qidirish",
+    "noCouriersFound": "Kuryerlar topilmadi.",
+    "createdSuccessfully": "Kuryer muvaffaqiyatli yaratildi",
+    "updatedSuccessfully": "Kuryer muvaffaqiyatli yangilandi",
+    "deletedSuccessfully": "Kuryer muvaffaqiyatli o'chirildi",
+    "failedToCreate": "Kuryer yaratishda xatolik yuz berdi",
+    "failedToUpdate": "Kuryer yangilashda xatolik yuz berdi",
+    "failedToDelete": "Kuryer o'chirishda xatolik yuz berdi",
+    "deleteCourierConfirmation": "Bu kuryer o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi."
   },
   "supportTickets": {
     "title": "Qo'llab-quvvatlash biletlari",
@@ -396,7 +485,17 @@
       "general": "Umumiy",
       "bug": "Xato hisoboti",
       "feature": "Xususiyat so'rovi"
-    }
+    },
+    "userRole": "Foydalanuvchi roli",
+    "priority": "Ustuvorlik",
+    "status": "Holat",
+    "createdAt": "Yaratilgan",
+    "actions": "Amallar",
+    "searchTicket": "Tiket qidirish",
+    "failedToLoad": "Tiketlarni yuklashda xatolik yuz berdi.",
+    "noTicketsFound": "Tiketlar topilmadi.",
+    "clickAddTicketToCreate": "Birinchi qo'llab-quvvatlash tiketini yaratish uchun 'Tiket qo'shish' tugmasini bosing.",
+    "deleteTicketConfirmation": "{{ticketNumber}} raqamli tiketni o'chirishni xohlaysizmi?"
   },
   "settings": {
     "title": "Sozlamalar",
@@ -428,7 +527,17 @@
     "exportData": "Ma'lumotlarni eksport qilish",
     "importData": "Ma'lumotlarni import qilish",
     "clearCache": "Keshni tozalash",
-    "resetSettings": "Sozlamalarni qayta o'rnatish"
+    "resetSettings": "Sozlamalarni qayta o'rnatish",
+    "featureFlags": "Funksiya bayroqlari",
+    "addFeatureFlag": "Funksiya bayrog'ini qo'shish",
+    "deleteFeatureFlag": "Funksiya bayrog'ini o'chirish",
+    "deleteFeatureFlagConfirmation": "\"{{key}}\" funksiya bayrog'ini o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.",
+    "loadingFeatureFlags": "Funksiya bayroqlari yuklanmoqda...",
+    "failedToLoadFeatureFlags": "Funksiya bayroqlarini yuklashda xatolik yuz berdi.",
+    "key": "Kalit",
+    "type": "Turi",
+    "value": "Qiymat",
+    "options": "Variantlar"
   },
   "modals": {
     "confirmDelete": "Ushbu elementni o'chirishni xohlaysizmi?",
@@ -517,6 +626,47 @@
     "clickAddTicketToCreate": "Birinchi qo'llab-quvvatlash tiketini yaratish uchun 'Tiket qo'shish' tugmasini bosing.",
     "deleteTicket": "Tiket o'chirish",
     "deleteTicketConfirmation": "{{ticketNumber}} raqamli tiketni o'chirishni xohlaysizmi?"
+  },
+  "outreach": {
+    "title": "Xabar yuborish",
+    "createOutreach": "Xabar yaratish",
+    "editOutreach": "Xabarni tahrirlash",
+    "history": "Xabar tarixi",
+    "message": "Xabar",
+    "targetType": "Maqsadli auditoriya",
+    "status": "Holat",
+    "recipients": "Qabul qiluvchilar",
+    "createdAt": "Yaratilgan sana",
+    "sentAt": "Yuborilgan sana",
+    "total": "jami",
+    "successful": "muvaffaqiyatli",
+    "failed": "muvaffaqiyatsiz",
+    "sendMessage": "Xabar yuborish",
+    "sendImmediately": "Darvozasiga yuborish",
+    "preview": "Ko'rish",
+    "titlePlaceholder": "Xabar sarlavhasini kiriting...",
+    "messagePlaceholder": "Xabaringizni bu yerga kiriting...",
+    "targetTypeDescription": "Ushbu xabar uchun maqsadli auditoriyani tanlang",
+    "noOutreachFound": "Xabar topilmadi",
+    "clickCreateOutreachToStart": "Birinchi xabaringizni yuborish uchun 'Xabar yaratish' tugmasini bosing",
+    "createdSuccessfully": "Xabar muvaffaqiyatli yaratildi",
+    "failedToCreate": "Xabar yaratishda xatolik yuz berdi",
+    "targetTypes": {
+      "all": "Barcha foydalanuvchilar",
+      "customers": "Faqat mijozlar",
+      "shopOwners": "Faqat do'kon egalari",
+      "couriers": "Faqat kuryerlar"
+    },
+    "statuses": {
+      "draft": "Loyiha",
+      "sent": "Yuborilgan",
+      "failed": "Muvaffaqiyatsiz"
+    },
+    "validation": {
+      "titleRequired": "Sarlavha majburiy",
+      "messageRequired": "Xabar majburiy",
+      "messageTooLong": "Xabar 1000 belgidan oshmasligi kerak"
+    }
   },
   "common": {
     "panel": "Panel",

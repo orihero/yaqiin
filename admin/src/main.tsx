@@ -19,14 +19,10 @@ const Categories = React.lazy(() => import('./pages/Categories/Categories'));
 const Orders = React.lazy(() => import('./pages/Orders/Orders'));
 const Couriers = React.lazy(() => import('./pages/Couriers/Couriers'));
 const SupportTickets = React.lazy(() => import('./pages/SupportTickets/SupportTickets'));
+// const Outreach = React.lazy(() => import('./pages/Outreach/Outreach')); // Temporarily disabled
 const Settings = React.lazy(() => import('./pages/Settings/Settings'));
 
-// Mock authentication state
-const useAuth = () => {
-  // Replace with real auth logic
-  const [isAuthenticated] = useState(true); // Set to false to test login
-  return { isAuthenticated };
-};
+// Remove mock authentication state as we're using the real auth store
 
 function ProtectedLayout() {
   return (
@@ -60,6 +56,7 @@ function App() {
               <Route path="/orders" element={<Orders />} />
               <Route path="/couriers" element={<Couriers />} />
               <Route path="/support-tickets" element={<SupportTickets />} />
+              {/* <Route path="/outreach" element={<Outreach />} /> // Temporarily disabled */}
               <Route path="/settings" element={<Settings />} />
               {/* Add more protected routes here */}
             </Route>

@@ -102,7 +102,7 @@ const Settings: React.FC = () => {
           className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
           onClick={handleAdd}
         >
-          + Add Feature Flag
+          + {t('settings.addFeatureFlag')}
         </button>
       </div>
       {/* Tab Bar */}
@@ -120,17 +120,17 @@ const Settings: React.FC = () => {
       {/* Tab Content */}
       {currentTab === 'featureFlags' && (
         <div className="bg-[#232b42] rounded-xl overflow-x-auto p-8 text-gray-200">
-          {isLoading && <div>Loading feature flags...</div>}
-          {isError && <div className="text-red-400">Error: {error?.message || 'Failed to load feature flags.'}</div>}
+          {isLoading && <div>{t('settings.loadingFeatureFlags')}</div>}
+          {isError && <div className="text-red-400">Error: {error?.message || t('settings.failedToLoadFeatureFlags')}</div>}
           {!isLoading && !isError && (
             <table className="w-full text-left">
               <thead>
                 <tr className="text-gray-400">
-                  <th className="py-2 px-4">Key</th>
-                  <th className="py-2 px-4">Type</th>
-                  <th className="py-2 px-4">Value</th>
-                  <th className="py-2 px-4">Options</th>
-                  <th className="py-2 px-4">Actions</th>
+                  <th className="py-2 px-4">{t('settings.key')}</th>
+                  <th className="py-2 px-4">{t('settings.type')}</th>
+                  <th className="py-2 px-4">{t('settings.value')}</th>
+                  <th className="py-2 px-4">{t('settings.options')}</th>
+                  <th className="py-2 px-4">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -174,16 +174,16 @@ const Settings: React.FC = () => {
                       <button
                         className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-xs"
                         onClick={() => handleEdit(flag)}
-                        title="Edit"
+                        title={t('common.edit')}
                       >
-                        ✏️ Edit
+                        ✏️ {t('common.edit')}
                       </button>
                       <button
                         className="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-xs"
                         onClick={() => handleDelete(flag)}
-                        title="Delete"
+                        title={t('common.delete')}
                       >
-                        🗑️ Delete
+                        🗑️ {t('common.delete')}
                       </button>
                     </td>
                   </tr>
@@ -205,8 +205,8 @@ const Settings: React.FC = () => {
       {/* Delete Confirm Dialog */}
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Feature Flag"
-        description={`Are you sure you want to delete the feature flag "${deleteTarget?.key}"? This action cannot be undone.`}
+        title={t('settings.deleteFeatureFlag')}
+        description={t('settings.deleteFeatureFlagConfirmation', { key: deleteTarget?.key })}
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget._id)}

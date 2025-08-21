@@ -36,6 +36,57 @@ router.get(
   }
 );
 
+// Update current user profile
+router.put(
+  "/me",
+  authMiddleware as RequestHandler,
+  async (req: any, res: Response, next: NextFunction) => {
+    try {
+      // Only allow updating certain fields for security
+      const allowedFields = [
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'email',
+        'addresses',
+        'preferences'
+      ];
+      
+      const updateData: any = {};
+      allowedFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          updateData[field] = req.body[field];
+        }
+      });
+
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        updateData,
+        { new: true }
+      );
+      
+      if (!user) {
+        res
+          .status(404)
+          .json({
+            success: false,
+            error: { code: 404, message: "User not found" },
+          });
+        return;
+      }
+      
+      res.json({ success: true, data: user, message: "Profile updated successfully" });
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          success: false,
+          error: { code: 500, message: "Failed to update user profile" },
+        });
+    }
+  }
+);
+
 // List all users with pagination, filtering, and search
 router.get("/", async (req, res, next) => {
   try {

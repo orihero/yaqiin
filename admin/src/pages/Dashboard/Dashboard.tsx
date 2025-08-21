@@ -93,7 +93,7 @@ function Dashboard() {
                   <div className="text-gray-400 text-xs">📅 {t('dashboard.charts.ordersChart')}</div>
                 </div>
                 <button className="bg-transparent border border-[#2e3952] text-gray-300 px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1">
-                  📅 {t('common.thisWeek', 'This Week')}
+                  📅 {t('common.thisWeek')}
                   <Icon icon="mdi:chevron-down" className="text-base" />
                 </button>
               </div>

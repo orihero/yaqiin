@@ -113,7 +113,7 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
           </div>
           <div className="flex justify-end gap-2 mt-6">
             <button type="button" className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600" disabled={loading}>{loading ? (isEdit ? t('common.saving', 'Saving...') : t('common.creating', 'Creating...')) : t('common.save')}</button>
+            <button type="submit" className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600" disabled={loading}>{loading ? (isEdit ? t('common.saving') : t('common.creating')) : t('common.save')}</button>
           </div>
         </form>
       </div>

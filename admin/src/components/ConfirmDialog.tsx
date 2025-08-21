@@ -29,7 +29,7 @@ export default function ConfirmDialog({ open, title, description, loading, onCan
                 {t('common.cancel')}
               </button>
               <button className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 flex items-center gap-2" onClick={onConfirm} disabled={loading}>
-                {loading ? t('common.deleting', 'Deleting...') : t('common.delete')}
+                {loading ? t('common.deleting') : t('common.delete')}
               </button>
         </div>
       </div>

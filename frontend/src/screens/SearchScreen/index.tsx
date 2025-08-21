@@ -83,10 +83,8 @@ const SearchScreen: React.FC = () => {
         setSheetOpen(false);
         setSelectedProduct(null);
       } catch (error: any) {
-        // Show error message to user
         console.error('Failed to add to cart:', error);
-        // You can add a toast notification here if you have a toast system
-        alert(error.message || 'Failed to add product to cart');
+        alert(error.message || t('common.addToCartFailed'));
       }
     }
   };
@@ -133,12 +131,12 @@ const SearchScreen: React.FC = () => {
             <input
               ref={inputRef}
               type="text"
-              className="flex-1 outline-none bg-transparent text-base"
+              className="flex-1 outline-none bg-transparent text-base text-[#232c43]"
               placeholder={t('search.placeholder')}
               value={search}
               onChange={handleInputChange}
             />
-            <SearchFilterButton onClick={() => setFilterOpen(true)} />
+            {/* <SearchFilterButton onClick={() => setFilterOpen(true)} /> */}
           </div>
         </div>
         <div
@@ -238,14 +236,14 @@ const SearchScreen: React.FC = () => {
               alt={
                 selectedProduct.name?.uz ||
                 selectedProduct.name?.ru ||
-                'Product'
+                t('productCard.product')
               }
               className="w-20 h-20 rounded-xl object-cover mb-2"
             />
             <div className="font-semibold text-lg text-[#232c43] mb-1">
               {selectedProduct.name?.uz ||
                 selectedProduct.name?.ru ||
-                'Product'}
+                t('productCard.product')}
             </div>
             <div className="text-[#ff7a00] font-bold text-base mb-2">
               ${
@@ -254,7 +252,7 @@ const SearchScreen: React.FC = () => {
                   : selectedProduct.price
               }
               <span className="text-xs font-normal text-gray-400">
-                /kg
+                /{t('productCard.kg')}
               </span>
             </div>
             {/* Quantity controls */}
@@ -282,7 +280,7 @@ const SearchScreen: React.FC = () => {
               className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
               onClick={handleConfirm}
             >
-              Add to Cart
+              {t('productCard.addToCart')}
             </button>
           </div>
         )}

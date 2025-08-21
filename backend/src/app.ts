@@ -13,6 +13,7 @@ import reviewRoutes from "./routes/reviewRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import settingRoutes from "./routes/settingRoutes";
 import supportTicketRoutes from "./routes/supportTicketRoutes";
+// import outreachRoutes from "./routes/outreachRoutes"; // Temporarily disabled
 import morgan from "morgan";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
@@ -52,6 +53,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/support-tickets", supportTicketRoutes);
+// app.use("/api/outreach", outreachRoutes); // Temporarily disabled
 app.use("/api/auth", authRoutes);
 
 // Serve uploads directory

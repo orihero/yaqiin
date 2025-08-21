@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Category } from '@yaqiin/shared/types/category';
+import { useTranslation } from 'react-i18next';
 
 interface FilterBottomSheetProps {
   open: boolean;
@@ -12,11 +13,11 @@ interface FilterBottomSheetProps {
   onApply: () => void;
 }
 
-const recentSearches = [
-  'Fresh fruit',
-  'Fresh vegetable',
-  'Fast-food',
-  'Cold drinks',
+const recentSearchesKeys = [
+  'search.recentSearches.freshFruit',
+  'search.recentSearches.freshVegetable',
+  'search.recentSearches.fastFood',
+  'search.recentSearches.coldDrinks',
 ];
 
 const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
@@ -29,6 +30,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   setPriceRange,
   onApply,
 }) => {
+  const { t } = useTranslation();
   const [selectedRecent, setSelectedRecent] = React.useState<string | null>(null);
 
   if (!open) return null;
@@ -38,14 +40,14 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
       <div className="w-full max-w-md bg-white rounded-t-3xl p-6 pb-8 shadow-lg animate-slide-up relative">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <span className="text-lg font-bold text-[#232c43]">Filter</span>
+          <span className="text-lg font-bold text-[#232c43]">{t('common.filter')}</span>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
             <svg width="24" height="24" fill="none" stroke="#232c43" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
         </div>
         {/* Price Range */}
         <div className="mb-6">
-          <div className="text-sm font-semibold text-[#232c43] mb-2">Price Range</div>
+          <div className="text-sm font-semibold text-[#232c43] mb-2">{t('common.priceRange')}</div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs text-gray-400">${priceRange[0]}</span>
             <input
@@ -75,7 +77,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         </div>
         {/* Categories */}
         <div className="mb-6">
-          <div className="text-sm font-semibold text-[#232c43] mb-2">Categories</div>
+          <div className="text-sm font-semibold text-[#232c43] mb-2">{t('common.categories')}</div>
           <div className="flex flex-wrap gap-2">
             {categories.map(cat => (
               <button
@@ -90,15 +92,15 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         </div>
         {/* Recently Search */}
         <div className="mb-6">
-          <div className="text-sm font-semibold text-[#232c43] mb-2">Recently Search</div>
+          <div className="text-sm font-semibold text-[#232c43] mb-2">{t('common.recentlySearched')}</div>
           <div className="flex flex-wrap gap-2">
-            {recentSearches.map(rs => (
+            {recentSearchesKeys.map(key => (
               <button
-                key={rs}
-                className={`px-4 py-2 rounded-full text-sm font-medium border ${selectedRecent === rs ? 'bg-[#232c43] text-white' : 'bg-gray-100 text-[#232c43]'}`}
-                onClick={() => setSelectedRecent(rs)}
+                key={key}
+                className={`px-4 py-2 rounded-full text-sm font-medium border ${selectedRecent === key ? 'bg-[#232c43] text-white' : 'bg-gray-100 text-[#232c43]'}`}
+                onClick={() => setSelectedRecent(key)}
               >
-                {rs}
+                {t(key)}
               </button>
             ))}
           </div>
@@ -108,7 +110,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
           className="w-full bg-[#232c43] text-white rounded-full py-4 text-lg font-bold shadow-md"
           onClick={onApply}
         >
-          Apply Now
+          {t('common.apply')}
         </button>
       </div>
     </div>

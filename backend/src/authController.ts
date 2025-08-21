@@ -6,7 +6,7 @@ import { parse } from '@telegram-apps/init-data-node';
 
 // TODO: Move secret to env
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN';
-const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_JWT_SECRET';
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 function parseInitData(initData: string) {
   // Parse query string into object

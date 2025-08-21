@@ -348,7 +348,7 @@ mainBot.on("message", async (ctx: CustomContext) => {
           String(ctx.from.id),
           customReason
         );
-        await ctx.reply("Order rejected.");
+        await ctx.reply(t(ctx, "orderRejected"));
       }
       customReasonMap.delete(userId);
       return;
@@ -379,18 +379,9 @@ mainBot.on("message", async (ctx: CustomContext) => {
         } else {
           let message = t(ctx, "recentOrders");
           
-          const statusTranslations = {
-            created: { uz: "🆕 Yangi", ru: "🆕 Новый", en: "🆕 New" },
-            packing: { uz: "📦 Tayyorlanmoqda", ru: "📦 Готовится", en: "📦 Packing" },
-            courier_picked: { uz: "🚚 Yo'lda", ru: "🚚 В пути", en: "🚚 On the way" },
-            delivered: { uz: "✅ Yetkazildi", ru: "✅ Доставлен", en: "✅ Delivered" },
-            completed: { uz: "✅ Tugallandi", ru: "✅ Завершен", en: "✅ Completed" },
-            rejected: { uz: "❌ Rad etildi", ru: "❌ Отклонен", en: "❌ Rejected" }
-          };
-          
           orders.forEach((order, index) => {
-            const status = statusTranslations[order.status as keyof typeof statusTranslations]?.[getLang(ctx) as keyof typeof statusTranslations.created] || order.status;
-            const currency = getLang(ctx) === "uz" ? "so'm" : getLang(ctx) === "ru" ? "сум" : "sum";
+            const status = t(ctx, `status${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`);
+            const currency = t(ctx, "currency");
             message += `${index + 1}. ${t(ctx, "orderNumber")}${(order._id as any).toString().slice(-6)}\n`;
             message += `   💰 ${(order as any).total} ${currency}\n`;
             message += `   📊 ${status}\n\n`;
@@ -468,18 +459,18 @@ mainBot.on("callback_query", async (ctx: CustomContext) => {
   if (nextMatch) {
     const orderId = nextMatch[1];
     const order = await Order.findById(orderId);
-    if (!order) return ctx.answerCbQuery("Order not found");
-    if (!ctx.from) return ctx.answerCbQuery("User not found");
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
     if (order.status === "created") {
       await Order.updateStatus(orderId, "packing", String(ctx.from.id));
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.reply("Order packed!");
+      await ctx.reply(t(ctx, "orderPacked"));
     } else if (order.status === "packing") {
       await Order.updateStatus(orderId, "courier_picked", String(ctx.from.id));
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.reply("Order picked by courier!");
+      await ctx.reply(t(ctx, "orderPickedByCourier"));
     } else {
-      await ctx.answerCbQuery("No further action.");
+      await ctx.answerCbQuery(t(ctx, "noFurtherAction"));
       return;
     }
     return;
@@ -488,7 +479,7 @@ mainBot.on("callback_query", async (ctx: CustomContext) => {
   const rejectMatch = data.match(/^order_reject_(.+)_shop$/);
   if (rejectMatch) {
     const orderId = rejectMatch[1];
-    await ctx.reply("Please provide a reason for rejection:");
+    await ctx.reply(t(ctx, "enterRejectionReason"));
     customReasonMap.set(userId, { orderId, role: "shop" });
     return;
   }

@@ -88,6 +88,7 @@
       "group": "Group",
       "saving": "Saving...",
       "creating": "Creating...",
+      "deleting": "Deleting...",
       "itemsPerPage": "Items per page",
       "panel": "Panel",
       "adminUser": "Admin User",
@@ -129,6 +130,7 @@
     "orders": "Orders",
     "couriers": "Couriers",
     "supportTickets": "Support Tickets",
+    "outreach": "Outreach",
     "settings": "Settings",
     "admin": "Admin"
   },
@@ -187,7 +189,10 @@
     "notifications": "Notifications",
     "emailNotifications": "Email Notifications",
     "smsNotifications": "SMS Notifications",
-    "pushNotifications": "Push Notifications"
+    "pushNotifications": "Push Notifications",
+    "noUsersFound": "No users found.",
+    "copyUserId": "Copy User ID",
+    "copied": "Copied!"
   },
   "shops": {
     "title": "Shops",
@@ -323,7 +328,16 @@
     "shippingInfo": "Shipping Information",
     "freeShipping": "Free Shipping",
     "shippingWeight": "Shipping Weight",
-    "shippingDimensions": "Shipping Dimensions"
+    "shippingDimensions": "Shipping Dimensions",
+    "searchProduct": "Search Product",
+    "image": "Image",
+    "name": "Name",
+    "category": "Category",
+    "basePrice": "Base Price",
+    "baseStock": "Base Stock",
+    "noProductsFound": "No products found.",
+    "clickAddProductToCreate": "Click Add Product to create your first product.",
+    "failedToLoadProducts": "Failed to load products."
   },
   "orders": {
     "title": "Orders",
@@ -370,7 +384,14 @@
       "cancelled": "Cancelled",
       "returned": "Returned",
       "refunded": "Refunded"
-    }
+    },
+    "filterOrderNumber": "Filter Order #",
+    "filterCustomer": "Filter Customer",
+    "filterShop": "Filter Shop",
+    "failedToLoad": "Failed to load orders.",
+    "noOrdersFound": "No orders found.",
+    "clickAddOrderToCreate": "Click Add Order to create your first order.",
+    "deleteOrderConfirmation": "Are you sure you want to delete this order? This action cannot be undone."
   },
   "couriers": {
     "title": "Couriers",
@@ -414,7 +435,22 @@
       "online": "Online",
       "busy": "Busy",
       "available": "Available"
-    }
+    },
+    "vehicle": "Vehicle",
+    "license": "License",
+    "availability": "Availability",
+    "status": "Status",
+    "created": "Created",
+    "action": "Action",
+    "searchCourier": "Search Courier",
+    "noCouriersFound": "No couriers found.",
+    "createdSuccessfully": "Courier created successfully",
+    "updatedSuccessfully": "Courier updated successfully",
+    "deletedSuccessfully": "Courier deleted successfully",
+    "failedToCreate": "Failed to create courier",
+    "failedToUpdate": "Failed to update courier",
+    "failedToDelete": "Failed to delete courier",
+    "deleteCourierConfirmation": "Are you sure you want to delete this courier? This action cannot be undone."
   },
   "supportTickets": {
     "title": "Support Tickets",
@@ -459,6 +495,57 @@
       "general": "General",
       "bug": "Bug Report",
       "feature": "Feature Request"
+    },
+    "userRole": "User Role",
+    "priority": "Priority",
+    "status": "Status",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "searchTicket": "Search Ticket",
+    "failedToLoad": "Failed to load tickets.",
+    "noTicketsFound": "No tickets found.",
+    "clickAddTicketToCreate": "Click Add Ticket to create your first support ticket.",
+    "deleteTicketConfirmation": "Are you sure you want to delete ticket #{{ticketNumber}}?"
+  },
+  "outreach": {
+    "title": "Outreach",
+    "createOutreach": "Create Outreach",
+    "editOutreach": "Edit Outreach",
+    "history": "Outreach History",
+    "message": "Message",
+    "targetType": "Target Type",
+    "status": "Status",
+    "recipients": "Recipients",
+    "createdAt": "Created At",
+    "sentAt": "Sent At",
+    "total": "total",
+    "successful": "successful",
+    "failed": "failed",
+    "sendMessage": "Send Message",
+    "sendImmediately": "Send immediately",
+    "preview": "Preview",
+    "titlePlaceholder": "Enter outreach title...",
+    "messagePlaceholder": "Enter your message here...",
+    "targetTypeDescription": "Select the target audience for this outreach message",
+    "noOutreachFound": "No outreach messages found",
+    "clickCreateOutreachToStart": "Click Create Outreach to send your first message",
+    "createdSuccessfully": "Outreach message created successfully",
+    "failedToCreate": "Failed to create outreach message",
+    "targetTypes": {
+      "all": "All Users",
+      "customers": "Customers Only",
+      "shopOwners": "Shop Owners Only",
+      "couriers": "Couriers Only"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "messageRequired": "Message is required",
+      "messageTooLong": "Message cannot exceed 1000 characters"
     }
   },
   "settings": {
@@ -491,7 +578,17 @@
     "exportData": "Export Data",
     "importData": "Import Data",
     "clearCache": "Clear Cache",
-    "resetSettings": "Reset Settings"
+    "resetSettings": "Reset Settings",
+    "featureFlags": "Feature Flags",
+    "addFeatureFlag": "Add Feature Flag",
+    "deleteFeatureFlag": "Delete Feature Flag",
+    "deleteFeatureFlagConfirmation": "Are you sure you want to delete the feature flag \"{{key}}\"? This action cannot be undone.",
+    "loadingFeatureFlags": "Loading feature flags...",
+    "failedToLoadFeatureFlags": "Failed to load feature flags.",
+    "key": "Key",
+    "type": "Type",
+    "value": "Value",
+    "options": "Options"
   },
   "modals": {
     "confirmDelete": "Are you sure you want to delete this item?",
@@ -528,59 +625,6 @@
     "uz": "O'zbekcha",
     "ru": "Русский"
   },
-  "orders": {
-    "orderNumber": "Order #",
-    "customer": "Customer",
-    "shop": "Shop",
-    "total": "Total",
-    "status": "Status",
-    "created": "Created",
-    "time": "Time",
-    "actions": "Actions",
-    "addOrder": "Add Order",
-    "filterOrderNumber": "Filter Order #",
-    "filterCustomer": "Filter Customer",
-    "filterShop": "Filter Shop",
-    "failedToLoad": "Failed to load orders.",
-    "noOrdersFound": "No orders found.",
-    "clickAddOrderToCreate": "Click Add Order to create your first order.",
-    "deleteOrder": "Delete Order",
-    "deleteOrderConfirmation": "Are you sure you want to delete this order? This action cannot be undone."
-  },
-  "couriers": {
-    "vehicle": "Vehicle",
-    "license": "License",
-    "availability": "Availability",
-    "status": "Status",
-    "created": "Created",
-    "action": "Action",
-    "addCourier": "Add Courier",
-    "searchCourier": "Search Courier",
-    "noCouriersFound": "No couriers found.",
-    "createdSuccessfully": "Courier created successfully",
-    "updatedSuccessfully": "Courier updated successfully",
-    "deletedSuccessfully": "Courier deleted successfully",
-    "failedToCreate": "Failed to create courier",
-    "failedToUpdate": "Failed to update courier",
-    "failedToDelete": "Failed to delete courier",
-    "deleteCourier": "Delete Courier",
-    "deleteCourierConfirmation": "Are you sure you want to delete this courier? This action cannot be undone."
-  },
-  "supportTickets": {
-    "title": "Title",
-    "userRole": "User Role",
-    "priority": "Priority",
-    "status": "Status",
-    "createdAt": "Created At",
-    "actions": "Actions",
-    "addTicket": "Add Ticket",
-    "searchTicket": "Search Ticket",
-    "failedToLoad": "Failed to load tickets.",
-    "noTicketsFound": "No tickets found.",
-    "clickAddTicketToCreate": "Click Add Ticket to create your first support ticket.",
-    "deleteTicket": "Delete Ticket",
-    "deleteTicketConfirmation": "Are you sure you want to delete ticket #{{ticketNumber}}?"
-  },
   "login": {
     "welcomeTitle": "Welcome to MDash",
     "welcomeSubtitle": "MDash helps developers to build organized and well coded dashboards full of beautiful and rich modules.",
@@ -610,15 +654,5 @@
       "payments": "Payments",
       "profitMore": "Profit more than last month"
     }
-  },
-  "products": {
-    "addProduct": "Add Product",
-    "searchProduct": "Search Product",
-    "image": "Image",
-    "name": "Name",
-    "category": "Category"
-  },
-  "settings": {
-    "featureFlags": "Feature Flags"
   }
 }

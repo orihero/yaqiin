@@ -12,9 +12,8 @@ function Sidebar() {
       { name: t('navigation.shops'), to: '/shops', icon: 'mdi:storefront-outline' },
       { name: t('navigation.categories'), to: '/categories', icon: 'mdi:shape-outline' },
       { name: t('navigation.products'), to: '/products', icon: 'mdi:package-variant-closed' },
-      { name: t('navigation.orders'), to: '/orders', icon: 'mdi:cart-outline' },
-      { name: t('navigation.couriers'), to: '/couriers', icon: 'mdi:truck-delivery-outline' },
       { name: t('navigation.supportTickets'), to: '/support-tickets', icon: 'mdi:lifebuoy' },
+      // { name: t('navigation.outreach'), to: '/outreach', icon: 'mdi:message-outline' }, // Temporarily disabled
       { name: t('navigation.settings'), to: '/settings', icon: 'mdi:cog-outline' },
     ];
 

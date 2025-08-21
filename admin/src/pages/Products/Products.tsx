@@ -100,22 +100,22 @@ const Products: React.FC = () => {
               <th className="py-3 px-4">{t('products.image')}</th>
               <th className="py-3 px-4">{t('products.name')}</th>
               <th className="py-3 px-4">{t('products.category')}</th>
-              <th className="py-3 px-4">Base Price</th>
-              <th className="py-3 px-4">Base Stock</th>
-              <th className="py-3 px-4 text-center">Actions</th>
+              <th className="py-3 px-4">{t('products.basePrice')}</th>
+              <th className="py-3 px-4">{t('products.baseStock')}</th>
+              <th className="py-3 px-4 text-center">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr><td colSpan={6} className="text-center py-8">⏳ Loading...</td></tr>
             ) : isError ? (
-              <tr><td colSpan={6} className="text-center py-8 text-red-400">❌ Failed to load products.</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-red-400">❌ {t('products.failedToLoadProducts')}</td></tr>
             ) : !data?.data?.length ? (
               <tr><td colSpan={6} className="text-center py-16 text-gray-400">
                 <div className="flex flex-col items-center">
                   <Icon icon="mdi:package-variant" className="text-5xl mb-4" />
-                  <div className="text-lg font-medium">📭 No products found.</div>
-                  <div className="text-sm">Click <span className="font-semibold">➕ Add Product</span> to create your first product.</div>
+                  <div className="text-lg font-medium">📭 {t('products.noProductsFound')}</div>
+                  <div className="text-sm">{t('products.clickAddProductToCreate')}</div>
                 </div>
               </td></tr>
             ) : (
@@ -133,10 +133,10 @@ const Products: React.FC = () => {
                   <td className="py-3 px-4">{formatPriceWithCurrency(product.basePrice.toString())}</td>
                   <td className="py-3 px-4">{formatNumber(product.baseStock.quantity.toString())} {product.baseStock.unit}</td>
                   <td className="py-3 px-4 text-center flex gap-3 justify-center">
-                    <button className="hover:text-blue-400" title="Edit" onClick={() => handleEdit(product)}>
+                    <button className="hover:text-blue-400" title={t('common.edit')} onClick={() => handleEdit(product)}>
                       <Icon icon="mdi:pencil" width={18} height={18} />
                     </button>
-                    <button className="hover:text-red-400" title="Delete" onClick={() => handleDelete(product)}>
+                    <button className="hover:text-red-400" title={t('common.delete')} onClick={() => handleDelete(product)}>
                       <Icon icon="mdi:delete" width={18} height={18} />
                     </button>
                   </td>
@@ -149,7 +149,7 @@ const Products: React.FC = () => {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <span>Items per page:</span>
+          <span>{t('common.itemsPerPage')}:</span>
           <select
             className="bg-[#232b42] text-white px-2 py-1 rounded"
             value={limit}
@@ -210,8 +210,8 @@ const Products: React.FC = () => {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={!!deleteTarget}
-        title="🗑️ Delete Product"
-        description={deleteTarget ? `⚠️ Are you sure you want to delete ${deleteTarget.name.uz}?` : ''}
+        title={`🗑️ ${t('products.deleteProduct')}`}
+        description={deleteTarget ? `⚠️ ${t('modals.confirmDelete')} ${deleteTarget.name.uz}?` : ''}
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}

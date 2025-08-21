@@ -47,7 +47,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                 <img
                     src={
                         item.product.images?.[0] ||
-                        "https://via.placeholder.com/80x80?text=No+Image"
+                        "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                     }
                     alt={
                         item.product.name?.uz ||
@@ -58,7 +58,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                     onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src =
-                            "https://via.placeholder.com/80x80?text=No+Image";
+                            "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
                     }}
                 />
                 <div className="flex-1 flex flex-col justify-between">
@@ -218,8 +218,9 @@ const MyCartScreen = () => {
             toast.success(t('cart.orderSuccess') || 'Order placed successfully!');
             navigate('/orders');
         } catch (err: any) {
-            setCheckoutError(err?.message || 'Checkout failed');
-            toast.error(err?.message || 'Checkout failed');
+            const fallback = t('cart.checkoutFailed') || 'Checkout failed';
+            setCheckoutError(err?.message || fallback);
+            toast.error(err?.message || fallback);
         } finally {
             setCheckoutLoading(false);
         }

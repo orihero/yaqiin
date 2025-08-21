@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShopProductDisplay } from '@yaqiin/shared/types/product';
 import React, { useState } from 'react';
-import { getShopProducts, getAvailableProductsForShop, assignProductToShop, removeProductFromShop, ShopProductListResponse } from '../../../services/shopProductService';
+import { getShopProducts, getAvailableProductsForShop, assignProductToShop, removeProductFromShop, updateShopProduct, ShopProductListResponse } from '../../../services/shopProductService';
 import MaskedInput from '../../../components/MaskedInput';
 import SearchableSelect from '../../../components/SearchableSelect';
 import { getUnitOptions } from '../../../utils/units';
 import { formatPriceWithCurrency, formatNumber } from '../../../utils/inputMasks';
+import ShopProductFormModal from './ShopProductFormModal';
 
 interface ShopProductsTabProps {
   shopId: string;
@@ -44,6 +45,10 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
     isRefundable: true,
     minOrderQuantity: 1,
   });
+  
+  // Edit modal state
+  const [editShopProduct, setEditShopProduct] = useState<ShopProductDisplay | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -106,6 +111,21 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
     },
   });
 
+  // Update shop product mutation
+  const updateShopProductMutation = useMutation({
+    mutationFn: async ({ shopProductId, data }: { shopProductId: string; data: Partial<ShopProductDisplay> }) => {
+      await updateShopProduct(shopProductId, data);
+    },
+    onSuccess: () => {
+      setEditModalOpen(false);
+      setEditShopProduct(null);
+      refetchShopProducts();
+    },
+    onError: (err: any) => {
+      console.error('Failed to update shop product:', err);
+    },
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1); // Reset to first page when searching
@@ -131,6 +151,11 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
     if (selectedProduct) {
       assignProductMutation.mutate(selectedProduct._id);
     }
+  };
+
+  const handleEditClick = (shopProduct: ShopProductDisplay) => {
+    setEditShopProduct(shopProduct);
+    setEditModalOpen(true);
   };
 
   // Helper function to get display text from ProductNameDesc
@@ -258,6 +283,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
                         <button
                           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
                           title="Edit Shop Product"
+                          onClick={() => handleEditClick(shopProduct)}
                         >
                           Edit ✏️
                         </button>
@@ -529,6 +555,27 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
           </div>
         </div>
       )}
+
+      {/* Edit Shop Product Modal */}
+      <ShopProductFormModal
+        open={editModalOpen}
+        mode="edit"
+        initialValues={editShopProduct || undefined}
+        loading={updateShopProductMutation.status === 'pending'}
+        error={updateShopProductMutation.isError ? (updateShopProductMutation.error as any)?.message : null}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditShopProduct(null);
+        }}
+        onSubmit={(values) => {
+          if (editShopProduct) {
+            updateShopProductMutation.mutate({
+              shopProductId: editShopProduct._id,
+              data: values
+            });
+          }
+        }}
+      />
     </div>
   );
 }

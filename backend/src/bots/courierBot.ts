@@ -7,6 +7,7 @@ import Order from "../models/Order";
 import User from "../models/User";
 import { t } from "../utils/i18n";
 import mongoose from "mongoose";
+import { sendOrderStatusUpdateToGroup } from "./controllers/orderGroupNotifier";
 
 const token = process.env.COURIER_BOT_TOKEN;
 if (!token) {
@@ -247,27 +248,36 @@ courierBot.on("text", async (ctx: CustomContext) => {
   const userId = String(ctx.from.id);
   if (customReasonMap.has(userId)) {
     const { orderId, role } = customReasonMap.get(userId);
-    const customReason =
-      ctx.message && "text" in ctx.message ? ctx.message["text"] : "";
+    const customReason = ctx.message && "text" in ctx.message ? ctx.message["text"] : "";
     if (!ctx.from) return;
     const order = await Order.findById(orderId);
     if (order) {
       if (role === "client_reject") {
-        await Order.updateStatus(
-          orderId,
-          "rejected",
-          String(ctx.from.id),
-          customReason
-        );
+        await Order.updateStatus(orderId, "rejected", String(ctx.from.id), customReason);
         await ctx.reply(t(ctx, "orderRejectedFinal", { reason: customReason }));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          const user = await User.findOne({ telegramId: String(ctx.from.id) });
+          if (user) {
+            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+          }
+        }
       } else {
-        await Order.updateStatus(
-          orderId,
-          "rejected",
-          String(ctx.from.id),
-          customReason
-        );
+        await Order.updateStatus(orderId, "rejected", String(ctx.from.id), customReason);
         await ctx.reply(t(ctx, "orderRejected"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          const user = await User.findOne({ telegramId: String(ctx.from.id) });
+          if (user) {
+            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+          }
+        }
       }
     }
     customReasonMap.delete(userId);
@@ -309,9 +319,15 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         await Order.updateStatus(orderId, "confirmed", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderConfirmedSentToShop"));
-        // Send to shop owner with Accept/Reject buttons
+        
+        // Send order status update to orders group
         const Shop = require("../models/Shop").default;
         const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "confirmed", user);
+        }
+        
+        // Send to shop owner with Accept/Reject buttons
         if (shop && shop.ownerId) {
           // Find shop owner user
           const shopOwner = await User.findById(shop.ownerId);
@@ -358,11 +374,16 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         // Send to shop group (if exists)
         const Shop = require("../models/Shop").default;
         const shop = await Shop.findById(order.shopId);
-        if (shop && shop.orders_chat_id) {
-          await ctx.telegram.sendMessage(
-            shop.orders_chat_id,
-            `${t(ctx, "newOrderLabel")}\n${t(ctx, "orderIdLabel")}: ${order._id}\n${t(ctx, "pleaseReviewOrder")}`
-          );
+        if (shop) {
+          // Always reflect to orders group as status update
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "packing", user);
+          // Also keep legacy plain text message if chat id exists
+          if (shop.orders_chat_id) {
+            await ctx.telegram.sendMessage(
+              shop.orders_chat_id,
+              `${t(ctx, "newOrderLabel")}\n${t(ctx, "orderIdLabel")}: ${order._id}\n${t(ctx, "pleaseReviewOrder")}`
+            );
+          }
         }
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBeAccepted"));
@@ -394,6 +415,13 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         await Order.updateStatus(orderId, "packing", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderAcceptedPackingStage"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "packing", user);
+        }
         // Update notification: show only 'Finish Packing' button
         let orderText = `📦 <b>${t(ctx, "orderPackingStage")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
         orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
@@ -438,6 +466,14 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         await Order.updateStatus(orderId, "packed", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "packingFinishedSentToCouriers"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "packed", user);
+        }
+        
         // Send to all couriers with 'Picked up' and 'Reject' buttons
         const couriers = await User.find({ role: "courier" });
         let orderText = `🚚 <b>${t(ctx, "orderReadyLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
@@ -489,6 +525,13 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
       if (order.status === "confirmed") {
         await Order.updateStatus(orderId, "rejected", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.answerCbQuery(t(ctx, "orderRejectedByShopOwner"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+        }
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBeRejected"));
         return;
@@ -510,6 +553,14 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         await Order.updateStatus(orderId, "courier_picked", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderPickedUp"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "courier_picked", user);
+        }
+        
         // Update notification: show only 'Delivered' button
         let orderText = `🚚 <b>${t(ctx, "orderOnTheWay")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
         orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
@@ -554,6 +605,14 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         await Order.updateStatus(orderId, "delivered", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderDelivered"));
+        
+        // Send order status update to orders group
+        const Shop = require("../models/Shop").default;
+        const shop = await Shop.findById(order.shopId);
+        if (shop) {
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "delivered", user);
+        }
+        
         // Send notification with 'Client paid' and 'Client rejected' buttons
         let orderText = `✅ <b>${t(ctx, "orderDeliveredLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
         orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
@@ -599,6 +658,13 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
       await Order.updateStatus(orderId, "paid", (user._id as mongoose.Types.ObjectId).toString());
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
       await ctx.reply(t(ctx, "orderPaidFinal"));
+      
+      // Send order status update to orders group
+      const Shop = require("../models/Shop").default;
+      const shop = await Shop.findById(order.shopId);
+      if (shop) {
+        await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "paid", user);
+      }
       // Optionally, send a final notification to shop/courier/client
     } else {
       await ctx.answerCbQuery(t(ctx, "orderCannotBePaid"));
@@ -621,6 +687,108 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
       customReasonMap.set(userId, { orderId, role: "client_reject" });
     } else {
       await ctx.answerCbQuery(t(ctx, "orderCannotBeRejected"));
+      return;
+    }
+    return;
+  }
+  
+  // Match admin status change
+  const adminStatusMatch = data.match(/^admin_status_(.+)_(.+)$/);
+  if (adminStatusMatch) {
+    const newStatus = adminStatusMatch[1];
+    const orderId = adminStatusMatch[2];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    
+    // Check if user is admin or operator
+    if (user.role === "admin" || user.role === "operator") {
+      // If rejecting, prompt for reason
+      if (newStatus === "rejected") {
+        await ctx.reply(t(ctx, "enterRejectionReason"));
+        customReasonMap.set(userId, { orderId, role: "admin", isAdminRejection: true });
+        return;
+      }
+      
+      // Update order status
+      await Order.updateStatus(orderId, newStatus, (user._id as mongoose.Types.ObjectId).toString());
+      
+      // Send confirmation
+      await ctx.answerCbQuery(t(ctx, "orderStatusChanged", { status: newStatus }));
+      
+      // Send updated status to orders group
+      const Shop = require("../models/Shop").default;
+      const shop = await Shop.findById(order.shopId);
+      if (shop) {
+        await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, newStatus, user);
+      }
+      
+      // Handle special cases for status changes
+      if (newStatus === "confirmed") {
+        // Send to shop owner if order was confirmed
+        if (shop && shop.ownerId) {
+          const shopOwner = await User.findById(shop.ownerId);
+          if (shopOwner && shopOwner.telegramId && /^\d+$/.test(shopOwner.telegramId)) {
+            let orderText = `🆕🛒 <b>${t(ctx, "newOrderLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+            orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+            orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
+            for (const item of order.items) {
+              orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+            }
+            orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+            orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "acceptOrRejectOrder")}`;
+            await ctx.telegram.sendMessage(
+              shopOwner.telegramId,
+              orderText,
+              {
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      { text: '✅ ' + t(ctx, "acceptBtn"), callback_data: `order_shop_accept_${order._id}` },
+                      { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_shop_reject_${order._id}` }
+                    ]
+                  ]
+                }
+              }
+            );
+          }
+        }
+      } else if (newStatus === "packed") {
+        // Send to all couriers if order was packed
+        const couriers = await User.find({ role: "courier" });
+        let orderText = `🚚 <b>${t(ctx, "orderReadyLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
+        orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
+        for (const item of order.items) {
+          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+        }
+        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
+        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
+        for (const courier of couriers) {
+          if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
+            await ctx.telegram.sendMessage(
+              courier.telegramId,
+              orderText,
+              {
+                parse_mode: 'HTML',
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                     { text: '🚚 ' + t(ctx, "pickedUpBtn"), callback_data: `order_courier_picked_${order._id}` },
+                     { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_courier_reject_${order._id}` }
+                    ]
+                  ]
+                }
+              }
+            );
+          }
+        }
+      }
+    } else {
+      await ctx.answerCbQuery(t(ctx, "noPermissionToChangeStatus"));
       return;
     }
     return;

@@ -1,15 +1,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth';
 import LanguageSelector from './LanguageSelector';
 
 function Header() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logout clicked');
-    // You can redirect to login page or clear auth tokens
-    // window.location.href = '/login';
+    logout();
+    navigate('/login');
   };
 
   return (

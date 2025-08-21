@@ -49,10 +49,8 @@ const HomeScreen = () => {
                 setSheetOpen(false);
                 setSelectedProduct(null);
             } catch (error: any) {
-                // Show error message to user
                 console.error('Failed to add to cart:', error);
-                // You can add a toast notification here if you have a toast system
-                alert(error.message || 'Failed to add product to cart');
+                alert(error.message || t('common.addToCartFailed'));
             }
         }
     };
@@ -98,15 +96,6 @@ const HomeScreen = () => {
                                 {t('home.title1')} {t('home.title2')}
                             </h1>
                         </div>
-                        {/* <div
-                            className="bg-white rounded-full p-3 shadow flex items-center justify-center"
-                            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-                        >
-                            <Icon
-                                icon="mdi:magnify"
-                                className="text-2xl text-[#232c43]"
-                            />
-                        </div> */}
                     </div>
                     {/* Category Tabs */}
                     <div className="flex gap-3 overflow-x-auto pl-1 pr-4 mb-4 scrollbar-hide items-center min-h-14 sticky top-0 bg-[#fff] z-45">
@@ -269,7 +258,7 @@ const HomeScreen = () => {
                             alt={
                                 selectedProduct.name?.uz ||
                                 selectedProduct.name?.ru ||
-                                "Product"
+                                t('productCard.product')
                             }
                             className="w-20 h-20 rounded-xl object-cover mb-2"
                         />
@@ -284,7 +273,7 @@ const HomeScreen = () => {
                                 ? selectedProduct.price.toFixed(2)
                                 : selectedProduct.price}
                             <span className="text-xs font-normal text-gray-400">
-                                /kg
+                                /{t('productCard.kg')}
                             </span>
                         </div>
                         {/* Quantity controls */}
@@ -321,7 +310,7 @@ const HomeScreen = () => {
                             className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
                             onClick={handleConfirm}
                         >
-                            Add to Cart
+                            {t('productCard.addToCart')}
                         </button>
                     </div>
                 )}
