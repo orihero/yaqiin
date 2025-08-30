@@ -4,7 +4,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\" \"npm --workspace admin run dev\""
+    "dev": "concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\" \"npm --workspace admin run dev\"",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend && npm run build --workspace=admin",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:delete": "pm2 delete ecosystem.config.js",
+    "pm2:logs": "pm2 logs",
+    "pm2:monit": "pm2 monit",
+    "pm2:start:prod": "pm2 start ecosystem.config.js --env production",
+    "pm2:start:dev": "pm2 start ecosystem.config.js --env development"
   },
   "keywords": [],
   "author": "",

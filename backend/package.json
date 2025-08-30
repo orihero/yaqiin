@@ -9,7 +9,13 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "seed": "ts-node src/seed.ts",
     "migrate:products": "ts-node ../scripts/migrateProductSchema.ts",
-    "test:openrouter": "ts-node src/test-openrouter.ts"
+    "test:openrouter": "ts-node src/test-openrouter.ts",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:delete": "pm2 delete ecosystem.config.js",
+    "pm2:logs": "pm2 logs",
+    "pm2:monit": "pm2 monit"
   },
   "keywords": [],
   "author": "",
