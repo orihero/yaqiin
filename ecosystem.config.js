@@ -10,11 +10,11 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'development',
-        PORT: 8080
+        PORT: 4433
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 8080
+        PORT: 4433
       },
       error_file: './logs/err.log',
       out_file: './logs/out.log',
@@ -32,18 +32,18 @@ module.exports = {
       max_memory_restart: '512M',
       env: {
         NODE_ENV: 'development',
-        PORT: 3001
+        PORT: 5000
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 5000
       },
       error_file: './logs/err.log',
       out_file: './logs/out.log',
       log_file: './logs/combined.log',
       time: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      args: 'preview --port 3001 --host 0.0.0.0'
+      args: 'preview --port 5000 --host 0.0.0.0'
     },
     {
       name: 'yaqiin-frontend',
