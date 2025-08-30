@@ -82,6 +82,12 @@ export const deleteProduct = async (_id: string) => {
   return res.data.data;
 };
 
+export const bulkDeleteProducts = async (productIds: string[]) => {
+  const res = await api.delete('/products/bulk', { data: { productIds } });
+  if (!res.data.success) throw new Error(res.data?.error?.message || 'Failed to delete products');
+  return res.data.data;
+};
+
 export const getAllProducts = async (): Promise<Product[]> => {
   const res = await api.get('/products');
   return res.data.data;

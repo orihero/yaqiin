@@ -13,6 +13,8 @@ import reviewRoutes from "./routes/reviewRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import settingRoutes from "./routes/settingRoutes";
 import supportTicketRoutes from "./routes/supportTicketRoutes";
+import excelImportRoutes from "./routes/excelImportRoutes";
+import imageGenerationRoutes from "./routes/imageGenerationRoutes";
 // import outreachRoutes from "./routes/outreachRoutes"; // Temporarily disabled
 import morgan from "morgan";
 import cors from "cors";
@@ -53,11 +55,16 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/support-tickets", supportTicketRoutes);
+app.use("/api/excel-import", excelImportRoutes);
+app.use("/api/image-generation", imageGenerationRoutes);
 // app.use("/api/outreach", outreachRoutes); // Temporarily disabled
 app.use("/api/auth", authRoutes);
 
-// Serve uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve uploads directory - try both possible locations
+const uploadsPath = path.join(__dirname, "../uploads");
+const uploadsPathAlt = path.join(__dirname, "uploads");
+app.use("/uploads", express.static(uploadsPath));
+app.use("/uploads", express.static(uploadsPathAlt));
 
 // Error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -8,7 +8,8 @@
     "start": "node dist/app.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "seed": "ts-node src/seed.ts",
-    "migrate:products": "ts-node ../scripts/migrateProductSchema.ts"
+    "migrate:products": "ts-node ../scripts/migrateProductSchema.ts",
+    "test:openrouter": "ts-node src/test-openrouter.ts"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,7 @@
     "@telegram-apps/init-data-node": "^2.0.10",
     "@turf/turf": "^7.2.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cheerio": "^0.22.35",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
@@ -25,7 +27,10 @@
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.10",
+    "@types/xlsx": "^0.0.35",
+    "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
@@ -35,8 +40,11 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
+    "openai": "^5.15.0",
     "path": "^0.12.7",
-    "telegraf": "^4.12.2"
+    "puppeteer": "^24.17.0",
+    "telegraf": "^4.12.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/multer": "^2.0.0",

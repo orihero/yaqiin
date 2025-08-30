@@ -404,6 +404,27 @@ router.put('/:id', upload.array('images', 10), async (req: Request, res, next) =
   }
 });
 
+// Bulk delete products
+router.delete('/bulk', async (req, res, next) => {
+  try {
+    const { productIds } = req.body;
+    
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      return next({ status: 400, message: 'Product IDs array is required' });
+    }
+
+    const result = await Product.deleteMany({ _id: { $in: productIds } });
+    
+    res.json({ 
+      success: true, 
+      data: { deletedCount: result.deletedCount }, 
+      message: `Successfully deleted ${result.deletedCount} products` 
+    });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to delete products', details: err });
+  }
+});
+
 router.delete('/:id', async (req, res, next) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);

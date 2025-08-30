@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductFormModal from './components/ProductFormModal';
+import ExcelImportModal from './components/ExcelImportModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, createProduct, updateProduct, deleteProduct, ProductListResponse } from '../../services/productService';
+import { getProducts, createProduct, updateProduct, deleteProduct, bulkDeleteProducts, ProductListResponse } from '../../services/productService';
 import { getAllCategories } from '../../services/categoryService';
 import { Product } from '@yaqiin/shared/types/product';
 import { Icon } from '@iconify/react';
@@ -17,8 +18,11 @@ const Products: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery<ProductListResponse>({
@@ -59,6 +63,16 @@ const Products: React.FC = () => {
     },
   });
 
+  // Bulk delete products mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (productIds: string[]) => bulkDeleteProducts(productIds),
+    onSuccess: () => {
+      setSelectedProducts(new Set());
+      setShowBulkDeleteDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+
   const handleAdd = () => {
     setEditProduct(null);
     setShowModal(true);
@@ -73,16 +87,67 @@ const Products: React.FC = () => {
     setDeleteTarget(product);
   };
 
+  const handleSelectAll = () => {
+    if (data?.data) {
+      if (selectedProducts.size === data.data.length) {
+        // If all are selected, deselect all
+        setSelectedProducts(new Set());
+      } else {
+        // Select all
+        setSelectedProducts(new Set(data.data.map(p => p._id)));
+      }
+    }
+  };
+
+  const handleSelectProduct = (productId: string) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId);
+    } else {
+      newSelected.add(productId);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const handleBulkDelete = () => {
+    setShowBulkDeleteDialog(true);
+  };
+
   return (
     <div className="p-8 min-h-screen bg-[#1a2236] text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">📦 {t('navigation.products')}</h1>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
-          onClick={handleAdd}
-        >
-          <Icon icon="mdi:plus" className="inline-block mr-2" /> ➕ {t('products.addProduct')}
-        </button>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">📦 {t('navigation.products')}</h1>
+          {selectedProducts.size > 0 && (
+            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {selectedProducts.size} selected
+            </span>
+          )}
+        </div>
+        <div className="flex gap-3">
+          {selectedProducts.size > 0 && (
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteMutation.isPending}
+            >
+              <Icon icon="mdi:delete-sweep" className="inline-block mr-2" /> 
+              🗑️ Delete Selected ({selectedProducts.size})
+            </button>
+          )}
+          <button
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
+            onClick={() => setShowImportModal(true)}
+          >
+            <Icon icon="mdi:file-excel" className="inline-block mr-2" /> 📊 Import from Excel
+          </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
+            onClick={handleAdd}
+          >
+            <Icon icon="mdi:plus" className="inline-block mr-2" /> ➕ {t('products.addProduct')}
+          </button>
+        </div>
       </div>
       <div className="mb-4 flex items-center">
         <input
@@ -97,6 +162,14 @@ const Products: React.FC = () => {
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-[#2e3650]">
+              <th className="py-3 px-4">
+                <input
+                  type="checkbox"
+                  checked={data?.data && selectedProducts.size === data.data.length}
+                  onChange={handleSelectAll}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+              </th>
               <th className="py-3 px-4">{t('products.image')}</th>
               <th className="py-3 px-4">{t('products.name')}</th>
               <th className="py-3 px-4">{t('products.category')}</th>
@@ -107,11 +180,11 @@ const Products: React.FC = () => {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={6} className="text-center py-8">⏳ Loading...</td></tr>
+              <tr><td colSpan={7} className="text-center py-8">⏳ Loading...</td></tr>
             ) : isError ? (
-              <tr><td colSpan={6} className="text-center py-8 text-red-400">❌ {t('products.failedToLoadProducts')}</td></tr>
+              <tr><td colSpan={7} className="text-center py-8 text-red-400">❌ {t('products.failedToLoadProducts')}</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={6} className="text-center py-16 text-gray-400">
+              <tr><td colSpan={7} className="text-center py-16 text-gray-400">
                 <div className="flex flex-col items-center">
                   <Icon icon="mdi:package-variant" className="text-5xl mb-4" />
                   <div className="text-lg font-medium">📭 {t('products.noProductsFound')}</div>
@@ -120,7 +193,20 @@ const Products: React.FC = () => {
               </td></tr>
             ) : (
               data?.data?.map((product: Product) => (
-                <tr key={product._id} className="border-b border-[#2e3650] hover:bg-[#202840] transition">
+                <tr 
+                  key={product._id} 
+                  className={`border-b border-[#2e3650] hover:bg-[#202840] transition ${
+                    selectedProducts.has(product._id) ? 'bg-blue-900 bg-opacity-30' : ''
+                  }`}
+                >
+                  <td className="py-3 px-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.has(product._id)}
+                      onChange={() => handleSelectProduct(product._id)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                  </td>
                   <td className="py-3 px-4">
                     {product.images && product.images.length > 0 ? (
                       <img src={product.images[0]} alt="Product" className="w-12 h-12 object-cover rounded" />
@@ -215,6 +301,25 @@ const Products: React.FC = () => {
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showBulkDeleteDialog}
+        title={`🗑️ Bulk Delete Products`}
+        description={`⚠️ Are you sure you want to delete ${selectedProducts.size} selected products? This action cannot be undone.`}
+        loading={bulkDeleteMutation.isPending}
+        onCancel={() => setShowBulkDeleteDialog(false)}
+        onConfirm={() => bulkDeleteMutation.mutate(Array.from(selectedProducts))}
+      />
+
+      {/* Excel Import Modal */}
+      <ExcelImportModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['products'] });
+        }}
       />
     </div>
   );
