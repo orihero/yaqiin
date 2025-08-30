@@ -1,7 +1,25 @@
 import express from 'express';
 import openRouterImageService, { OpenRouterImageService } from '../services/openRouterImageService';
-import imageScraperService from '../services/imageScraperService';
 import { telegramAuthMiddleware } from '../utils/authMiddleware';
+
+// Mock interface for image scraper service since it doesn't exist
+interface ImageScraperService {
+  getProductImages(name: string, maxImages: number, enableGeneration: boolean): Promise<Array<{
+    url: string;
+    alt: string;
+    title: string;
+    source?: string;
+  }>>;
+}
+
+// Mock implementation
+const imageScraperService: ImageScraperService = {
+  async getProductImages(name: string, maxImages: number, enableGeneration: boolean) {
+    // Mock implementation - returns empty array
+    console.log(`Mock: Attempting to scrape images for "${name}" (max: ${maxImages}, generation: ${enableGeneration})`);
+    return [];
+  }
+};
 
 const router = express.Router();
 
@@ -31,14 +49,19 @@ router.post('/create-with-ai-images', telegramAuthMiddleware, async (req, res) =
     console.log(`🛍️ Creating product with AI images: ${name}`);
 
     // Step 1: Try to get images from scraping first
-    let images: any[] = [];
+    let images: Array<{
+      url: string;
+      alt: string;
+      title: string;
+      source: string;
+    }> = [];
     
     try {
       console.log('🔍 Attempting to scrape existing product images...');
       const scrapedImages = await imageScraperService.getProductImages(name, maxImages, false); // Disable generation initially
       
       if (scrapedImages.length > 0) {
-        images = scrapedImages.map(img => ({
+        images = scrapedImages.map((img: { url: string; alt: string; title: string; source?: string }) => ({
           url: img.url,
           alt: img.alt,
           title: img.title,
@@ -97,11 +120,11 @@ router.post('/create-with-ai-images', telegramAuthMiddleware, async (req, res) =
       try {
         console.log('🔄 Trying scraping with AI generation fallback...');
         const fallbackImages = await imageScraperService.getProductImages(name, maxImages, true);
-        images = fallbackImages.map(img => ({
+        images = fallbackImages.map((img: { url: string; alt: string; title: string; source?: string }) => ({
           url: img.url,
           alt: img.alt,
           title: img.title,
-          source: img.source
+          source: img.source || 'fallback'
         }));
         console.log(`🔄 Got ${images.length} images from fallback method`);
       } catch (fallbackError) {
