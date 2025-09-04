@@ -1,67 +1,54 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { assignCourierToShop, getShopAvailableCouriers, getShopCouriers, unassignCourierFromShop } from '../../../services/shopService';
-import { getUsers } from '../../../services/userService';
 
 interface ShopCouriersTabProps {
   shopId: string;
+  assignedCouriersData: any;
+  assignedCouriersLoading: boolean;
+  assignedCouriersError: Error | null;
+  availableCouriersData: any;
+  availableCouriersLoading: boolean;
+  availableCouriersError: Error | null;
+  courierSearch: string;
+  setCourierSearch: (search: string) => void;
 }
 
-export default function ShopCouriersTab({ shopId }: ShopCouriersTabProps) {
-  const [courierSearch, setCourierSearch] = useState('');
+export default function ShopCouriersTab({
+  shopId,
+  assignedCouriersData,
+  assignedCouriersLoading,
+  assignedCouriersError,
+  availableCouriersData,
+  availableCouriersLoading,
+  availableCouriersError,
+  courierSearch,
+  setCourierSearch
+}: ShopCouriersTabProps) {
+  const [addCourierModalOpen, setAddCourierModalOpen] = useState(false);
+  const [modalCourierSearch, setModalCourierSearch] = useState('');
   const [assigningCourierId, setAssigningCourierId] = useState<string | null>(null);
   const [unassigningCourierId, setUnassigningCourierId] = useState<string | null>(null);
   const [assignError, setAssignError] = useState<string | null>(null);
   const [unassignError, setUnassignError] = useState<string | null>(null);
-  const [addCourierModalOpen, setAddCourierModalOpen] = useState(false);
-  const [modalCourierSearch, setModalCourierSearch] = useState('');
 
   const queryClient = useQueryClient();
-
-  // Fetch assigned couriers
-  const { data: assignedCouriersData, isLoading: assignedCouriersLoading, error: assignedCouriersError, refetch: refetchAssignedCouriers } = useQuery({
-    queryKey: ['shop-assigned-couriers', shopId],
-    queryFn: () => getShopCouriers(shopId),
-    enabled: !!shopId,
-  });
-
-  // Fetch available couriers (not assigned to this shop)
-  const { data: availableCouriersData, isLoading: availableCouriersLoading, error: availableCouriersError, refetch: refetchAvailableCouriers } = useQuery({
-    queryKey: ['shop-available-couriers', shopId, courierSearch],
-    queryFn: async () => {
-      const res = await getShopAvailableCouriers(shopId);
-      // Filter by search
-      const search = courierSearch.trim().toLowerCase();
-      return {
-        data: (res.data || []).filter((user: any) => {
-          if (!search) return true;
-          return (
-            (user.firstName && user.firstName.toLowerCase().includes(search)) ||
-            (user.lastName && user.lastName.toLowerCase().includes(search)) ||
-            (user.username && user.username.toLowerCase().includes(search)) ||
-            (user.phoneNumber && user.phoneNumber.includes(search))
-          );
-        })
-      };
-    },
-    enabled: !!shopId,
-  });
 
   // Assign courier mutation
   const assignCourierMutation = useMutation({
     mutationFn: async (courierId: string) => {
       setAssigningCourierId(courierId);
       setAssignError(null);
-      await assignCourierToShop(shopId, courierId);
-    },
-    onSuccess: () => {
-      setAssigningCourierId(null);
-      refetchAssignedCouriers();
-      refetchAvailableCouriers();
-    },
-    onError: (err: any) => {
-      setAssignError(err?.message || 'Failed to assign courier');
-      setAssigningCourierId(null);
+      try {
+        await assignCourierToShop(shopId, courierId);
+        queryClient.invalidateQueries({ queryKey: ['shop-assigned-couriers', shopId] });
+        queryClient.invalidateQueries({ queryKey: ['shop-available-couriers', shopId] });
+      } catch (err: any) {
+        setAssignError(err?.message || 'Failed to assign courier');
+        throw err;
+      } finally {
+        setAssigningCourierId(null);
+      }
     },
   });
 
@@ -70,16 +57,16 @@ export default function ShopCouriersTab({ shopId }: ShopCouriersTabProps) {
     mutationFn: async (courierId: string) => {
       setUnassigningCourierId(courierId);
       setUnassignError(null);
-      await unassignCourierFromShop(shopId, courierId);
-    },
-    onSuccess: () => {
-      setUnassigningCourierId(null);
-      refetchAssignedCouriers();
-      refetchAvailableCouriers();
-    },
-    onError: (err: any) => {
-      setUnassignError(err?.message || 'Failed to unassign courier');
-      setUnassigningCourierId(null);
+      try {
+        await unassignCourierFromShop(shopId, courierId);
+        queryClient.invalidateQueries({ queryKey: ['shop-assigned-couriers', shopId] });
+        queryClient.invalidateQueries({ queryKey: ['shop-available-couriers', shopId] });
+      } catch (err: any) {
+        setUnassignError(err?.message || 'Failed to unassign courier');
+        throw err;
+      } finally {
+        setUnassigningCourierId(null);
+      }
     },
   });
 
@@ -196,13 +183,11 @@ export default function ShopCouriersTab({ shopId }: ShopCouriersTabProps) {
             {assignError && <div className="text-red-400 mb-2">{assignError} ❗</div>}
             
             <div className="flex justify-end gap-2 mt-6">
-              <button className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={() => setAddCourierModalOpen(false)}>
-                Close
-              </button>
+              <button className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={() => setAddCourierModalOpen(false)}>Close</button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-}
+} 
