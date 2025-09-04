@@ -57,6 +57,8 @@ export interface Shop {
   status: 'active' | 'inactive' | 'suspended';
   commission?: number;
   orders_chat_id?: string;
+  photo?: string; // Shop photo URL
+  logo?: string; // Shop logo URL
   createdAt: Date;
   updatedAt: Date;
 } 

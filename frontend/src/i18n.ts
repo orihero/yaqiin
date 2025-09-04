@@ -46,6 +46,29 @@ const resources = {
         recentlySearched: 'Recently Searched',
         apply: 'Apply',
         addToCartFailed: 'Failed to add product to cart',
+        loading: 'Loading...',
+        select: 'Select',
+        cancel: 'Cancel',
+        save: 'Save',
+        edit: 'Edit',
+        delete: 'Delete',
+        remove: 'Remove',
+        add: 'Add',
+        update: 'Update',
+        confirm: 'Confirm',
+        back: 'Back',
+        next: 'Next',
+        previous: 'Previous',
+        close: 'Close',
+        open: 'Open',
+        yes: 'Yes',
+        no: 'No',
+        ok: 'OK',
+        error: 'Error',
+        success: 'Success',
+        warning: 'Warning',
+        info: 'Information',
+        optional: 'Optional'
       },
       productCard: {
         product: 'Product',
@@ -82,7 +105,9 @@ const resources = {
       settings: {
         title: 'Settings',
         language: 'Language',
-        logout: 'Log Out'
+        logout: 'Log Out',
+        confirmLogout: 'Are you sure you want to logout?',
+        accountManagement: 'Account Management'
       },
       search: {
         title: 'Search',
@@ -96,6 +121,52 @@ const resources = {
           coldDrinks: 'Cold drinks',
         }
       },
+      address: {
+        title: 'My Addresses',
+        addNew: 'Add New',
+        noAddresses: 'No addresses found',
+        addFirstAddress: 'Add your first delivery address',
+        addAddress: 'Add Address',
+        addresses: 'addresses',
+        address: 'Address',
+        default: 'Default',
+        setDefault: 'Set as Default',
+        addAddressComingSoon: 'Add address feature coming soon',
+        editAddressComingSoon: 'Edit address feature coming soon',
+        confirmDelete: 'Are you sure you want to delete this address?',
+        deleteSuccess: 'Address deleted successfully',
+        deleteFailed: 'Failed to delete address',
+        setDefaultSuccess: 'Default address updated successfully',
+        setDefaultFailed: 'Failed to set default address',
+        editAddress: 'Edit Address',
+        selectLocation: 'Select Location',
+        getCurrentLocation: 'Get Current Location',
+        gettingLocation: 'Getting location...',
+        clickMapToSelect: 'Click on the map to select location',
+        titlePlaceholder: 'Home, Work, etc.',
+        streetPlaceholder: 'Enter street address',
+        cityPlaceholder: 'Enter city',
+        districtPlaceholder: 'Enter district',
+        notesPlaceholder: 'Additional notes (optional)',
+        fillRequiredFields: 'Please fill in all required fields',
+        locationFound: 'Location found successfully',
+        locationError: 'Failed to get your location',
+        geolocationNotSupported: 'Geolocation is not supported by your browser',
+        saveError: 'Failed to save address',
+        updateSuccess: 'Address updated successfully',
+        addSuccess: 'Address added successfully',
+        saving: 'Saving...',
+        buildingNumber: 'Building Number',
+        entranceNumber: 'Entrance Number',
+        apartmentNumber: 'Apartment Number',
+        building: 'Building',
+        entrance: 'Entrance',
+        apartment: 'Apartment',
+        buildingNumberPlaceholder: 'Enter building number',
+        entranceNumberPlaceholder: 'Enter entrance number',
+        apartmentNumberPlaceholder: 'Enter apartment number',
+        setAsDefault: 'Set as Default'
+      },
       productDetails: {
         loading: 'Loading...',
         notFound: 'Product not found.',
@@ -108,7 +179,13 @@ const resources = {
       },
       myShop: {
         title: 'My Shop',
-        placeholder: 'This is a placeholder for the My Shop page.'
+        placeholder: 'This is a placeholder for the My Shop page.',
+        noShopAssigned: 'No shop assigned',
+        shopNotFound: 'Shop not found',
+        loadError: 'Failed to load shop',
+        viewShop: 'View shop details',
+        shopLogo: 'Shop logo',
+        shopPhoto: 'Shop photo'
       },
       account: {
         title: 'Account',
@@ -172,6 +249,19 @@ const resources = {
         orderSummary: 'Order Summary',
         moreItems: '+{{count}} more'
       },
+      shop: {
+        status: 'Status',
+        statuses: {
+          active: 'Active',
+          inactive: 'Inactive',
+          suspended: 'Suspended'
+        },
+        contact: 'Contact',
+        address: 'Address',
+        rating: 'Rating',
+        reviews: 'reviews',
+        createdAt: 'Created'
+      },
       loading: {
         appName: 'Yaqiin'
       }
@@ -221,6 +311,29 @@ const resources = {
         recentlySearched: 'Недавние запросы',
         apply: 'Применить',
         addToCartFailed: 'Не удалось добавить товар в корзину',
+        loading: 'Загрузка...',
+        select: 'Выбрать',
+        cancel: 'Отмена',
+        save: 'Сохранить',
+        edit: 'Редактировать',
+        delete: 'Удалить',
+        remove: 'Удалить',
+        add: 'Добавить',
+        update: 'Обновить',
+        confirm: 'Подтвердить',
+        back: 'Назад',
+        next: 'Далее',
+        previous: 'Предыдущий',
+        close: 'Закрыть',
+        open: 'Открыть',
+        yes: 'Да',
+        no: 'Нет',
+        ok: 'ОК',
+        error: 'Ошибка',
+        success: 'Успешно',
+        warning: 'Предупреждение',
+        info: 'Информация',
+        optional: 'Необязательно'
       },
       productCard: {
         product: 'Продукт',
@@ -257,7 +370,9 @@ const resources = {
       settings: {
         title: 'Настройки',
         language: 'Язык',
-        logout: 'Выйти'
+        logout: 'Выйти',
+        confirmLogout: 'Вы уверены, что хотите выйти?',
+        accountManagement: 'Управление аккаунтом'
       },
       search: {
         title: 'Поиск',
@@ -271,6 +386,52 @@ const resources = {
           coldDrinks: 'Холодные напитки',
         }
       },
+      address: {
+        title: 'Мои адреса',
+        addNew: 'Добавить новый',
+        noAddresses: 'Адреса не найдены',
+        addFirstAddress: 'Добавьте ваш первый адрес доставки',
+        addAddress: 'Добавить адрес',
+        addresses: 'адресов',
+        address: 'Адрес',
+        default: 'По умолчанию',
+        setDefault: 'Установить по умолчанию',
+        addAddressComingSoon: 'Функция добавления адреса скоро появится',
+        editAddressComingSoon: 'Функция редактирования адреса скоро появится',
+        confirmDelete: 'Вы уверены, что хотите удалить этот адрес?',
+        deleteSuccess: 'Адрес успешно удален',
+        deleteFailed: 'Не удалось удалить адрес',
+        setDefaultSuccess: 'Адрес по умолчанию успешно обновлен',
+        setDefaultFailed: 'Не удалось установить адрес по умолчанию',
+        editAddress: 'Редактировать адрес',
+        selectLocation: 'Выбрать местоположение',
+        getCurrentLocation: 'Получить текущее местоположение',
+        gettingLocation: 'Получение местоположения...',
+        clickMapToSelect: 'Нажмите на карту, чтобы выбрать местоположение',
+        titlePlaceholder: 'Дом, Работа и т.д.',
+        streetPlaceholder: 'Введите адрес улицы',
+        cityPlaceholder: 'Введите город',
+        districtPlaceholder: 'Введите район',
+        notesPlaceholder: 'Дополнительные заметки (необязательно)',
+        fillRequiredFields: 'Пожалуйста, заполните все обязательные поля',
+        locationFound: 'Местоположение найдено успешно',
+        locationError: 'Не удалось получить ваше местоположение',
+        geolocationNotSupported: 'Геолокация не поддерживается вашим браузером',
+        saveError: 'Не удалось сохранить адрес',
+        updateSuccess: 'Адрес успешно обновлен',
+        addSuccess: 'Адрес успешно добавлен',
+        saving: 'Сохранение...',
+        buildingNumber: 'Номер здания',
+        entranceNumber: 'Номер подъезда',
+        apartmentNumber: 'Номер квартиры',
+        building: 'Здание',
+        entrance: 'Подъезд',
+        apartment: 'Квартира',
+        buildingNumberPlaceholder: 'Введите номер здания',
+        entranceNumberPlaceholder: 'Введите номер подъезда',
+        apartmentNumberPlaceholder: 'Введите номер квартиры',
+        setAsDefault: 'Установить по умолчанию'
+      },
       productDetails: {
         loading: 'Загрузка...',
         notFound: 'Товар не найден.',
@@ -283,7 +444,13 @@ const resources = {
       },
       myShop: {
         title: 'Мой магазин',
-        placeholder: 'Это заглушка для страницы моего магазина.'
+        placeholder: 'Это заглушка для страницы моего магазина.',
+        noShopAssigned: 'Магазин не назначен',
+        shopNotFound: 'Магазин не найден',
+        loadError: 'Не удалось загрузить магазин',
+        viewShop: 'Просмотр деталей магазина',
+        shopLogo: 'Логотип магазина',
+        shopPhoto: 'Фото магазина'
       },
       account: {
         title: 'Аккаунт',
@@ -346,6 +513,19 @@ const resources = {
         items: 'товаров',
         orderSummary: 'Сводка заказа',
         moreItems: '+{{count}} еще'
+      },
+      shop: {
+        status: 'Статус',
+        statuses: {
+          active: 'Активный',
+          inactive: 'Неактивный',
+          suspended: 'Приостановлен'
+        },
+        contact: 'Контакты',
+        address: 'Адрес',
+        rating: 'Рейтинг',
+        reviews: 'отзывов',
+        createdAt: 'Создан'
       },
       loading: {
         appName: 'Yaqiin'
@@ -432,7 +612,9 @@ const resources = {
       settings: {
         title: 'Sozlamalar',
         language: 'Til',
-        logout: 'Chiqish'
+        logout: 'Chiqish',
+        confirmLogout: 'Chiqishni xohlaysizmi?',
+        accountManagement: 'Hisob boshqaruvi'
       },
       search: {
         title: 'Qidirish',
@@ -445,6 +627,52 @@ const resources = {
           fastFood: 'Tezkor taomlar',
           coldDrinks: 'Sovuq ichimliklar',
         }
+      },
+      address: {
+        title: 'Mening manzillarim',
+        addNew: 'Yangi qo\'shish',
+        noAddresses: 'Manzillar topilmadi',
+        addFirstAddress: 'Birinchi yetkazib berish manzilingizni qo\'shing',
+        addAddress: 'Manzil qo\'shish',
+        addresses: 'manzil',
+        address: 'Manzil',
+        default: 'Standart',
+        setDefault: 'Standart sifatida o\'rnatish',
+        addAddressComingSoon: 'Manzil qo\'shish funksiyasi tez orada paydo bo\'ladi',
+        editAddressComingSoon: 'Manzilni tahrirlash funksiyasi tez orada paydo bo\'ladi',
+        confirmDelete: 'Bu manzilni o\'chirishni xohlaysizmi?',
+        deleteSuccess: 'Manzil muvaffaqiyatli o\'chirildi',
+        deleteFailed: 'Manzilni o\'chirib bo\'lmadi',
+        setDefaultSuccess: 'Standart manzil muvaffaqiyatli yangilandi',
+        setDefaultFailed: 'Standart manzilni o\'rnatib bo\'lmadi',
+        editAddress: 'Manzilni tahrirlash',
+        selectLocation: 'Manzilni tanlash',
+        getCurrentLocation: 'Joriy manzilni olish',
+        gettingLocation: 'Manzil olinmoqda...',
+        clickMapToSelect: 'Manzilni tanlash uchun xaritaga bosing',
+        titlePlaceholder: 'Uy, Ish va boshqalar',
+        streetPlaceholder: 'Ko\'cha manzilini kiriting',
+        cityPlaceholder: 'Shaharni kiriting',
+        districtPlaceholder: 'Tumanni kiriting',
+        notesPlaceholder: 'Qo\'shimcha izohlar (ixtiyoriy)',
+        fillRequiredFields: 'Iltimos, barcha majburiy maydonlarni to\'ldiring',
+        locationFound: 'Manzil muvaffaqiyatli topildi',
+        locationError: 'Manzilingizni olishda xatolik',
+        geolocationNotSupported: 'Geolokatsiya brauzeringiz tomonidan qo\'llab-quvvatlanmaydi',
+        saveError: 'Manzilni saqlashda xatolik',
+        updateSuccess: 'Manzil muvaffaqiyatli yangilandi',
+        addSuccess: 'Manzil muvaffaqiyatli qo\'shildi',
+        saving: 'Saqlanmoqda...',
+        buildingNumber: 'Bino raqami',
+        entranceNumber: 'Kirish raqami',
+        apartmentNumber: 'Kvartira raqami',
+        building: 'Bino',
+        entrance: 'Kirish',
+        apartment: 'Kvartira',
+        buildingNumberPlaceholder: 'Bino raqamini kiriting',
+        entranceNumberPlaceholder: 'Kirish raqamini kiriting',
+        apartmentNumberPlaceholder: 'Kvartira raqamini kiriting',
+        setAsDefault: 'Standart sifatida o\'rnatish'
       },
       productDetails: {
         loading: 'Yuklanmoqda...',
@@ -521,6 +749,19 @@ const resources = {
         items: 'mahsulotlar',
         orderSummary: 'Buyurtma xulosasi',
         moreItems: '+{{count}} ta ko\'proq'
+      },
+      shop: {
+        status: 'Holat',
+        statuses: {
+          active: 'Faol',
+          inactive: 'Faol emas',
+          suspended: 'To\'xtatilgan'
+        },
+        contact: 'Aloqa',
+        address: 'Manzil',
+        rating: 'Reyting',
+        reviews: 'tafsilot',
+        createdAt: 'Yaratilgan'
       },
       loading: {
         appName: 'Yaqiin'

@@ -50,6 +50,9 @@ export default async function shopSeed() {
         contactInfo: defaultContactInfo(i),
         operatingHours: defaultOperatingHours,
         status: 'active',
+        // Sample photo and logo URLs for testing
+        photo: `https://picsum.photos/400/300?random=${i + 1}`,
+        logo: `https://picsum.photos/200/200?random=${i + 10}`,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

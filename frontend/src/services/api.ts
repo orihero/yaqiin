@@ -3,10 +3,29 @@ import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } 
 import { useUserStore } from '../store/userStore';
 import type { Shop } from '@yaqiin/shared/types/shop';
 
-const BASE_API_URL = import.meta.env.VITE_API_URL || '/api';
+// Get the API URL from environment or use a default
+const getApiUrl = () => {
+  // If we're in development, use the local backend
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3000/api';
+  }
+  
+  // If we have a specific API URL from environment, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Default to relative path for production
+  return '/api';
+};
+
+const BASE_API_URL = getApiUrl();
+
+console.log('API Base URL:', BASE_API_URL);
 
 const api = axios.create({
   baseURL: BASE_API_URL,
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor
@@ -29,10 +48,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: any) => {
+    console.error('API Error:', error);
+    
     if (error.response?.status === 401) {
       // Unauthorized, redirect to login or show message
       // window.location.href = '/login'; // Uncomment if you want to force logout
     }
+    
+    // Handle network errors (like mixed content)
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - possible mixed content issue');
+    }
+    
     return Promise.reject(error);
   }
 );

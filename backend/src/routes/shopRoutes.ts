@@ -3,8 +3,23 @@ import Shop from '../models/Shop';
 import { parseQuery } from '../utils/queryHelper';
 import mongoose from 'mongoose';
 import Group from '../models/Group';
+import multer from 'multer';
+import path from 'path';
 
 const router = Router();
+
+// Multer setup for shop images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../uploads'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'shop-' + uniqueSuffix + '-' + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
 
 // List all shops with pagination, filtering, and search
 router.get('/', async (req, res, next) => {
@@ -39,9 +54,78 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'logo', maxCount: 1 }
+]), async (req, res, next) => {
   try {
-    const shop = new Shop(req.body);
+    const body = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    
+    console.log('Shop create request body:', body);
+    console.log('Shop create files:', files);
+    
+    // Parse JSON strings from FormData
+    if (typeof body.contactInfo === 'string') {
+      try {
+        body.contactInfo = JSON.parse(body.contactInfo);
+        console.log('Parsed contactInfo:', body.contactInfo);
+      } catch (e) {
+        console.log('Failed to parse contactInfo:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.address === 'string') {
+      try {
+        body.address = JSON.parse(body.address);
+        console.log('Parsed address:', body.address);
+      } catch (e) {
+        console.log('Failed to parse address:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.operatingHours === 'string') {
+      try {
+        body.operatingHours = JSON.parse(body.operatingHours);
+        console.log('Parsed operatingHours:', body.operatingHours);
+      } catch (e) {
+        console.log('Failed to parse operatingHours:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.deliveryZones === 'string') {
+      try {
+        body.deliveryZones = JSON.parse(body.deliveryZones);
+        console.log('Parsed deliveryZones:', body.deliveryZones);
+      } catch (e) {
+        console.log('Failed to parse deliveryZones:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    
+    // Handle uploaded files
+    const baseUrl = req.protocol + '://' + req.get('host');
+    console.log('Base URL for file uploads (POST):', baseUrl);
+    if (files && files.photo && files.photo.length > 0) {
+      body.photo = baseUrl + '/uploads/' + files.photo[0].filename;
+      console.log('Photo file uploaded (POST):', files.photo[0].filename);
+      console.log('Photo URL set to (POST):', body.photo);
+    }
+    if (files && files.logo && files.logo.length > 0) {
+      body.logo = baseUrl + '/uploads/' + files.logo[0].filename;
+      console.log('Logo file uploaded (POST):', files.logo[0].filename);
+      console.log('Logo URL set to (POST):', body.logo);
+    }
+    
+    // Handle external URLs if provided
+    if (body.photoUrl && !body.photo) {
+      body.photo = body.photoUrl;
+    }
+    if (body.logoUrl && !body.logo) {
+      body.logo = body.logoUrl;
+    }
+    
+    const shop = new Shop(body);
     await shop.save();
     res.status(201).json({ success: true, data: shop, message: 'Shop created' });
   } catch (err) {
@@ -49,12 +133,103 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'logo', maxCount: 1 }
+]), async (req, res, next) => {
   try {
-    const shop = await Shop.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const body = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    
+    console.log('Shop update request body:', body);
+    console.log('Shop update files:', files);
+    console.log('Fields being updated:', Object.keys(body));
+    console.log('Request headers:', req.headers);
+    console.log('Content-Type:', req.get('Content-Type'));
+    
+    // Parse JSON strings from FormData
+    if (typeof body.contactInfo === 'string') {
+      try {
+        body.contactInfo = JSON.parse(body.contactInfo);
+        console.log('Parsed contactInfo:', body.contactInfo);
+      } catch (e) {
+        console.log('Failed to parse contactInfo:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.address === 'string') {
+      try {
+        body.address = JSON.parse(body.address);
+        console.log('Parsed address:', body.address);
+      } catch (e) {
+        console.log('Failed to parse address:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.operatingHours === 'string') {
+      try {
+        body.operatingHours = JSON.parse(body.operatingHours);
+        console.log('Parsed operatingHours:', body.operatingHours);
+      } catch (e) {
+        console.log('Failed to parse operatingHours:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    if (typeof body.deliveryZones === 'string') {
+      try {
+        body.deliveryZones = JSON.parse(body.deliveryZones);
+        console.log('Parsed deliveryZones:', body.deliveryZones);
+      } catch (e) {
+        console.log('Failed to parse deliveryZones:', e);
+        // If parsing fails, keep as is
+      }
+    }
+    
+    // Handle uploaded files
+    const baseUrl = req.protocol + '://' + req.get('host');
+    console.log('Base URL for file uploads (PUT):', baseUrl);
+    if (files && files.photo && files.photo.length > 0) {
+      body.photo = baseUrl + '/uploads/' + files.photo[0].filename;
+      console.log('Photo file uploaded (PUT):', files.photo[0].filename);
+      console.log('Photo URL set to (PUT):', body.photo);
+    }
+    if (files && files.logo && files.logo.length > 0) {
+      body.logo = baseUrl + '/uploads/' + files.logo[0].filename;
+      console.log('Logo file uploaded (PUT):', files.logo[0].filename);
+      console.log('Logo URL set to (PUT):', body.logo);
+    }
+    
+    // Handle remove flags
+    if (body.removePhoto === 'true' || body.removePhoto === true) {
+      body.photo = null;
+      console.log('Removing photo as requested');
+    }
+    if (body.removeLogo === 'true' || body.removeLogo === true) {
+      body.logo = null;
+      console.log('Removing logo as requested');
+    }
+    
+    // Handle external URLs if provided
+    if (body.photoUrl && !body.photo) {
+      body.photo = body.photoUrl;
+    }
+    if (body.logoUrl && !body.logo) {
+      body.logo = body.logoUrl;
+    }
+    
+    console.log('Final body to update:', JSON.stringify(body, null, 2));
+    
+    const shop = await Shop.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
     if (!shop) return next({ status: 404, message: 'Shop not found' });
+    
+    console.log('Updated shop data:', JSON.stringify(shop, null, 2));
+    console.log('Shop photo field:', shop.photo);
+    console.log('Shop logo field:', shop.logo);
+    
     res.json({ success: true, data: shop, message: 'Shop updated' });
   } catch (err) {
+    console.error('Shop update error:', err);
+    console.error('Error details:', JSON.stringify(err, null, 2));
     next({ status: 400, message: 'Failed to update shop', details: err });
   }
 });

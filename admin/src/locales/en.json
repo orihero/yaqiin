@@ -1,8 +1,9 @@
 {
       "common": {
       "loading": "Loading...",
-      "save": "Save",
-      "cancel": "Cancel",
+          "save": "Save",
+    "cancel": "Cancel",
+    "remove": "Remove",
       "delete": "Delete",
       "edit": "Edit",
       "add": "Add",
@@ -97,6 +98,8 @@
       "noOptionsFound": "No options found",
       "thisWeek": "This Week",
       "lastWeek": "Last Week",
+      "navigate": "Navigate",
+      "clickToPreview": "Click to preview",
       "last7Days": "Last 7 days",
       "notAvailable": "N/A",
       "paypal": "PayPal",
@@ -207,6 +210,7 @@
     "shopEmail": "Shop Email",
     "shopDescription": "Shop Description",
     "shopLogo": "Shop Logo",
+    "shopPhoto": "Shop Photo",
     "shopBanner": "Shop Banner",
     "shopLocation": "Shop Location",
     "latitude": "Latitude",

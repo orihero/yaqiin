@@ -9,6 +9,7 @@ import { getAllCategories } from '../../services/categoryService';
 import { Product } from '@yaqiin/shared/types/product';
 import { Icon } from '@iconify/react';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import ImagePreviewModal from '../../components/ImagePreviewModal';
 import { Category } from '@yaqiin/shared/types/category';
 import { formatPriceWithCurrency, formatNumber } from '../../utils/inputMasks';
 
@@ -23,6 +24,7 @@ const Products: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [imagePreview, setImagePreview] = useState<{ images: string[]; initialIndex: number } | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery<ProductListResponse>({
@@ -107,6 +109,15 @@ const Products: React.FC = () => {
       newSelected.add(productId);
     }
     setSelectedProducts(newSelected);
+  };
+
+  const handleImageClick = (product: Product, imageIndex: number = 0) => {
+    if (product.images && product.images.length > 0) {
+      setImagePreview({
+        images: product.images,
+        initialIndex: imageIndex
+      });
+    }
   };
 
   const handleBulkDelete = () => {
@@ -209,7 +220,13 @@ const Products: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">
                     {product.images && product.images.length > 0 ? (
-                      <img src={product.images[0]} alt="Product" className="w-12 h-12 object-cover rounded" />
+                      <img 
+                        src={product.images[0]} 
+                        alt="Product" 
+                        className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                        onClick={() => handleImageClick(product, 0)}
+                        title={t('common.clickToPreview', 'Click to preview')}
+                      />
                     ) : (
                       <span className="text-gray-500 flex items-center justify-center"><Icon icon="mdi:image-off-outline" width={32} height={32} /></span>
                     )}
@@ -320,6 +337,14 @@ const Products: React.FC = () => {
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['products'] });
         }}
+      />
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        open={!!imagePreview}
+        images={imagePreview?.images || []}
+        initialIndex={imagePreview?.initialIndex || 0}
+        onClose={() => setImagePreview(null)}
       />
     </div>
   );

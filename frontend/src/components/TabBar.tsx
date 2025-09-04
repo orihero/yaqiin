@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useCartStore } from '../store/cartStore';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import SafeArea from './SafeArea';
 
 const TabBar: React.FC<{ current: string }> = ({ current }) => {
     const cart = useCartStore(state => state.cart);
@@ -17,7 +18,10 @@ const TabBar: React.FC<{ current: string }> = ({ current }) => {
         { key: "Profile", label: t('tabBar.profile'), icon: "mdi:account", path: '/profile' },
     ];
     return (
-        <div className="fixed bottom-0 left-0 w-full max-w-md mx-auto shadow-lg flex justify-between items-center px-2 py-3 z-40 bg-[#232c43]">
+        <SafeArea 
+            className="fixed bottom-0 left-0 w-full max-w-md mx-auto shadow-lg flex justify-between items-center px-2 py-3 z-40 bg-[#232c43]"
+            edges={['bottom']}
+        >
             {tabs.map((tab) => (
                 <button
                     key={tab.key}
@@ -58,7 +62,7 @@ const TabBar: React.FC<{ current: string }> = ({ current }) => {
                     <span className="text-xs">{tab.label}</span>
                 </button>
             ))}
-        </div>
+        </SafeArea>
     );
 };
 

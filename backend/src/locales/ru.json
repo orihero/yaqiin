@@ -41,5 +41,6 @@
   "totalLabel": "Итого",
   "nextStepLabel": "Следующий шаг",
   "pleaseReviewOrder": "Пожалуйста, проверьте заказ.",
-  "acceptOrRejectOrder": "Примите или отклоните заказ."
+  "acceptOrRejectOrder": "Примите или отклоните заказ.",
+  "deliveryLocationLabel": "Место доставки"
 } 

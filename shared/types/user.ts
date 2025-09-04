@@ -1,10 +1,9 @@
 export interface Address {
   _id: string;
-  title: string;
-  street: string;
-  city: string;
-  district: string;
-  postalCode: string;
+  title?: string;
+  buildingNumber: string;
+  entranceNumber?: string;
+  apartmentNumber?: string;
   coordinates: {
     lat: number;
     lng: number;

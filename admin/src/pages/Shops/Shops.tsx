@@ -8,6 +8,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { Shop } from '@yaqiin/shared/types/shop';
 import { User } from '@yaqiin/shared/types/user';
 import { useNavigate } from 'react-router-dom';
+import { getOnlyChangedFields } from '../../utils/changeTracker';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -115,6 +116,7 @@ export default function ShopsPage() {
           <thead>
             <tr className="border-b border-[#2e3650]">
               <th className="py-3 px-4">#</th>
+              <th className="py-3 px-4">{t('shops.shopLogo', 'Logo')}</th>
               <th className="py-3 px-4">{t('common.name')}</th>
               <th className="py-3 px-4">{t('shops.owner')}</th>
               <th className="py-3 px-4">{t('common.phone')}</th>
@@ -125,11 +127,11 @@ export default function ShopsPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="text-center py-8">{t('common.loading')}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8">{t('common.loading')}</td></tr>
             ) : error ? (
-              <tr><td colSpan={7} className="text-center py-8 text-red-400">{String(error.message)}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-red-400">{String(error.message)}</td></tr>
             ) : !data?.data?.length ? (
-              <tr><td colSpan={7} className="text-center py-8">{t('shops.noShopsFound', 'No shops found.')}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8">{t('shops.noShopsFound', 'No shops found.')}</td></tr>
             ) : (
               data.data.map((shop: Shop, idx: number) => (
                 <tr
@@ -139,6 +141,19 @@ export default function ShopsPage() {
                   title={t('shops.viewShopDetails', 'View shop details')}
                 >
                   <td className="py-3 px-4">{(page - 1) * limit + idx + 1}</td>
+                  <td className="py-3 px-4">
+                    {shop.logo ? (
+                      <img 
+                        src={shop.logo} 
+                        alt={`${shop.name} logo`} 
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-600 rounded flex items-center justify-center text-xs text-gray-400">
+                        {shop.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 px-4 font-semibold">{shop.name}</td>
                   <td className="py-3 px-4">{
                     userMap[shop.ownerId]
@@ -218,7 +233,15 @@ export default function ShopsPage() {
         details={updateShopMutation.isError ? (updateShopMutation.error as any)?.details : null}
         onClose={() => setEditShop(null)}
         onSubmit={(values) => {
-          if (editShop) updateShopMutation.mutate({ ...editShop, ...values });
+          if (editShop) {
+            // Only send the changed fields plus the _id
+            const changedFields = getOnlyChangedFields(editShop, values);
+            const updateData = { ...changedFields, _id: editShop._id };
+            console.log('Shop edit - Original:', editShop);
+            console.log('Shop edit - Changes:', changedFields);
+            console.log('Shop edit - Sending:', updateData);
+            updateShopMutation.mutate(updateData);
+          }
         }}
       />
       {/* Delete Confirmation Dialog */}

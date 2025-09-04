@@ -7,6 +7,9 @@ export interface IAddress extends Document {
   city: string;
   district: string;
   postalCode: string;
+  building?: string;
+  entrance?: string;
+  apartment?: string;
   coordinates: {
     lat: number;
     lng: number;
@@ -20,6 +23,9 @@ const AddressSchema = new Schema<IAddress>({
   city: { type: String }, // not required
   district: { type: String }, // not required
   postalCode: { type: String },
+  building: { type: String },
+  entrance: { type: String },
+  apartment: { type: String },
   coordinates: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },

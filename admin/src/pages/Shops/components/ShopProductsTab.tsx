@@ -7,6 +7,7 @@ import SearchableSelect from '../../../components/SearchableSelect';
 import { getUnitOptions } from '../../../utils/units';
 import { formatPriceWithCurrency, formatNumber } from '../../../utils/inputMasks';
 import ShopProductFormModal from './ShopProductFormModal';
+import ImagePreviewModal from '../../../components/ImagePreviewModal';
 
 interface ShopProductsTabProps {
   shopId: string;
@@ -49,6 +50,7 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
   // Edit modal state
   const [editShopProduct, setEditShopProduct] = useState<ShopProductDisplay | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<{ images: string[]; initialIndex: number } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -158,6 +160,15 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
     setEditModalOpen(true);
   };
 
+  const handleImageClick = (shopProduct: ShopProductDisplay, imageIndex: number = 0) => {
+    if (shopProduct.product?.images && shopProduct.product.images.length > 0) {
+      setImagePreview({
+        images: shopProduct.product.images,
+        initialIndex: imageIndex
+      });
+    }
+  };
+
   // Helper function to get display text from ProductNameDesc
   const getDisplayText = (nameDesc: any, fallback = 'N/A') => {
     if (!nameDesc) return fallback;
@@ -232,7 +243,9 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
                         <img
                           src={shopProduct.product.images[0]}
                           alt={getDisplayText(shopProduct.product?.name)}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => handleImageClick(shopProduct, 0)}
+                          title="Click to preview"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gray-600 rounded flex items-center justify-center">
@@ -575,6 +588,14 @@ export default function ShopProductsTab({ shopId }: ShopProductsTabProps) {
             });
           }
         }}
+      />
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        open={!!imagePreview}
+        images={imagePreview?.images || []}
+        initialIndex={imagePreview?.initialIndex || 0}
+        onClose={() => setImagePreview(null)}
       />
     </div>
   );

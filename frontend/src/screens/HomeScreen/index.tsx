@@ -85,8 +85,8 @@ const HomeScreen = () => {
                     ref={listRef}
                     className="bg-white rounded-b-[52px] px-4  pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
                     style={{
-                        minHeight: "calc(100vh - 70px)",
-                        maxHeight: "calc(100vh - 70px)",
+                        minHeight: "calc(100vh - 90px)",
+                        maxHeight: "calc(100vh - 90px)",
                     }}
                 >
                     {/* Header */}

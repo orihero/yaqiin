@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAllCategories } from '../../../services/categoryService';
 import { Category } from '@yaqiin/shared/types/category';
@@ -6,6 +6,7 @@ import { Product } from '@yaqiin/shared/types/product';
 import MaskedInput from '../../../components/MaskedInput';
 import SearchableSelect from '../../../components/SearchableSelect';
 import { getUnitOptions } from '../../../utils/units';
+import ImagePreviewModal from '../../../components/ImagePreviewModal';
 
 // ProductFormModal: Right-side drawer modal for adding/editing products. Follows admin panel modal conventions.
 
@@ -135,6 +136,7 @@ function productFormReducer(state: ProductFormState, action: ProductFormAction):
 export default function ProductFormModal({ open = true, product, loading = false, error, onClose, onSubmit }: ProductFormModalProps) {
   const isEdit = !!product;
   const [state, dispatch] = useReducer(productFormReducer, initialState);
+  const [imagePreview, setImagePreview] = useState<{ images: string[]; initialIndex: number } | null>(null);
 
   const { data: categories, isLoading: loadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -206,6 +208,10 @@ export default function ProductFormModal({ open = true, product, loading = false
   };
   const handleRemoveImageUrl = (idx: number) => {
     dispatch({ type: 'REMOVE_IMAGE_URL', index: idx });
+  };
+
+  const handleImagePreview = (images: string[], initialIndex: number = 0) => {
+    setImagePreview({ images, initialIndex });
   };
 
   return (
@@ -314,10 +320,38 @@ export default function ProductFormModal({ open = true, product, loading = false
             <div className="col-span-2">
               <label className="block mb-1 text-white">🖼️ Product Images</label>
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="block mb-2" />
+              
+              {/* Existing Product Images (when editing) */}
+              {isEdit && product?.images && product.images.length > 0 && (
+                <div className="mb-4">
+                  <label className="block mb-2 text-white text-sm">📸 Current Product Images</label>
+                  <div className="flex flex-wrap gap-2">
+                    {product.images.map((src, idx) => (
+                      <div key={`existing-${idx}`} className="relative w-20 h-20">
+                        <img 
+                          src={src} 
+                          alt={`Product ${idx + 1}`} 
+                          className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                          onClick={() => handleImagePreview(product.images, idx)}
+                          title="Click to preview"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* New Image Previews */}
               <div className="flex flex-wrap gap-2 mt-2">
                 {state.imagePreviews.map((src, idx) => (
                   <div key={idx} className="relative w-20 h-20">
-                    <img src={src} alt="Preview" className="w-full h-full object-cover rounded" />
+                    <img 
+                      src={src} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
+                      onClick={() => handleImagePreview(state.imagePreviews, idx)}
+                      title="Click to preview"
+                    />
                     <button type="button" className="absolute top-0 right-0 bg-black/60 text-white rounded-full p-1 text-xs" onClick={() => handleRemoveImage(idx)}>❌</button>
                   </div>
                 ))}
@@ -355,6 +389,14 @@ export default function ProductFormModal({ open = true, product, loading = false
           </div>
         </form>
       </div>
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        open={!!imagePreview}
+        images={imagePreview?.images || []}
+        initialIndex={imagePreview?.initialIndex || 0}
+        onClose={() => setImagePreview(null)}
+      />
     </div>
   );
 } 

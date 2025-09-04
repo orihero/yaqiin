@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Shop } from '@yaqiin/shared/types/shop';
@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getAvailableOwners, getUserById } from '../../../services/userService';
 import { ShopOperatingHours, OperatingHoursDay } from '@yaqiin/shared/types/shop';
 import { getUnassignedGroups } from '../../../services/shopService';
+import { getOnlyChangedFields } from '../../../utils/changeTracker';
+import ImagePreviewModal from '../../../components/ImagePreviewModal';
 
 interface ShopFormModalProps {
   open: boolean;
@@ -55,6 +57,22 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
     coordinates: { lat: 0, lng: 0 },
   };
   const defaultContactInfo = { phoneNumber: '', email: '', telegramUsername: '' };
+  
+  // State for file uploads
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(initialValues?.photo || null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialValues?.logo || null);
+  const [imagePreview, setImagePreview] = useState<{ images: string[]; initialIndex: number } | null>(null);
+  
+  // State for tracking if user wants to remove existing images
+  const [shouldRemovePhoto, setShouldRemovePhoto] = useState(false);
+  const [shouldRemoveLogo, setShouldRemoveLogo] = useState(false);
+  
+  // Refs for file inputs
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Partial<Shop>>({
     defaultValues: {
       name: '',
@@ -89,8 +107,71 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
   );
   const [extraOwner, setExtraOwner] = useState<any>(null);
 
+  // File handling functions
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('Photo file selected:', file);
+    if (file) {
+      setPhotoFile(file);
+      setShouldRemovePhoto(false); // Reset remove flag when new file is selected
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('Logo file selected:', file);
+    if (file) {
+      setLogoFile(file);
+      setShouldRemoveLogo(false); // Reset remove flag when new file is selected
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setLogoFile(null);
+      setLogoPreview(null);
+    }
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setShouldRemovePhoto(true);
+    // Clear the file input
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setShouldRemoveLogo(true);
+    // Clear the file input
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+  };
+
+  const handleImagePreview = (images: string[], initialIndex: number = 0) => {
+    setImagePreview({ images, initialIndex });
+  };
+
   useEffect(() => {
     if (open && mode === 'edit' && initialValues) {
+      console.log('Setting up edit mode with initial values:', initialValues);
+      console.log('Photo URL:', initialValues.photo);
+      console.log('Logo URL:', initialValues.logo);
+      
       reset({
         name: initialValues.name || '',
         ownerId: initialValues.ownerId || '',
@@ -100,7 +181,16 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
         description: initialValues.description || '',
         ...initialValues,
       });
-      setOperatingHours(initialValues.operatingHours || getDefaultOperatingHours());
+             setOperatingHours(initialValues.operatingHours || getDefaultOperatingHours());
+       setPhotoPreview(initialValues.photo || null);
+       setLogoPreview(initialValues.logo || null);
+       
+       // Reset remove flags when opening edit mode
+       setShouldRemovePhoto(false);
+       setShouldRemoveLogo(false);
+       
+       console.log('Photo preview set to:', initialValues.photo);
+       console.log('Logo preview set to:', initialValues.logo);
     }
     if (open && mode === 'add') {
       reset({
@@ -112,6 +202,10 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
         description: '',
       });
       setOperatingHours(getDefaultOperatingHours());
+      setPhotoFile(null);
+      setLogoFile(null);
+      setPhotoPreview(null);
+      setLogoPreview(null);
     }
   }, [open, mode, initialValues, reset]);
 
@@ -144,21 +238,103 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
         <h2 className="text-xl font-bold mb-4">{isEdit ? t('shops.editShop') : t('shops.addShop')}</h2>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         {renderDetails(details)}
-        <form onSubmit={handleSubmit((values) => {
-          const submitValues: Partial<Shop> = {
-            ...values,
-            operatingHours,
-            contactInfo: {
-              ...defaultContactInfo,
-              ...(initialValues?.contactInfo || {}),
-              ...(values.contactInfo || {}),
-            },
-            address: {
-              ...defaultAddress,
-              ...(initialValues?.address || {}),
-              ...(values.address || {}),
-            },
+                 <form onSubmit={handleSubmit((values) => {
+           console.log('=== FORM SUBMISSION START ===');
+           console.log('Form values:', values);
+           console.log('Photo file state at submission:', photoFile);
+           console.log('Logo file state at submission:', logoFile);
+                     const currentValues: Partial<Shop> & { photoFile?: File | null; logoFile?: File | null } = {
+             ...values,
+             operatingHours,
+             contactInfo: {
+               ...defaultContactInfo,
+               ...(initialValues?.contactInfo || {}),
+               ...(values.contactInfo || {}),
+             },
+             address: {
+               ...defaultAddress,
+               ...(initialValues?.address || {}),
+               ...(values.address || {}),
+             },
+           };
+           
+           // Always include file fields if they exist
+           if (photoFile) {
+             currentValues.photoFile = photoFile;
+             console.log('Photo file added to currentValues:', photoFile.name);
+           }
+           if (logoFile) {
+             currentValues.logoFile = logoFile;
+             console.log('Logo file added to currentValues:', logoFile.name);
+           }
+           
+           console.log('Current values after file addition:', currentValues);
+          
+          // For edit mode, handle file uploads and changes
+          let submitValues: Partial<Shop> & { 
+            photoFile?: File | null; 
+            logoFile?: File | null;
+            removePhoto?: boolean;
+            removeLogo?: boolean;
           };
+          
+          if (isEdit && initialValues) {
+            console.log('=== EDIT MODE DEBUG ===');
+            console.log('Photo file state:', photoFile);
+            console.log('Logo file state:', logoFile);
+            console.log('Photo preview:', photoPreview);
+            console.log('Logo preview:', logoPreview);
+            
+            // If we have file uploads or remove flags, we need to send them regardless of other changes
+            if (photoFile || logoFile || shouldRemovePhoto || shouldRemoveLogo) {
+              console.log('File uploads or removals detected - sending FormData');
+              submitValues = {
+                _id: initialValues._id,
+                photoFile: photoFile || undefined,
+                logoFile: logoFile || undefined,
+              };
+              
+              // Handle remove flags
+              if (shouldRemovePhoto) {
+                submitValues.removePhoto = true;
+              }
+              if (shouldRemoveLogo) {
+                submitValues.removeLogo = true;
+              }
+              
+              // Also include any other changed fields
+              const { photoFile: _, logoFile: __, ...currentValuesWithoutFiles } = currentValues;
+              const changedFields = getOnlyChangedFields(initialValues, currentValuesWithoutFiles);
+              submitValues = { ...submitValues, ...changedFields };
+            } else {
+              // No file uploads, only send changed fields
+              console.log('No file uploads - sending only changed fields');
+              const { photoFile: _, logoFile: __, ...currentValuesWithoutFiles } = currentValues;
+              const changedFields = getOnlyChangedFields(initialValues, currentValuesWithoutFiles);
+              
+              submitValues = { ...changedFields };
+              
+              // Ensure we always include the _id for identification
+              if (!submitValues._id) {
+                submitValues._id = initialValues._id;
+              }
+              
+              // Always include existing photo and logo URLs if they exist
+              if (initialValues.photo) {
+                submitValues.photo = initialValues.photo;
+              }
+              if (initialValues.logo) {
+                submitValues.logo = initialValues.logo;
+              }
+            }
+            
+            console.log('Final submit values:', submitValues);
+            console.log('Submit values keys:', Object.keys(submitValues));
+          } else {
+            // For add mode, send all values
+            submitValues = currentValues;
+          }
+          
           onSubmit(submitValues);
         })}>
           <div className="grid grid-cols-2 gap-4">
@@ -218,6 +394,16 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
               {errors.contactInfo?.phoneNumber && <span className="text-red-400 text-xs">{errors.contactInfo.phoneNumber.message as string}</span>}
             </div>
             <div>
+              <label className="block mb-1">{t('common.email')}</label>
+              <input type="email" className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('contactInfo.email')} />
+              {errors.contactInfo?.email && <span className="text-red-400 text-xs">{errors.contactInfo.email.message as string}</span>}
+            </div>
+            <div>
+              <label className="block mb-1">{t('common.telegramUsername', 'Telegram Username')}</label>
+              <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('contactInfo.telegramUsername')} />
+              {errors.contactInfo?.telegramUsername && <span className="text-red-400 text-xs">{errors.contactInfo.telegramUsername.message as string}</span>}
+            </div>
+            <div>
               <label className="block mb-1">{t('users.city')}</label>
               <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.city', { required: t('forms.validation.required') })} />
               {errors.address?.city && <span className="text-red-400 text-xs">{errors.address.city.message as string}</span>}
@@ -231,6 +417,32 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
               <label className="block mb-1">{t('shops.district', 'District')}</label>
               <input className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('address.district', { required: t('forms.validation.required') })} />
               {errors.address?.district && <span className="text-red-400 text-xs">{errors.address.district.message as string}</span>}
+            </div>
+            <div>
+              <label className="block mb-1">{t('shops.latitude', 'Latitude')}</label>
+              <input 
+                type="number" 
+                step="any"
+                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
+                {...register('address.coordinates.lat', { 
+                  required: t('forms.validation.required'),
+                  valueAsNumber: true 
+                })} 
+              />
+              {errors.address?.coordinates?.lat && <span className="text-red-400 text-xs">{errors.address.coordinates.lat.message as string}</span>}
+            </div>
+            <div>
+              <label className="block mb-1">{t('shops.longitude', 'Longitude')}</label>
+              <input 
+                type="number" 
+                step="any"
+                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
+                {...register('address.coordinates.lng', { 
+                  required: t('forms.validation.required'),
+                  valueAsNumber: true 
+                })} 
+              />
+              {errors.address?.coordinates?.lng && <span className="text-red-400 text-xs">{errors.address.coordinates.lng.message as string}</span>}
             </div>
             <div className="col-span-2">
               <label className="block mb-1">{t('shops.openingHours')}</label>
@@ -292,6 +504,89 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
               <label className="block mb-1">{t('common.description')}</label>
               <textarea className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" rows={2} {...register('description')} />
             </div>
+            
+            {/* Photo Upload */}
+            <div className="col-span-2">
+              <label className="block mb-1">{t('shops.shopPhoto', 'Shop Photo')}</label>
+              <div className="flex items-center gap-4">
+                                 <input
+                   ref={photoInputRef}
+                   type="file"
+                   accept="image/*"
+                   onChange={handlePhotoChange}
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                 />
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={removePhoto}
+                    className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded text-white text-sm"
+                  >
+                    {t('common.remove', 'Remove')}
+                  </button>
+                )}
+              </div>
+              {photoPreview && (
+                <div className="mt-2">
+                  <img
+                    src={photoPreview}
+                    alt="Shop photo preview"
+                    className="w-32 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => handleImagePreview([photoPreview], 0)}
+                    title="Click to preview"
+                    onError={(e) => {
+                      console.error('Failed to load photo:', photoPreview);
+                      console.error('Error event:', e);
+                    }}
+                    onLoad={() => {
+                      console.log('Photo loaded successfully:', photoPreview);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Logo Upload */}
+            <div className="col-span-2">
+              <label className="block mb-1">{t('shops.shopLogo', 'Shop Logo')}</label>
+              <div className="flex items-center gap-4">
+                                 <input
+                   ref={logoInputRef}
+                   type="file"
+                   accept="image/*"
+                   onChange={handleLogoChange}
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                 />
+                {logoPreview && (
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded text-white text-sm"
+                  >
+                    {t('common.remove', 'Remove')}
+                  </button>
+                )}
+              </div>
+              {logoPreview && (
+                <div className="mt-2">
+                  <img
+                    src={logoPreview}
+                    alt="Shop logo preview"
+                    className="w-32 h-32 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => handleImagePreview([logoPreview], 0)}
+                    title="Click to preview"
+                    onError={(e) => {
+                      console.error('Failed to load logo:', logoPreview);
+                      console.error('Error event:', e);
+                    }}
+                    onLoad={() => {
+                      console.log('Logo loaded successfully:', logoPreview);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block mb-1">{t('common.status')}</label>
               <select className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" {...register('status', { required: true })}>
@@ -307,6 +602,14 @@ export default function ShopFormModal({ open, mode, initialValues, loading, erro
           </div>
         </form>
       </div>
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        open={!!imagePreview}
+        images={imagePreview?.images || []}
+        initialIndex={imagePreview?.initialIndex || 0}
+        onClose={() => setImagePreview(null)}
+      />
     </div>
   );
 } 

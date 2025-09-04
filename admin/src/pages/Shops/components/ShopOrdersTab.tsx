@@ -289,11 +289,11 @@ export default function ShopOrdersTab({ shopId }: ShopOrdersTabProps) {
     setSelectedOrder(null);
   };
 
-  // Filter orders based on search and status
+  // Filter and sort orders based on search and status
   const filteredOrders = useMemo(() => {
     if (!ordersData?.data) return [];
     
-    return ordersData.data.filter(order => {
+    const filtered = ordersData.data.filter(order => {
       const matchesSearch = searchTerm === '' || 
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customerId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -302,6 +302,9 @@ export default function ShopOrdersTab({ shopId }: ShopOrdersTabProps) {
       
       return matchesSearch && matchesStatus;
     });
+
+    // Sort by creation time (newest first)
+    return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [ordersData?.data, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {

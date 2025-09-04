@@ -486,6 +486,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
         for (const courier of couriers) {
           if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
+            // Send order details message
             await ctx.telegram.sendMessage(
               courier.telegramId,
               orderText,
@@ -501,6 +502,26 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
                 }
               }
             );
+            
+            // Send delivery location to courier
+            if (order.deliveryAddress && order.deliveryAddress.coordinates) {
+              const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+              const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
+              
+              // Send location message with address
+              await ctx.telegram.sendMessage(
+                courier.telegramId,
+                locationText + addressText,
+                { parse_mode: 'HTML' }
+              );
+              
+              // Send actual location coordinates
+              await ctx.telegram.sendLocation(
+                courier.telegramId,
+                order.deliveryAddress.coordinates.lat,
+                order.deliveryAddress.coordinates.lng
+              );
+            }
           } else {
             console.error('[Order Notify] Invalid or missing telegramId for courier:', courier);
           }
@@ -570,6 +591,8 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         }
         orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
         orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressDeliveredWhenDone")}`;
+        
+        // Send the order details message
         await ctx.telegram.sendMessage(
           user.telegramId,
           orderText,
@@ -584,6 +607,26 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
             }
           }
         );
+        
+        // Send delivery location to courier when picking up
+        if (order.deliveryAddress && order.deliveryAddress.coordinates) {
+          const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+          const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
+          
+          // Send location message with address
+          await ctx.telegram.sendMessage(
+            user.telegramId,
+            locationText + addressText,
+            { parse_mode: 'HTML' }
+          );
+          
+          // Send actual location coordinates
+          await ctx.telegram.sendLocation(
+            user.telegramId,
+            order.deliveryAddress.coordinates.lat,
+            order.deliveryAddress.coordinates.lng
+          );
+        }
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBePickedUp"));
         return;
@@ -622,6 +665,8 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         }
         orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
         orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPaidOrRejected")}`;
+        
+        // Send the order details message
         await ctx.telegram.sendMessage(
           user.telegramId,
           orderText,
@@ -637,6 +682,26 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
             }
           }
         );
+        
+        // Send delivery location to courier
+        if (order.deliveryAddress && order.deliveryAddress.coordinates) {
+          const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+          const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
+          
+          // Send location message with address
+          await ctx.telegram.sendMessage(
+            user.telegramId,
+            locationText + addressText,
+            { parse_mode: 'HTML' }
+          );
+          
+          // Send actual location coordinates
+          await ctx.telegram.sendLocation(
+            user.telegramId,
+            order.deliveryAddress.coordinates.lat,
+            order.deliveryAddress.coordinates.lng
+          );
+        }
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBeDelivered"));
         return;
@@ -769,6 +834,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
         for (const courier of couriers) {
           if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
+            // Send order details message
             await ctx.telegram.sendMessage(
               courier.telegramId,
               orderText,
@@ -784,6 +850,26 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
                 }
               }
             );
+            
+            // Send delivery location to courier
+            if (order.deliveryAddress && order.deliveryAddress.coordinates) {
+              const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
+              const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
+              
+              // Send location message with address
+              await ctx.telegram.sendMessage(
+                courier.telegramId,
+                locationText + addressText,
+                { parse_mode: 'HTML' }
+              );
+              
+              // Send actual location coordinates
+              await ctx.telegram.sendLocation(
+                courier.telegramId,
+                order.deliveryAddress.coordinates.lat,
+                order.deliveryAddress.coordinates.lng
+              );
+            }
           }
         }
       }

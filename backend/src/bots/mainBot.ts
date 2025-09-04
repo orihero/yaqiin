@@ -4,6 +4,7 @@ console.log("[mainBot] File loaded");
 // @ts-ignore
 import { Markup, Telegraf, Context as TelegrafContext } from "telegraf";
 import User from "../models/User";
+import Shop from "../models/Shop";
 import { findShopForLocation } from "../utils/geoHelper";
 import Order from "../models/Order"; // Added import for Order
 import { t, getLang } from "../utils/i18n";
@@ -72,6 +73,21 @@ function getSettingsMenuKeyboard(ctx: CustomContext) {
 // Function to show main menu
 async function showMainMenu(ctx: CustomContext) {
   await ctx.reply(t(ctx, "greeting"), getMainMenuKeyboard(ctx));
+}
+
+// Function to send shop information with photo
+async function sendShopInfo(ctx: CustomContext, shop: any) {
+  const shopMessage = t(ctx, "shopArea", { shop: shop.name });
+  
+  if (shop.photo) {
+    // Send photo with caption
+    await ctx.replyWithPhoto(shop.photo, {
+      caption: shopMessage
+    });
+  } else {
+    // Send text only if no photo available
+    await ctx.reply(shopMessage);
+  }
 }
 
 // Move .hears handler registration here, before any .on('message') or .on('text') handlers
@@ -188,84 +204,35 @@ mainBot.on("message", async (ctx: CustomContext) => {
       if (shop) {
         // Check if user already exists
         const existingUser = await User.findOne({ telegramId });
-                 if (existingUser) {
-           // Update shopId for existing user
-           console.log(
-             `[mainBot] Assigning shopId to existing user: userId=${existingUser._id}, telegramId=${telegramId}, shopId=${shop._id}`
-           );
-           existingUser.shopId = shop._id as import("mongoose").Types.ObjectId;
-           await existingUser.save();
-           console.log(
-             `[mainBot] shopId assigned and saved for existing user: userId=${existingUser._id}, shopId=${existingUser.shopId}`
-           );
-           
-           // Set user in session for proper language detection
-           sessionUserMap.set(ctx, existingUser);
-           
-           await ctx.reply(t(ctx, "shopArea", { shop: shop.name }));
-           await showMainMenu(ctx);
-           return;
-         }
-        // Store shopId in registration state for new users
+        if (existingUser) {
+          // Update shopId for existing user
+          console.log(
+            `[mainBot] Assigning shopId to existing user: userId=${existingUser._id}, telegramId=${telegramId}, shopId=${shop._id}`
+          );
+          existingUser.shopId = shop._id as import("mongoose").Types.ObjectId;
+          await existingUser.save();
+          console.log(
+            `[mainBot] shopId assigned and saved for existing user: userId=${existingUser._id}, shopId=${existingUser.shopId}`
+          );
+          
+          // Set user in session for proper language detection
+          sessionUserMap.set(ctx, existingUser);
+          
+          await sendShopInfo(ctx, shop);
+          await showMainMenu(ctx);
+          return;
+        }
+        
+        // Store shopId and location in registration state for new users
         state.shopId = shop._id;
+        state.location = ctx.message.location;
         console.log(
-          `[mainBot] Storing shopId in registration state for new user: telegramId=${telegramId}, shopId=${shop._id}`
+          `[mainBot] Storing shopId and location in registration state for new user: telegramId=${telegramId}, shopId=${shop._id}`
         );
-                 // Complete registration immediately without apartment/block/entrance
-         const user = new User({
-           telegramId,
-           firstName: state.firstName || ctx.from.first_name,
-           lastName: state.lastName || ctx.from.last_name,
-           phoneNumber: state.phoneNumber,
-           role: "client",
-           status: "active",
-           shopId: state.shopId,
-           preferences: {
-             language: state.language,
-             notifications: {
-               orderUpdates: true,
-               promotions: true,
-               newProducts: true,
-             },
-           },
-           addresses: [
-             {
-               title: "Telegram Location",
-               street: "",
-               city: "",
-               district: "",
-               postalCode: "",
-               coordinates: {
-                 lat: state.location.latitude,
-                 lng: state.location.longitude,
-               },
-               isDefault: true,
-             },
-           ],
-         });
-         await user.save();
-         console.log(
-           `[mainBot] New user registered with shopId: userId=${user._id}, telegramId=${telegramId}, shopId=${user.shopId}`
-         );
-         registrationState.delete(telegramId);
-         
-         // Set user in session for proper language detection
-         sessionUserMap.set(ctx, user);
-         
-         // Send single welcome message with shop info and menu
-         const welcomeMessage = `${t(ctx, "shopArea", { shop: shop.name })}\n\n${t(ctx, "registrationComplete")}`;
-         await ctx.reply(welcomeMessage, getMainMenuKeyboard(ctx));
-         
-         // Also send the mini app button
-         await ctx.reply(
-           t(ctx, "openMiniApp"),
-           Markup.inlineKeyboard([
-             Markup.button.webApp(
-               t(ctx, "openMiniAppBtn"),
-               "https://yaqiin-frontend.vercel.app/"
-             ),
-           ])
-         );
+        
+        // Move to building number step
+        state.step = "building";
+        await ctx.reply(t(ctx, "enterBlock"));
         return;
       } else {
         // 🚫 Out of service area message
@@ -294,6 +261,7 @@ mainBot.on("message", async (ctx: CustomContext) => {
             };
           }
           await user.save();
+          await sendShopInfo(ctx, shop);
           await ctx.reply(t(ctx, "locationUpdated"));
           await showMainMenu(ctx);
         } else {
@@ -372,7 +340,7 @@ mainBot.on("message", async (ctx: CustomContext) => {
             Markup.inlineKeyboard([
               Markup.button.webApp(
                 t(ctx, "openMiniAppBtn"),
-                "https://yaqiin-frontend.vercel.app/"
+                "https://yaqiin-frontend.vercel.app/?expand=true&disable_closing=true"
               ),
             ])
           );
@@ -444,6 +412,92 @@ mainBot.on("message", async (ctx: CustomContext) => {
     const state = registrationState.get(telegramId);
     if (!state) {
       await ctx.reply(t(ctx, "unknownCommand"));
+      return;
+    }
+
+    // Handle building, entrance, and apartment number steps
+    if (state.step === "building") {
+      state.building = ctx.message.text;
+      state.step = "entrance";
+      await ctx.reply(t(ctx, "enterEntrance"));
+      return;
+    }
+
+    if (state.step === "entrance") {
+      state.entrance = ctx.message.text;
+      state.step = "apartment";
+      await ctx.reply(t(ctx, "enterApartment"));
+      return;
+    }
+
+    if (state.step === "apartment") {
+      state.apartment = ctx.message.text;
+      
+      // Complete registration with all details
+      const user = new User({
+        telegramId,
+        firstName: state.firstName || ctx.from.first_name,
+        lastName: state.lastName || ctx.from.last_name,
+        phoneNumber: state.phoneNumber,
+        role: "client",
+        status: "active",
+        shopId: state.shopId,
+        preferences: {
+          language: state.language,
+          notifications: {
+            orderUpdates: true,
+            promotions: true,
+            newProducts: true,
+          },
+        },
+        addresses: [
+          {
+            title: "Telegram Location",
+            street: "",
+            city: "",
+            district: "",
+            postalCode: "",
+            building: state.building,
+            entrance: state.entrance,
+            apartment: state.apartment,
+            coordinates: {
+              lat: state.location.latitude,
+              lng: state.location.longitude,
+            },
+            isDefault: true,
+          },
+        ],
+      });
+      await user.save();
+      console.log(
+        `[mainBot] New user registered with complete details: userId=${user._id}, telegramId=${telegramId}, shopId=${user.shopId}`
+      );
+      registrationState.delete(telegramId);
+      
+      // Set user in session for proper language detection
+      sessionUserMap.set(ctx, user);
+      
+      // Get shop info for welcome message
+      const shop = await findShopForLocation(state.location.latitude, state.location.longitude);
+      
+      if (shop) {
+        // Send shop info with photo first
+        await sendShopInfo(ctx, shop);
+      }
+      
+      // Send registration completion message
+      await ctx.reply(t(ctx, "registrationComplete"), getMainMenuKeyboard(ctx));
+      
+      // Also send the mini app button
+      await ctx.reply(
+        t(ctx, "openMiniApp"),
+        Markup.inlineKeyboard([
+          Markup.button.webApp(
+            t(ctx, "openMiniAppBtn"),
+            "https://yaqiin-frontend.vercel.app/?expand=true&disable_closing=true"
+          ),
+        ])
+      );
       return;
     }
   }

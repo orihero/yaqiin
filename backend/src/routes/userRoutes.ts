@@ -204,4 +204,180 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
+// Address management routes
+// Add new address
+router.post("/me/addresses", authMiddleware as RequestHandler, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "User not found" },
+      });
+      return;
+    }
+
+    const newAddress = {
+      ...req.body,
+      _id: new Date().getTime().toString(), // Generate a temporary ID
+    };
+
+    // If this is the first address, make it default
+    if (!user.addresses || user.addresses.length === 0) {
+      newAddress.isDefault = true;
+    }
+
+    // If the new address is set as default, remove default from other addresses
+    if (newAddress.isDefault && user.addresses) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    }
+
+    user.addresses.push(newAddress);
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      data: newAddress,
+      message: "Address added successfully"
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 500, message: "Failed to add address" },
+    });
+  }
+});
+
+// Update address
+router.put("/me/addresses/:addressId", authMiddleware as RequestHandler, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "User not found" },
+      });
+      return;
+    }
+
+    const addressIndex = user.addresses.findIndex(addr => addr._id === req.params.addressId);
+    if (addressIndex === -1) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "Address not found" },
+      });
+      return;
+    }
+
+    // If the address is being set as default, remove default from other addresses
+    if (req.body.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    }
+
+    user.addresses[addressIndex] = {
+      ...user.addresses[addressIndex],
+      ...req.body,
+    };
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: user.addresses[addressIndex],
+      message: "Address updated successfully"
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 500, message: "Failed to update address" },
+    });
+  }
+});
+
+// Delete address
+router.delete("/me/addresses/:addressId", authMiddleware as RequestHandler, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "User not found" },
+      });
+      return;
+    }
+
+    const addressIndex = user.addresses.findIndex(addr => addr._id === req.params.addressId);
+    if (addressIndex === -1) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "Address not found" },
+      });
+      return;
+    }
+
+    const deletedAddress = user.addresses[addressIndex];
+    user.addresses.splice(addressIndex, 1);
+
+    // If the deleted address was default and there are other addresses, make the first one default
+    if (deletedAddress.isDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: null,
+      message: "Address deleted successfully"
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 500, message: "Failed to delete address" },
+    });
+  }
+});
+
+// Set address as default
+router.patch("/me/addresses/:addressId/default", authMiddleware as RequestHandler, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "User not found" },
+      });
+      return;
+    }
+
+    const addressIndex = user.addresses.findIndex(addr => addr._id === req.params.addressId);
+    if (addressIndex === -1) {
+      res.status(404).json({
+        success: false,
+        error: { code: 404, message: "Address not found" },
+      });
+      return;
+    }
+
+    // Remove default from all addresses
+    user.addresses.forEach(addr => addr.isDefault = false);
+
+    // Set the specified address as default
+    user.addresses[addressIndex].isDefault = true;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      data: user.addresses[addressIndex],
+      message: "Default address updated successfully"
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 500, message: "Failed to set default address" },
+    });
+  }
+});
+
 export default router;

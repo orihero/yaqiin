@@ -41,5 +41,6 @@
   "totalLabel": "Total",
   "nextStepLabel": "Next step",
   "pleaseReviewOrder": "Please review the order.",
-  "acceptOrRejectOrder": "Accept or reject the order."
+  "acceptOrRejectOrder": "Accept or reject the order.",
+  "deliveryLocationLabel": "Delivery Location"
 } 

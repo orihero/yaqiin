@@ -59,6 +59,28 @@ After migration, the following new endpoints will be available:
 
 ## Schema Changes
 
+### Shop Model
+```typescript
+interface Shop {
+  _id: string;
+  name: string;
+  description?: string;
+  ownerId: string;
+  contactInfo: ShopContactInfo;
+  address: ShopAddress;
+  deliveryZones?: DeliveryZone[];
+  operatingHours: ShopOperatingHours;
+  rating?: ShopRating;
+  status: 'active' | 'inactive' | 'suspended';
+  commission?: number;
+  orders_chat_id?: string;
+  photo?: string; // Shop photo URL
+  logo?: string; // Shop logo URL
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
 ### Product Model (Global)
 ```typescript
 interface Product {

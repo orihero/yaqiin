@@ -103,6 +103,8 @@ export interface IShop extends Document {
   commission?: number;
   couriers?: mongoose.Types.ObjectId[];
   orders_chat_id?: string;
+  photo?: string; // Shop photo URL
+  logo?: string; // Shop logo URL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -120,6 +122,8 @@ const ShopSchema = new Schema<IShop>({
   commission: { type: Number },
   couriers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   orders_chat_id: { type: String },
+  photo: { type: String },
+  logo: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

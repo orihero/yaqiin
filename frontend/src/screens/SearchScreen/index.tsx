@@ -115,8 +115,9 @@ const SearchScreen: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col scrollbar-hide">
-      <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col scrollbar-hide">
+    <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
+      {/* Main Content Card */}
+      <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
         {/* Compact Navy Header with inline search bar */}
         <div className="w-full flex items-center px-4 pt-6 pb-4" style={{ background: '#232c43', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px' }}>
           <button
@@ -139,11 +140,14 @@ const SearchScreen: React.FC = () => {
             {/* <SearchFilterButton onClick={() => setFilterOpen(true)} /> */}
           </div>
         </div>
-        <div
-          ref={listRef}
-          className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col overflow-auto scrollbar-hide"
-          style={{ minHeight: 'calc(100vh - 70px)', maxHeight: 'calc(100vh - 70px)' }}
-        >
+                 <div
+           ref={listRef}
+           className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
+           style={{
+             minHeight: "calc(100vh - 170px)",
+             maxHeight: "calc(100vh - 170px)",
+           }}
+         >
           {/* Product Grid */}
           <div className="grid grid-cols-2 gap-4">
             {isLoading ? (

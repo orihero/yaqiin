@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getUsers } from '../../../services/userService';
 import { updateShop } from '../../../services/shopService';
 import ShopFormModal from './ShopFormModal';
+import { getOnlyChangedFields } from '../../../utils/changeTracker';
 
 interface ShopInfoTabProps {
   shopData: Shop;
@@ -216,6 +217,30 @@ export default function ShopInfoTab({ shopData, isLoading, error }: ShopInfoTabP
 
   return (
     <div className="space-y-4">
+      {/* Shop Photo and Logo */}
+      <div className="flex gap-4 mb-4">
+        {shopData.photo && (
+          <div>
+            <div className="font-semibold mb-2">Shop Photo:</div>
+            <img 
+              src={shopData.photo} 
+              alt="Shop photo" 
+              className="w-32 h-32 object-cover rounded border"
+            />
+          </div>
+        )}
+        {shopData.logo && (
+          <div>
+            <div className="font-semibold mb-2">Shop Logo:</div>
+            <img 
+              src={shopData.logo} 
+              alt="Shop logo" 
+              className="w-32 h-32 object-cover rounded border"
+            />
+          </div>
+        )}
+      </div>
+      
       <div><span className="font-semibold">Name:</span> {shopData.name}</div>
       <div><span className="font-semibold">Owner:</span> {
         userMap[shopData.ownerId]
@@ -316,7 +341,26 @@ export default function ShopInfoTab({ shopData, isLoading, error }: ShopInfoTabP
           setSaveError(null);
           setSaveSuccess(false);
           try {
-            await updateShop({ ...values, _id: shopData._id });
+            console.log('ShopInfoTab edit - Received values:', values);
+            
+            // Check if we have file uploads or remove flags
+            const hasFileUploads = values.photoFile || values.logoFile;
+            const hasRemoveFlags = values.removePhoto || values.removeLogo;
+            
+            if (hasFileUploads || hasRemoveFlags) {
+              // If we have file uploads or remove flags, send the values directly
+              console.log('ShopInfoTab edit - File uploads or remove flags detected, sending values directly');
+              await updateShop(values);
+            } else {
+              // Only send the changed fields plus the _id for non-file updates
+              const changedFields = getOnlyChangedFields(shopData, values);
+              const updateData = { ...changedFields, _id: shopData._id };
+              console.log('ShopInfoTab edit - Original:', shopData);
+              console.log('ShopInfoTab edit - Changes:', changedFields);
+              console.log('ShopInfoTab edit - Sending:', updateData);
+              await updateShop(updateData);
+            }
+            
             setEditShopModalOpen(false);
             setSaveSuccess(true);
             queryClient.invalidateQueries({ queryKey: ['shop', shopData._id] });

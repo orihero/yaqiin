@@ -3,6 +3,20 @@
 body {
     background: #232c43;
     color: #f3f4f6;
+    /* Prevent overscroll behavior that might close the WebApp */
+    overscroll-behavior: none;
+    /* Ensure the body takes full height */
+    min-height: 100vh;
+    /* Prevent bounce effects on iOS */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* CSS Custom Properties for safe areas */
+:root {
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
 /* Hide scrollbar utility */
@@ -12,4 +26,43 @@ body {
 }
 .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+}
+
+/* Safe area support for mobile devices */
+@supports (padding: max(0px)) {
+    .safe-area {
+        padding-bottom: max(var(--safe-area-inset-bottom), 0px);
+        padding-top: max(var(--safe-area-inset-top), 0px);
+        padding-left: max(var(--safe-area-inset-left), 0px);
+        padding-right: max(var(--safe-area-inset-right), 0px);
+    }
+}
+
+/* Fallback for browsers that don't support env() */
+@supports not (padding: env(safe-area-inset-bottom)) {
+    .safe-area {
+        padding-bottom: 20px; /* Fallback padding for bottom safe area */
+        padding-top: 20px; /* Fallback padding for top safe area */
+    }
+}
+
+/* Telegram WebApp specific styles to prevent closing on scroll */
+html {
+    /* Prevent overscroll behavior */
+    overscroll-behavior: none;
+    /* Ensure proper viewport behavior */
+    height: 100%;
+}
+
+/* Ensure the root element takes full height */
+#root {
+    min-height: 100vh;
+    /* Prevent any scroll-related closing behavior */
+    overscroll-behavior: none;
+}
+
+/* Prevent any container from causing overscroll */
+* {
+    /* Prevent overscroll on all elements */
+    overscroll-behavior: none;
 }

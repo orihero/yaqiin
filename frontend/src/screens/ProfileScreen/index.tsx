@@ -57,11 +57,6 @@ const ProfileScreen: React.FC = () => {
       onClick: (navigate: (path: string) => void) => navigate('/account'),
     },
     {
-      icon: 'mdi:store',
-      label: t('profile.myShop'),
-      onClick: (navigate: (path: string) => void) => navigate('/my-shop'),
-    },
-    {
       icon: 'mdi:clipboard-list',
       label: t('profile.orders'),
       onClick: (navigate: (path: string) => void) => navigate('/orders'),
