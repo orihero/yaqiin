@@ -60,6 +60,7 @@ export interface IProduct extends Document {
   name: IProductNameDesc;
   description?: IProductNameDesc;
   categoryId: mongoose.Types.ObjectId;
+  brand?: IProductNameDesc;
   images?: string[];
   basePrice: number; // Changed from price to basePrice
   unit: string;
@@ -78,6 +79,7 @@ const ProductSchema = new Schema<IProduct>({
   name: { type: ProductNameDescSchema, required: true },
   description: { type: ProductNameDescSchema },
   categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  brand: { type: ProductNameDescSchema },
   images: [{ type: String }],
   basePrice: { type: Number, required: true }, // Changed from price to basePrice
   unit: { type: String, required: true },

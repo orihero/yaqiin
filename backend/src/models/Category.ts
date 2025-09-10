@@ -17,6 +17,7 @@ export interface ICategory extends Document {
   imageUrl?: string;
   icon?: string;
   sortOrder?: number;
+  attributes?: mongoose.Types.ObjectId[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +30,7 @@ const CategorySchema = new Schema<ICategory>({
   imageUrl: { type: String },
   icon: { type: String },
   sortOrder: { type: Number },
+  attributes: [{ type: Schema.Types.ObjectId, ref: 'CategoryAttribute' }],
   isActive: { type: Boolean, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

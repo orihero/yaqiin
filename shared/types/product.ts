@@ -32,6 +32,7 @@ export interface Product {
   name: ProductNameDesc;
   description?: ProductNameDesc;
   categoryId: string;
+  brand?: ProductNameDesc;
   images?: string[];
   basePrice: number; // Base price, can be overridden by shop
   unit: string;

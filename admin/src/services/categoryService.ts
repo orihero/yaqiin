@@ -27,7 +27,23 @@ export const deleteCategory = async (_id: string) => {
   return res.data.data;
 };
 
+export const bulkDeleteCategories = async (categoryIds: string[]) => {
+  const res = await api.delete('/categories/bulk', { data: { categoryIds } });
+  if (!res.data.success) throw new Error(res.data?.error?.message || 'Failed to delete categories');
+  return res.data.data;
+};
+
 export const getAllCategories = async (): Promise<Category[]> => {
   const res = await api.get('/categories');
+  return res.data.data;
+};
+
+export const getCategoriesHierarchy = async (): Promise<Category[]> => {
+  const res = await api.get('/categories?limit=1000'); // Get all categories
+  return res.data.data;
+};
+
+export const getCategoryProductCounts = async (): Promise<{ [categoryId: string]: number }> => {
+  const res = await api.get('/categories/product-counts');
   return res.data.data;
 }; 

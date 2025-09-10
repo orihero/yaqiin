@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './category';
+export * from './categoryAttribute';
 export * from './courier';
 export * from './delivery';
 export * from './notification';

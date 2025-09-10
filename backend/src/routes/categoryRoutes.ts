@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Category from '../models/Category';
+import Product from '../models/Product';
 import { parseQuery } from '../utils/queryHelper';
 
 const router = Router();
@@ -57,6 +58,27 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
+// Bulk delete categories
+router.delete('/bulk', async (req, res, next) => {
+  try {
+    const { categoryIds } = req.body;
+    
+    if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+      return next({ status: 400, message: 'Category IDs array is required' });
+    }
+
+    const result = await Category.deleteMany({ _id: { $in: categoryIds } });
+    
+    res.json({ 
+      success: true, 
+      data: { deletedCount: result.deletedCount }, 
+      message: `Successfully deleted ${result.deletedCount} categories` 
+    });
+  } catch (err) {
+    next({ status: 400, message: 'Failed to delete categories', details: err });
+  }
+});
+
 router.delete('/:id', async (req, res, next) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
@@ -64,6 +86,58 @@ router.delete('/:id', async (req, res, next) => {
     res.json({ success: true, data: null, message: 'Category deleted' });
   } catch (err) {
     next(err);
+  }
+});
+
+// Get product counts for all categories
+router.get('/product-counts', async (req, res, next) => {
+  try {
+    const productCounts = await Product.aggregate([
+      {
+        $match: {
+          categoryId: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$categoryId',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const countsMap: { [key: string]: number } = {};
+    productCounts.forEach(item => {
+      if (item._id) {
+        countsMap[item._id.toString()] = item.count;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: countsMap
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Seed categories endpoint
+router.post('/seed', async (req, res, next) => {
+  try {
+    const excelImportService = await import('../services/excelImportService');
+    const result = await excelImportService.default.createComprehensiveCategories();
+    
+    res.json({
+      success: result.success,
+      data: {
+        totalCategories: result.totalCategories,
+        mainCategories: result.mainCategories
+      },
+      message: result.message
+    });
+  } catch (err) {
+    next({ status: 500, message: 'Failed to seed categories', details: err });
   }
 });
 
