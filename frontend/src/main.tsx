@@ -81,6 +81,9 @@ function App() {
     console.log("=== End Debug Information ===");
     if(window.Telegram?.WebApp) {
       window.Telegram.WebApp.requestFullscreen();
+      window.Telegram.WebApp.lockOrientation('portrait');
+      window.Telegram.WebApp.disableVerticalSwipes();
+      window.Telegram.WebApp.disableHorizontalSwipes();
     }
   }, []);
   
