@@ -5,11 +5,6 @@ import type { Shop } from '@yaqiin/shared/types/shop';
 
 // Get the API URL from environment or use a default
 const getApiUrl = () => {
-  // If we're in development, use the local backend
-  if (import.meta.env.DEV) {
-    return 'http://localhost:3000/api';
-  }
-  
   // If we have a specific API URL from environment, use it
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;

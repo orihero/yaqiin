@@ -28,12 +28,12 @@ async function telegramMiniAppAuth(setUser: (user: any, token: string) => void) 
   try {
     const params = retrieveLaunchParams();
     console.log("params", params);
-    
+
     if (params.tgWebAppData?.signature) {
       try {
         const telegramId = params.tgWebAppData?.user?.id;
         console.log("Attempting to authenticate with telegramId:", telegramId);
-        
+
         const res = await api.post('/auth/telegram', { telegramId });
         const { token, user } = res.data.data;
         setUser(user, token);
@@ -70,7 +70,7 @@ function initializeTelegramWebApp() {
 
 function App() {
   const setUser = useUserStore((s) => s.setUser);
-  
+
   // Debug information
   React.useEffect(() => {
     console.log("=== WebApp Debug Information ===");
@@ -79,14 +79,18 @@ function App() {
     console.log("window.location.href:", window.location.href);
     console.log("User Agent:", navigator.userAgent);
     console.log("=== End Debug Information ===");
-    if(window.Telegram?.WebApp) {
-      window.Telegram.WebApp.requestFullscreen();
-      window.Telegram.WebApp.lockOrientation('portrait');
-      window.Telegram.WebApp.disableVerticalSwipes();
-      window.Telegram.WebApp.disableHorizontalSwipes();
+    try {
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.requestFullscreen();
+        window.Telegram.WebApp.lockOrientation('portrait');
+        window.Telegram.WebApp.disableVerticalSwipes();
+        window.Telegram.WebApp.disableHorizontalSwipes();
+      }
+    } catch (error) {
+      console.error("Error initializing Telegram WebApp:", error);
     }
   }, []);
-  
+
   React.useEffect(() => {
     console.log("Trying to get init data");
     telegramMiniAppAuth(setUser);
