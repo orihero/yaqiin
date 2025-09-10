@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductFormModal from './components/ProductFormModal';
-import ExcelImportModal from './components/ExcelImportModal';
-import CustomExcelImportModal from './components/CustomExcelImportModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, createProduct, updateProduct, deleteProduct, bulkDeleteProducts, ProductListResponse } from '../../services/productService';
 import { getAllCategories } from '../../services/categoryService';
@@ -20,8 +18,6 @@ const Products: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showCustomImportModal, setShowCustomImportModal] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
@@ -148,18 +144,6 @@ const Products: React.FC = () => {
               🗑️ Delete Selected ({selectedProducts.size})
             </button>
           )}
-          <button
-            className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold"
-            onClick={() => setShowCustomImportModal(true)}
-          >
-            <Icon icon="mdi:magnify" className="inline-block mr-2" /> 🔍 Analyze Excel
-          </button>
-          <button
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
-            onClick={() => setShowImportModal(true)}
-          >
-            <Icon icon="mdi:file-excel" className="inline-block mr-2" /> 📊 Import from Excel
-          </button>
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
             onClick={handleAdd}
@@ -338,23 +322,6 @@ const Products: React.FC = () => {
         onConfirm={() => bulkDeleteMutation.mutate(Array.from(selectedProducts))}
       />
 
-      {/* Excel Import Modal */}
-      <ExcelImportModal
-        open={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['products'] });
-        }}
-      />
-
-      {/* Custom Excel Import Modal */}
-      <CustomExcelImportModal
-        open={showCustomImportModal}
-        onClose={() => setShowCustomImportModal(false)}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['products'] });
-        }}
-      />
 
       {/* Image Preview Modal */}
       <ImagePreviewModal
