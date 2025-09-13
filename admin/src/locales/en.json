@@ -96,6 +96,8 @@
       "select": "Select...",
       "search": "Search...",
       "noOptionsFound": "No options found",
+      "searching": "Searching...",
+      "typeToSearch": "Type to search...",
       "thisWeek": "This Week",
       "lastWeek": "Last Week",
       "navigate": "Navigate",
@@ -122,7 +124,8 @@
         "previous": "<",
         "next": ">",
         "last": ">>"
-      }
+      },
+      "addToCartFailed": "Failed to add item to cart"
     },
   "navigation": {
     "dashboard": "Dashboard",
@@ -290,7 +293,10 @@
     "descriptionUzbek": "Description (Uzbek)",
     "descriptionRussian": "Description (Russian)",
     "iconName": "Icon (Iconify name)",
-    "iconPlaceholder": "e.g. mdi:food-apple"
+    "iconPlaceholder": "e.g. mdi:food-apple",
+    "noParent": "No Parent (Root Category)",
+    "selectParentCategory": "Select parent category",
+    "parentCategoryHelp": "Leave empty to create a root category"
   },
   "products": {
     "title": "Products",
@@ -344,6 +350,58 @@
     "noProductsFound": "No products found.",
     "clickAddProductToCreate": "Click Add Product to create your first product.",
     "failedToLoadProducts": "Failed to load products."
+  },
+  "productDetails": {
+    "loading": "Loading product details...",
+    "notFound": "Product not found",
+    "available": "Available in stock",
+    "outOfStock": "Out of stock",
+    "description": "Product Description",
+    "similar": "Similar Products",
+    "failedToLoad": "Failed to load similar products",
+    "noSimilar": "No similar products found"
+  },
+  "productCard": {
+    "product": "Product",
+    "addToCart": "Add to cart",
+    "goToCart": "Go to cart",
+    "addedToCartSuccess": "Product successfully added to cart!",
+    "kg": "kg"
+  },
+  "units": {
+    "pcs": "pcs",
+    "kg": "kg",
+    "g": "g",
+    "l": "L",
+    "ml": "ml",
+    "pack": "pack",
+    "box": "box",
+    "bottle": "bottle",
+    "can": "can",
+    "bag": "bag",
+    "piece": "piece",
+    "slice": "slice",
+    "cup": "cup",
+    "tbsp": "tbsp",
+    "tsp": "tsp",
+    "bunch": "bunch",
+    "head": "head",
+    "clove": "clove",
+    "sprig": "sprig",
+    "sheet": "sheet",
+    "roll": "roll",
+    "bar": "bar",
+    "stick": "stick",
+    "cube": "cube",
+    "scoop": "scoop",
+    "portion": "portion",
+    "serving": "serving",
+    "meal": "meal",
+    "set": "set",
+    "pair": "pair",
+    "dozen": "dozen",
+    "hundred": "hundred",
+    "thousand": "thousand"
   },
   "orders": {
     "title": "Orders",

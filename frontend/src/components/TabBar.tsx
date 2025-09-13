@@ -59,7 +59,7 @@ const TabBar: React.FC<{ current: string }> = ({ current }) => {
                             </span>
                         )}
                     </span>
-                    <span className="text-xs">{tab.label}</span>
+                    <span className="text-xs supreme-ll-black">{tab.label}</span>
                 </button>
             ))}
         </SafeArea>

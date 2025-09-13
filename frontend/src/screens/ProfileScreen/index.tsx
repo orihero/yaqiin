@@ -69,7 +69,7 @@ const ProfileScreen: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#232c43] flex flex-col items-center pt-6 pb-0">
+    <div className="min-h-screen bg-[#232c43] flex flex-col items-center pt-6 pb-0 safe-area" style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
       {/* Header */}
       <div className="w-full max-w-md px-4">
         <Header

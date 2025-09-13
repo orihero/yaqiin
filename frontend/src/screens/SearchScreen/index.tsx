@@ -115,11 +115,11 @@ const SearchScreen: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
+    <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       {/* Main Content Card */}
       <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
         {/* Compact Navy Header with inline search bar */}
-        <div className="w-full flex items-center px-4 pt-6 pb-4" style={{ background: '#232c43', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px' }}>
+        <div className="w-full flex items-center px-4 pt-6 pb-4" style={{ background: '#232c43', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
           <button
             className="bg-white bg-opacity-100 rounded-full p-2 mr-3 flex-shrink-0"
             onClick={() => window.history.back()}
@@ -144,8 +144,8 @@ const SearchScreen: React.FC = () => {
            ref={listRef}
            className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
            style={{
-             minHeight: "calc(100vh - 170px)",
-             maxHeight: "calc(100vh - 170px)",
+             minHeight: "calc(100vh - 280px)",
+             maxHeight: "calc(100vh - 280px)",
            }}
          >
           {/* Product Grid */}

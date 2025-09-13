@@ -2,6 +2,10 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
+import { useQuery } from '@tanstack/react-query';
+import { getCategoriesHierarchy, searchCategories, getInitialCategories } from '../../../services/categoryService';
+import { Category } from '@yaqiin/shared/types/category';
+import SearchableSelectAsync from '../../../components/SearchableSelectAsync';
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -33,7 +37,86 @@ function renderDetails(details: any) {
 export default function CategoryFormModal({ open, mode, loading, error, details, initialValues, onClose, onSubmit }: CategoryFormModalProps) {
   const { t } = useTranslation();
   const isEdit = mode === 'edit';
-  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm({
+  
+  // Helper function to get all descendant category IDs (to prevent circular references)
+  const getDescendantIds = (categoryId: string, categories: Category[]): string[] => {
+    const descendants: string[] = [];
+    
+    const findDescendants = (parentId: string) => {
+      categories.forEach(category => {
+        if (category.parentId === parentId) {
+          descendants.push(category._id);
+          findDescendants(category._id); // Recursively find children
+        }
+      });
+    };
+    
+    findDescendants(categoryId);
+    return descendants;
+  };
+
+  // Helper function to format categories for searchable select
+  const formatCategoriesForSelect = (categories: Category[], excludeId?: string): { value: string; label: string }[] => {
+    const formatCategory = (category: Category): { value: string; label: string } => {
+      return {
+        value: category._id,
+        label: category.name.uz,
+      };
+    };
+
+    const result: { value: string; label: string }[] = [];
+    
+    // Add "No Parent" option
+    result.push({ value: '', label: t('categories.noParent', 'No Parent (Root Category)') });
+    
+    // Get descendant IDs to prevent circular references when editing
+    const descendantIds = excludeId ? getDescendantIds(excludeId, categories) : [];
+    
+    // Add categories, preventing self-selection and circular references
+    categories.forEach(category => {
+      if (category._id !== excludeId && !descendantIds.includes(category._id)) {
+        result.push(formatCategory(category));
+      }
+    });
+    
+    return result;
+  };
+
+  // Async search function for parent categories
+  const handleCategorySearch = async (searchTerm: string): Promise<{ value: string; label: string }[]> => {
+    try {
+      const searchResults = await searchCategories(searchTerm, isEdit ? initialValues?._id : undefined);
+      return formatCategoriesForSelect(searchResults, isEdit ? initialValues?._id : undefined);
+    } catch (error) {
+      console.error('Category search error:', error);
+      return [];
+    }
+  };
+
+  // Fetch initial categories for the dropdown
+  const { data: initialCategories = [] } = useQuery<Category[]>({
+    queryKey: ['initial-categories', isEdit ? initialValues?._id : undefined],
+    queryFn: () => getInitialCategories(isEdit ? initialValues?._id : undefined),
+    enabled: open, // Only fetch when modal is open
+  });
+
+  // Format initial categories for the select
+  const initialOptions: { value: string; label: string }[] = React.useMemo(() => {
+    const options: { value: string; label: string }[] = [
+      { value: '', label: t('categories.noParent', 'No Parent (Root Category)') }
+    ];
+    
+    // Add initial categories
+    initialCategories.forEach(category => {
+      options.push({
+        value: category._id,
+        label: category.name.uz,
+      });
+    });
+    
+    return options;
+  }, [initialCategories, t]);
+  const { register, handleSubmit, reset, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
       name: {
         uz: initialValues?.name?.uz || '',
@@ -45,6 +128,7 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
       },
       isActive: initialValues?.isActive ?? true,
       icon: initialValues?.icon || '',
+      parentId: initialValues?.parentId || '',
     },
   });
 
@@ -61,6 +145,7 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
         },
         isActive: initialValues?.isActive ?? true,
         icon: initialValues?.icon || '',
+        parentId: initialValues?.parentId || '',
       });
     }
   }, [open, initialValues, reset]);
@@ -78,7 +163,14 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
         <h2 className="text-xl font-bold mb-4">{isEdit ? t('categories.editCategory') : t('categories.addCategory')}</h2>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         {renderDetails(details)}
-        <form onSubmit={handleSubmit((values) => onSubmit(values))}>
+        <form onSubmit={handleSubmit((values) => {
+          // Convert empty parentId to null
+          const submitValues = {
+            ...values,
+            parentId: values.parentId || null
+          };
+          onSubmit(submitValues);
+        })}>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1">{t('categories.nameUzbek', 'Name (Uzbek)')}</label>
@@ -105,6 +197,21 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
               {typeof watch === 'function' && watch('icon') && (
                 <div className="mt-2"><Icon icon={watch('icon')} width={32} height={32} /></div>
               )}
+            </div>
+            <div className="col-span-2">
+              <label className="block mb-1">{t('categories.parentCategory', 'Parent Category')}</label>
+              <SearchableSelectAsync
+                value={watch('parentId') || ''}
+                onChange={(value) => setValue('parentId', value)}
+                onSearch={handleCategorySearch}
+                initialOptions={initialOptions}
+                placeholder={t('categories.selectParentCategory', 'Select parent category')}
+                className="w-full"
+                debounceMs={1000}
+              />
+              <div className="text-xs text-gray-400 mt-1">
+                {t('categories.parentCategoryHelp', 'Leave empty to create a root category')}
+              </div>
             </div>
             <div className="col-span-2 flex items-center gap-2 mt-2">
               <input type="checkbox" id="isActive" {...register('isActive')} className="w-4 h-4" />

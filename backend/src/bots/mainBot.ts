@@ -312,7 +312,7 @@ mainBot.on("message", async (ctx: CustomContext) => {
       if (order) {
         await Order.updateStatus(
           orderId,
-          "rejected",
+          "rejected_by_shop",
           String(ctx.from.id),
           customReason
         );

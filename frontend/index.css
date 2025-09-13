@@ -1,8 +1,179 @@
 @import "tailwindcss";
 
+/* Supreme LL Font Face Declarations */
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Thin.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-ThinItalic.otf") format("opentype");
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-LightItalic.otf") format("opentype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-RegularItalic.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Book.otf") format("opentype");
+    font-weight: 450;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-BookItalic.otf") format("opentype");
+    font-weight: 450;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-MediumItalic.otf") format("opentype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-BoldItalic.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-BoldFlat.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-BoldFlatItalic.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-Black.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("./src/assets/fonts/llsupreme/SupremeLL-BlackItalic.otf") format("opentype");
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Supreme LL Font Classes */
+.supreme-ll {
+    font-family: "Supreme LL", sans-serif;
+}
+
+.supreme-ll-thin {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 100;
+}
+
+.supreme-ll-light {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 300;
+}
+
+.supreme-ll-regular {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 400;
+}
+
+.supreme-ll-book {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 450;
+}
+
+.supreme-ll-medium {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 500;
+}
+
+.supreme-ll-bold {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 700;
+}
+
+.supreme-ll-black {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 900;
+}
+
 body {
     background: #232c43;
     color: #f3f4f6;
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 400;
     /* Prevent overscroll behavior that might close the WebApp */
     overscroll-behavior: none;
     /* Ensure the body takes full height */

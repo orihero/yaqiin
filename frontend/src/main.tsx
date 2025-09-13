@@ -85,6 +85,10 @@ function App() {
         window.Telegram.WebApp.lockOrientation('portrait');
         window.Telegram.WebApp.disableVerticalSwipes();
         window.Telegram.WebApp.disableHorizontalSwipes();
+        window.Telegram.WebApp.BackButton.show();
+        window.Telegram.WebApp.BackButton.onClick(() => {
+          console.log("Back button pressed");
+        });
       }
     } catch (error) {
       console.error("Error initializing Telegram WebApp:", error);

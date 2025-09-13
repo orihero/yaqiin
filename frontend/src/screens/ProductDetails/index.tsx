@@ -6,6 +6,8 @@ import { Icon } from "@iconify/react";
 import { useTranslation } from 'react-i18next';
 import ProductCard from "../../components/ProductCard";
 import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
+import BottomSheet from "../HomeScreen/components/BottomSheet";
+import { toast } from 'react-toastify';
 
 const ProductDetails: React.FC = () => {
     const { id: productId } = useParams<{ id: string }>();
@@ -29,6 +31,10 @@ const ProductDetails: React.FC = () => {
     const isInCart = !!cartItem;
     const cartQuantity = cartItem?.quantity || 0;
 
+    // BottomSheet state
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [quantity, setQuantity] = useState(1);
+
     if (isLoading) return <div className="text-center py-12">{t('productDetails.loading')}</div>;
     if (isError || !product)
         return (
@@ -37,36 +43,56 @@ const ProductDetails: React.FC = () => {
             </div>
         );
 
-    const handleAddToCart = () => {
+    // Open sheet with product
+    const handleAddClick = () => {
+        setQuantity(1);
+        setSheetOpen(true);
+    };
+
+    // Confirm add/update
+    const handleConfirm = () => {
         try {
-            addToCart(product, 1);
+            addToCart(product, quantity);
+            setSheetOpen(false);
+            toast.success(t('productCard.addedToCartSuccess'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         } catch (error: any) {
             console.error('Failed to add to cart:', error);
-            alert(error.message || t('common.addToCartFailed'));
+            toast.error(error.message || t('common.addToCartFailed'), {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
-    const handleUpdateQuantity = (newQuantity: number) => {
-        if (newQuantity <= 0) {
-            removeFromCart(productId!);
-        } else {
-            updateQuantity(productId!, newQuantity);
-        }
+    const handleGoToCart = () => {
+        navigate('/cart');
     };
 
     return (
-        <div className="min-h-screen flex flex-col relative pb-20">
+        <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide safe-area" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
             {/* Product Image */}
             <div
                 className="bg-[#fff] rounded-[54px]"
                 style={{
-                    minHeight: "calc(100vh - 100px)",
-                    maxHeight: "calc(100vh - 100px)",
+                    minHeight: "calc(100vh - 200px)",
+                    maxHeight: "calc(100vh - 200px)",
                 }}
             >
                 <div className="w-full bg-[#F6F6F6] h-70 rounded-b-[60px] flex flex-col items-center overflow-hidden">
                     <button
-                        className="absolute top-6 left-4 bg-white rounded-full p-2 z-20"
+                        className="absolute left-4 bg-white rounded-full p-2 z-20"
+                        style={{ top: 'max(1.5rem, env(safe-area-inset-top, 0px))' }}
                         onClick={() => navigate(-1)}
                     >
                         <Icon
@@ -154,7 +180,7 @@ const ProductDetails: React.FC = () => {
                                             </div>
                                             <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
                                                 {formatPrice(relatedProduct.price || relatedProduct.basePrice)}
-                                                <span className="text-xs font-normal text-gray-400">/{relatedProduct.unit}</span>
+                                                <span className="text-xs font-normal text-gray-400">/{t(`units.${relatedProduct.unit?.toLowerCase()}`) || relatedProduct.unit}</span>
                                             </div>
                                             <button
                                                 className="absolute -bottom-3 -right-3 bg-[#ff7a00] rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-4 border-white"
@@ -184,41 +210,92 @@ const ProductDetails: React.FC = () => {
                 </div>
             </div>
             {/* Bottom Bar */}
-            <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 h-20 py-3 px-6 flex justify-between items-center z-50 mx-auto shadow-lg">
-                <span className="text-[#232c43] text-xl font-bold">
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md h-20 py-3 px-6 flex justify-between items-center z-50 mx-auto ">
+                <span className="text-white text-2xl font-bold">
                     {formatPrice(product.price || product.basePrice)}{" "}
-                    <span className="text-sm font-normal text-gray-500">
-                        /{product.unit}
-                    </span>
+                        <span className="text-sm font-normal text-gray-500">
+                            /{t(`units.${product.unit?.toLowerCase()}`) || product.unit}
+                        </span>
                 </span>
                 
                 {!isInCart ? (
                     <button
                         className="bg-[#ff7a00] text-white font-bold py-2 px-6 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
-                        onClick={handleAddToCart}
+                        onClick={handleAddClick}
                     >
                         {t('productCard.addToCart')}
                     </button>
                 ) : (
-                    <div className="flex items-center gap-2">
+                    <button
+                        className="bg-[#ff7a00] text-white font-bold py-4 px-6 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
+                        onClick={handleGoToCart}
+                    >
+                        {t('productCard.goToCart')}
+                    </button>
+                )}
+            </div>
+            <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
+                {product && (
+                    <div className="flex flex-col items-center">
+                        <img
+                            src={
+                                product.images?.[0] ||
+                                "https://via.placeholder.com/80x80?text=No+Image"
+                            }
+                            alt={
+                                product.name?.uz ||
+                                product.name?.ru ||
+                                t('productCard.product')
+                            }
+                            className="w-20 h-20 rounded-xl object-cover mb-2"
+                        />
+                        <div className="font-semibold text-lg text-[#232c43] mb-1">
+                            {product.name?.uz ||
+                                product.name?.ru ||
+                                "Product"}
+                        </div>
+                        <div className="text-[#ff7a00] font-bold text-base mb-2">
+                            {formatPrice(product.price || product.basePrice)}
+                            <span className="text-xs font-normal text-gray-400">
+                                /{t(`units.${product.unit?.toLowerCase()}`) || product.unit}
+                            </span>
+                        </div>
+                        {/* Quantity controls */}
+                        <div className="flex flex-row items-center gap-4 my-4">
+                            <button
+                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
+                                onClick={() =>
+                                    setQuantity((q) => Math.max(1, q - 1))
+                                }
+                            >
+                                <Icon icon="mdi:minus" />
+                            </button>
+                            <input
+                                type="text"
+                                value={quantity}
+                                className="min-w-4 max-w-20 outline-none text-right text-[#333]"
+                                onChange={(e) =>
+                                    setQuantity(() =>
+                                        Number(e.target.value || 1)
+                                    )
+                                }
+                            />
+                            <button
+                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
+                                onClick={() => setQuantity((q) => q + 1)}
+                            >
+                                <Icon icon="mdi:plus" />
+                            </button>
+                        </div>
                         <button
-                            className="w-7 h-7 rounded-full bg-[#ff7a00] flex items-center justify-center text-lg font-bold text-white hover:bg-[#e66a00] transition-colors"
-                            onClick={() => handleUpdateQuantity(cartQuantity - 1)}
+                            className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
+                            onClick={handleConfirm}
                         >
-                            –
-                        </button>
-                        <span className="font-semibold text-base text-[#232c43] min-w-6 text-center">
-                            {cartQuantity}
-                        </span>
-                        <button
-                            className="w-7 h-7 rounded-full bg-[#ff7a00] flex items-center justify-center text-lg font-bold text-white hover:bg-[#e66a00] transition-colors"
-                            onClick={() => handleUpdateQuantity(cartQuantity + 1)}
-                        >
-                            +
+                            {t('productCard.addToCart')}
                         </button>
                     </div>
                 )}
-            </div>
+            </BottomSheet>
         </div>
     );
 };

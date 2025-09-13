@@ -94,7 +94,7 @@ export interface IOrder extends Document {
   deliveryAddress: IOrderAddress;
   paymentMethod: 'cash_on_delivery' | 'bank_transfer';
   paymentStatus: 'pending' | 'paid' | 'failed';
-  status: 'created' | 'confirmed' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected';
+  status: 'created' | 'operator_confirmed' | 'packing' | 'packed' | 'courier_picked' | 'delivered' | 'paid' | 'rejected_by_shop' | 'rejected_by_courier' | 'cancelled_by_client';
   rejectionReason?: string;
   statusHistory?: IOrderStatusHistory[];
   scheduledDelivery?: IOrderScheduledDelivery;
@@ -120,7 +120,7 @@ const OrderSchema = new Schema<IOrder>({
   deliveryAddress: { type: OrderAddressSchema, required: true },
   paymentMethod: { type: String, enum: ['cash_on_delivery', 'bank_transfer'], required: true },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], required: true },
-  status: { type: String, enum: ['created', 'confirmed', 'packing', 'packed', 'courier_picked', 'delivered', 'paid', 'rejected'], required: true },
+  status: { type: String, enum: ['created', 'operator_confirmed', 'packing', 'packed', 'courier_picked', 'delivered', 'paid', 'rejected_by_shop', 'rejected_by_courier', 'cancelled_by_client'], required: true },
   rejectionReason: { type: String },
   statusHistory: [OrderStatusHistorySchema],
   scheduledDelivery: { type: OrderScheduledDeliverySchema },
@@ -151,7 +151,7 @@ OrderSchema.statics.updateStatus = async function(orderId, newStatus, updatedBy,
   const order = await this.findById(orderId);
   if (!order) return null;
   order.status = newStatus;
-  if (newStatus === 'rejected' && reason) {
+  if ((newStatus === 'rejected_by_shop' || newStatus === 'rejected_by_courier') && reason) {
     order.rejectionReason = reason;
   }
   order.statusHistory = order.statusHistory || [];

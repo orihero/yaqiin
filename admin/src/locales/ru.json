@@ -95,6 +95,8 @@
     "select": "Выбрать...",
     "search": "Поиск...",
     "noOptionsFound": "Варианты не найдены",
+    "searching": "Поиск...",
+    "typeToSearch": "Введите для поиска...",
     "thisWeek": "Эта неделя",
     "lastWeek": "Прошлая неделя",
     "last7Days": "Последние 7 дней",
@@ -121,7 +123,8 @@
       "previous": "<",
       "next": ">",
       "last": ">>"
-    }
+    },
+    "addToCartFailed": "Не удалось добавить товар в корзину"
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -268,7 +271,10 @@
     "descriptionUzbek": "Описание (узбекский)",
     "descriptionRussian": "Описание (русский)",
     "iconName": "Иконка (имя Iconify)",
-    "iconPlaceholder": "например mdi:food-apple"
+    "iconPlaceholder": "например, mdi:food-apple",
+    "noParent": "Без родителя (корневая категория)",
+    "selectParentCategory": "Выберите родительскую категорию",
+    "parentCategoryHelp": "Оставьте пустым для создания корневой категории"
   },
   "products": {
     "title": "Товары",
@@ -322,6 +328,58 @@
     "noProductsFound": "Товары не найдены.",
     "clickAddProductToCreate": "Нажмите 'Добавить товар' чтобы создать первый товар.",
     "failedToLoadProducts": "Не удалось загрузить товары."
+  },
+  "productDetails": {
+    "loading": "Загрузка деталей товара...",
+    "notFound": "Товар не найден",
+    "available": "Доступен в наличии",
+    "outOfStock": "Нет в наличии",
+    "description": "Описание товара",
+    "similar": "Похожие товары",
+    "failedToLoad": "Не удалось загрузить похожие товары",
+    "noSimilar": "Похожие товары не найдены"
+  },
+  "productCard": {
+    "product": "Товар",
+    "addToCart": "Добавить в корзину",
+    "goToCart": "Перейти в корзину",
+    "addedToCartSuccess": "Товар успешно добавлен в корзину!",
+    "kg": "кг"
+  },
+  "units": {
+    "pcs": "шт",
+    "kg": "кг",
+    "g": "г",
+    "l": "л",
+    "ml": "мл",
+    "pack": "пакет",
+    "box": "коробка",
+    "bottle": "бутылка",
+    "can": "банка",
+    "bag": "мешок",
+    "piece": "кусок",
+    "slice": "ломтик",
+    "cup": "чашка",
+    "tbsp": "ст.л.",
+    "tsp": "ч.л.",
+    "bunch": "пучок",
+    "head": "головка",
+    "clove": "зубчик",
+    "sprig": "веточка",
+    "sheet": "лист",
+    "roll": "рулон",
+    "bar": "плитка",
+    "stick": "палочка",
+    "cube": "кубик",
+    "scoop": "ложка",
+    "portion": "порция",
+    "serving": "подача",
+    "meal": "блюдо",
+    "set": "набор",
+    "pair": "пара",
+    "dozen": "дюжина",
+    "hundred": "сотня",
+    "thousand": "тысяча"
   },
   "orders": {
     "title": "Заказы",

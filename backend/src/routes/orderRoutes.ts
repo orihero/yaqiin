@@ -10,6 +10,43 @@ import authMiddleware from "../utils/authMiddleware";
 import { parseQuery } from "../utils/queryHelper";
 import { escapeMarkdownV2, escapeMarkdownV2Url } from "../utils/telegram";
 import { sendOrderCreatedTelegramNotification } from '../bots/controllers/telegramOrderNotification';
+import mainBot from "../bots/mainBot";
+
+// Function to send order status update notification to client
+async function sendOrderStatusUpdateNotification(telegramId: string, order: any, newStatus: string, oldStatus: string) {
+  try {
+    console.log(`[Notification] Starting notification for telegramId: ${telegramId}, order: ${order.orderNumber}, status: ${oldStatus} -> ${newStatus}`);
+    
+    const statusMessages: Record<string, string> = {
+      'created': '📝 Your order has been created and is being processed',
+      'operator_confirmed': '✅ Your order has been confirmed by our operator',
+      'packing': '📦 Your order is being packed',
+      'packed': '📦 Your order has been packed and is ready for pickup',
+      'courier_picked': '🚚 Your order has been picked up by the courier',
+      'delivered': '🎉 Your order has been delivered!',
+      'paid': '💰 Payment for your order has been received',
+      'rejected_by_shop': '❌ Your order was rejected by the shop',
+      'rejected_by_courier': '❌ Your order was rejected by the courier',
+      'cancelled_by_client': '🚫 Your order has been cancelled'
+    };
+
+    const message = statusMessages[newStatus] || `📋 Your order status has been updated to: ${newStatus}`;
+    
+    const notificationText = `🛍️ *Order Update*\n\n` +
+      `Order #${order.orderNumber}\n` +
+      `Status: ${message}\n\n` +
+      `Previous status: ${oldStatus}\n` +
+      `New status: ${newStatus}`;
+    
+    console.log(`[Notification] Sending message:`, notificationText);
+    
+    await mainBot.telegram.sendMessage(telegramId, notificationText, { parse_mode: 'Markdown' });
+    console.log(`[Notification] Message sent successfully to ${telegramId}`);
+  } catch (error) {
+    console.error('Failed to send order status notification:', error);
+    console.error('Error details:', error);
+  }
+}
 
 const router = Router();
 
@@ -222,6 +259,7 @@ router.post(
 
 router.put(
   "/:id",
+  authMiddleware,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const order = await Order.findById(req.params.id);
@@ -232,78 +270,105 @@ router.put(
 
       const user = (req as any).user;
       const newStatus = req.body.status;
+      const isAdmin = user && user.role === "admin";
       const isClient = user && user.role === "client";
       const isShop = user && user.role === "shop_owner";
       const isCourier = user && user.role === "courier";
 
-      // Enforce status transitions
-      if (newStatus === "cancelled_by_client") {
-        if (!isClient) {
-          res
-            .status(403)
-            .json({
-              success: false,
-              message: "Only clients can cancel orders.",
-            });
-          return;
+      // Admins can update any order status without restrictions
+      if (!isAdmin) {
+        // Enforce status transitions for non-admin users
+        if (newStatus === "cancelled_by_client") {
+          if (!isClient) {
+            res
+              .status(403)
+              .json({
+                success: false,
+                message: "Only clients can cancel orders.",
+              });
+            return;
+          }
+          if (!["created", "packing"].includes(order.status)) {
+            res
+              .status(400)
+              .json({
+                success: false,
+                message:
+                  "You can only cancel before the courier picks up the order.",
+              });
+            return;
+          }
         }
-        if (!["created", "packing"].includes(order.status)) {
-          res
-            .status(400)
-            .json({
-              success: false,
-              message:
-                "You can only cancel before the courier picks up the order.",
-            });
-          return;
+        if (newStatus === "rejected_by_shop") {
+          if (!isShop) {
+            res
+              .status(403)
+              .json({
+                success: false,
+                message: "Only shop owners can reject orders.",
+              });
+            return;
+          }
+          if (!["created", "packing"].includes(order.status)) {
+            res
+              .status(400)
+              .json({
+                success: false,
+                message: "Shop can only reject before courier picks up.",
+              });
+            return;
+          }
         }
-      }
-      if (newStatus === "rejected_by_shop") {
-        if (!isShop) {
-          res
-            .status(403)
-            .json({
-              success: false,
-              message: "Only shop owners can reject orders.",
-            });
-          return;
-        }
-        if (!["created", "packing"].includes(order.status)) {
-          res
-            .status(400)
-            .json({
-              success: false,
-              message: "Shop can only reject before courier picks up.",
-            });
-          return;
-        }
-      }
-      if (newStatus === "rejected_by_courier") {
-        if (!isCourier) {
-          res
-            .status(403)
-            .json({
-              success: false,
-              message: "Only couriers can reject orders.",
-            });
-          return;
-        }
-        if (order.status !== "courier_picked") {
-          res
-            .status(400)
-            .json({
-              success: false,
-              message: "Courier can only reject after picking up.",
-            });
-          return;
+        if (newStatus === "rejected_by_courier") {
+          if (!isCourier) {
+            res
+              .status(403)
+              .json({
+                success: false,
+                message: "Only couriers can reject orders.",
+              });
+            return;
+          }
+          if (order.status !== "courier_picked") {
+            res
+              .status(400)
+              .json({
+                success: false,
+                message: "Courier can only reject after picking up.",
+              });
+            return;
+          }
         }
       }
 
-      // Allow other status transitions as needed (add more rules if required)
+      // Store the old status for notification purposes
+      const oldStatus = order.status;
 
       // Update order
       Object.assign(order, req.body);
       await order.save();
+
+      // Send notification to client if status changed and user is admin
+      if (isAdmin && newStatus && newStatus !== oldStatus) {
+        console.log(`[Order Update] Admin ${user._id} updating order ${order._id} from ${oldStatus} to ${newStatus}`);
+        try {
+          const client = await User.findById(order.customerId);
+          console.log(`[Order Update] Found client:`, client ? { id: client._id, telegramId: client.telegramId } : 'null');
+          if (client && client.telegramId) {
+            console.log(`[Order Update] Sending notification to client ${client.telegramId}`);
+            await sendOrderStatusUpdateNotification(client.telegramId, order, newStatus, oldStatus);
+            console.log(`[Order Update] Notification sent successfully`);
+          } else {
+            console.log(`[Order Update] No client or telegramId found, skipping notification`);
+          }
+        } catch (notificationError) {
+          console.error("Failed to send order status notification:", notificationError);
+          // Don't fail the request if notification fails
+        }
+      } else {
+        console.log(`[Order Update] Not sending notification - isAdmin: ${isAdmin}, newStatus: ${newStatus}, oldStatus: ${oldStatus}, statusChanged: ${newStatus !== oldStatus}`);
+      }
+
       res.json({ success: true, data: order, message: "Order updated" });
     } catch (err: any) {
       next({ status: 400, message: "Failed to update order", details: err });

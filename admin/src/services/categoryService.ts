@@ -46,4 +46,26 @@ export const getCategoriesHierarchy = async (): Promise<Category[]> => {
 export const getCategoryProductCounts = async (): Promise<{ [categoryId: string]: number }> => {
   const res = await api.get('/categories/product-counts');
   return res.data.data;
+};
+
+export const searchCategories = async (searchTerm: string, excludeId?: string): Promise<Category[]> => {
+  const params = new URLSearchParams({ 
+    limit: '50', // Limit results for better performance
+    search: searchTerm 
+  });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  return res.data.data;
+};
+
+export const getInitialCategories = async (excludeId?: string): Promise<Category[]> => {
+  const params = new URLSearchParams({ 
+    limit: '10', // Fetch initial 10 categories
+    page: '1'
+  });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  return res.data.data;
 }; 

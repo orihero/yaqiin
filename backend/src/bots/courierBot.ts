@@ -253,7 +253,7 @@ courierBot.on("text", async (ctx: CustomContext) => {
     const order = await Order.findById(orderId);
     if (order) {
       if (role === "client_reject") {
-        await Order.updateStatus(orderId, "rejected", String(ctx.from.id), customReason);
+        await Order.updateStatus(orderId, "rejected_by_courier", String(ctx.from.id), customReason);
         await ctx.reply(t(ctx, "orderRejectedFinal", { reason: customReason }));
         
         // Send order status update to orders group
@@ -262,11 +262,11 @@ courierBot.on("text", async (ctx: CustomContext) => {
         if (shop) {
           const user = await User.findOne({ telegramId: String(ctx.from.id) });
           if (user) {
-            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected_by_courier", user);
           }
         }
       } else {
-        await Order.updateStatus(orderId, "rejected", String(ctx.from.id), customReason);
+        await Order.updateStatus(orderId, "rejected_by_courier", String(ctx.from.id), customReason);
         await ctx.reply(t(ctx, "orderRejected"));
         
         // Send order status update to orders group
@@ -275,7 +275,7 @@ courierBot.on("text", async (ctx: CustomContext) => {
         if (shop) {
           const user = await User.findOne({ telegramId: String(ctx.from.id) });
           if (user) {
-            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+            await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected_by_courier", user);
           }
         }
       }
@@ -316,7 +316,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
     if (user.role === "admin" || user.role === "operator") {
       if (order.status === "created") {
         // Accept: set to confirmed, update statusHistory
-        await Order.updateStatus(orderId, "confirmed", (user._id as mongoose.Types.ObjectId).toString());
+        await Order.updateStatus(orderId, "operator_confirmed", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderConfirmedSentToShop"));
         
@@ -324,7 +324,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
         const Shop = require("../models/Shop").default;
         const shop = await Shop.findById(order.shopId);
         if (shop) {
-          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "confirmed", user);
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "operator_confirmed", user);
         }
         
         // Send to shop owner with Accept/Reject buttons
@@ -411,7 +411,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
     const user = await User.findOne({ telegramId: userId });
     if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
     if (user.role === "shop_owner") {
-      if (order.status === "confirmed") {
+      if (order.status === "operator_confirmed") {
         await Order.updateStatus(orderId, "packing", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         await ctx.reply(t(ctx, "orderAcceptedPackingStage"));
@@ -543,15 +543,15 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
     const user = await User.findOne({ telegramId: userId });
     if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
     if (user.role === "shop_owner") {
-      if (order.status === "confirmed") {
-        await Order.updateStatus(orderId, "rejected", (user._id as mongoose.Types.ObjectId).toString());
+      if (order.status === "operator_confirmed") {
+        await Order.updateStatus(orderId, "rejected_by_shop", (user._id as mongoose.Types.ObjectId).toString());
         await ctx.answerCbQuery(t(ctx, "orderRejectedByShopOwner"));
         
         // Send order status update to orders group
         const Shop = require("../models/Shop").default;
         const shop = await Shop.findById(order.shopId);
         if (shop) {
-          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected", user);
+          await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "rejected_by_shop", user);
         }
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBeRejected"));
@@ -771,7 +771,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
     // Check if user is admin or operator
     if (user.role === "admin" || user.role === "operator") {
       // If rejecting, prompt for reason
-      if (newStatus === "rejected") {
+      if (newStatus === "rejected_by_courier" || newStatus === "rejected_by_shop") {
         await ctx.reply(t(ctx, "enterRejectionReason"));
         customReasonMap.set(userId, { orderId, role: "admin", isAdminRejection: true });
         return;
@@ -791,7 +791,7 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
       }
       
       // Handle special cases for status changes
-      if (newStatus === "confirmed") {
+      if (newStatus === "operator_confirmed") {
         // Send to shop owner if order was confirmed
         if (shop && shop.ownerId) {
           const shopOwner = await User.findById(shop.ownerId);

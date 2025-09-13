@@ -19,23 +19,29 @@ export async function sendOrderStatusUpdateToGroup(
   const clientPhone = client?.phoneNumber || '';
 
   const statusEmojis: Record<string, string> = {
-    confirmed: '✅',
+    created: '📝',
+    operator_confirmed: '✅',
     packing: '📦',
     packed: '📦',
     courier_picked: '🚚',
     delivered: '🎯',
     paid: '💵',
-    rejected: '❌',
+    rejected_by_shop: '❌',
+    rejected_by_courier: '❌',
+    cancelled_by_client: '🚫',
   };
 
   const statusLabels: Record<string, string> = {
-    confirmed: 'Buyurtma tasdiqlandi',
+    created: 'Buyurtma yaratildi',
+    operator_confirmed: 'Buyurtma tasdiqlandi',
     packing: 'Buyurtma tayyorlanmoqda',
     packed: 'Buyurtma tayyor',
     courier_picked: 'Kuryer buyurtmani oldi',
     delivered: 'Buyurtma yetkazildi',
     paid: "Buyurtma to'landi",
-    rejected: 'Buyurtma rad etildi',
+    rejected_by_shop: 'Do\'kon tomonidan rad etildi',
+    rejected_by_courier: 'Kuryer tomonidan rad etildi',
+    cancelled_by_client: 'Mijoz tomonidan bekor qilindi',
   };
 
   const emoji = statusEmojis[status] || '📋';
@@ -75,34 +81,42 @@ export function createStatusActionButtons(order: any, currentStatus: string) {
   const buttons: any[][] = [];
 
   const statusTransitions: Record<string, string[]> = {
-    created: ['confirmed', 'rejected'],
-    confirmed: ['packing', 'rejected'],
-    packing: ['packed', 'rejected'],
-    packed: ['courier_picked', 'rejected'],
-    courier_picked: ['delivered', 'rejected'],
-    delivered: ['paid', 'rejected'],
+    created: ['operator_confirmed', 'rejected_by_shop'],
+    operator_confirmed: ['packing', 'rejected_by_shop'],
+    packing: ['packed', 'rejected_by_shop'],
+    packed: ['courier_picked', 'rejected_by_shop'],
+    courier_picked: ['delivered', 'rejected_by_courier'],
+    delivered: ['paid'],
     paid: [],
-    rejected: [],
+    rejected_by_shop: [],
+    rejected_by_courier: [],
+    cancelled_by_client: [],
   };
 
   const statusLabels: Record<string, string> = {
-    confirmed: '✅ Tasdiqlash',
+    created: '📝 Yaratildi',
+    operator_confirmed: '✅ Tasdiqlash',
     packing: '📦 Tayyorlash',
     packed: '📦 Tayyor',
     courier_picked: '🚚 Kuryer oldi',
     delivered: '🎯 Yetkazildi',
     paid: "💵 To'landi",
-    rejected: '❌ Rad etish',
+    rejected_by_shop: '❌ Do\'kon rad etdi',
+    rejected_by_courier: '❌ Kuryer rad etdi',
+    cancelled_by_client: '🚫 Mijoz bekor qildi',
   };
 
   const statusEmojis: Record<string, string> = {
-    confirmed: '✅',
+    created: '📝',
+    operator_confirmed: '✅',
     packing: '📦',
     packed: '📦',
     courier_picked: '🚚',
     delivered: '🎯',
     paid: '💵',
-    rejected: '❌',
+    rejected_by_shop: '❌',
+    rejected_by_courier: '❌',
+    cancelled_by_client: '🚫',
   };
 
   const next = statusTransitions[currentStatus] || [];

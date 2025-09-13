@@ -230,18 +230,18 @@ const MyCartScreen = () => {
     };
 
     return (
-        <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
+        <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
             {/* Main Content Card */}
             <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
                 <div
                     className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
                     style={{
-                        minHeight: "calc(100vh - 90px)",
-                        maxHeight: "calc(100vh - 90px)",
+                        minHeight: "calc(100vh - 140px)",
+                        maxHeight: "calc(100vh - 140px)",
                     }}
                 >
                     {/* Header with Total and Checkout */}
-                    <div className="flex items-center justify-between mb-6 pt-6 px-0">
+                    <div className="flex items-center justify-between " style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
                         <div className="flex-1">
                             <h1 className="text-xl font-bold text-[#232c43] leading-tight">
                                 {t('home.title1')} {t('home.title2')}

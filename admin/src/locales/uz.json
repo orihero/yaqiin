@@ -95,6 +95,8 @@
     "select": "Tanlang...",
     "search": "Qidirish...",
     "noOptionsFound": "Variantlar topilmadi",
+    "searching": "Qidirilmoqda...",
+    "typeToSearch": "Qidirish uchun yozing...",
     "thisWeek": "Bu hafta",
     "lastWeek": "O'tgan hafta",
     "last7Days": "So'nggi 7 kun",
@@ -121,7 +123,8 @@
       "previous": "<",
       "next": ">",
       "last": ">>"
-    }
+    },
+    "addToCartFailed": "Mahsulotni savatchaga qo'shishda xatolik yuz berdi"
   },
   "navigation": {
     "dashboard": "Boshqaruv paneli",
@@ -268,7 +271,10 @@
     "descriptionUzbek": "Tavsif (o'zbekcha)",
     "descriptionRussian": "Tavsif (ruscha)",
     "iconName": "Ikonka (Iconify nomi)",
-    "iconPlaceholder": "masalan mdi:food-apple"
+    "iconPlaceholder": "masalan, mdi:food-apple",
+    "noParent": "Ota kategoriya yo'q (asosiy kategoriya)",
+    "selectParentCategory": "Ota kategoriyani tanlang",
+    "parentCategoryHelp": "Asosiy kategoriya yaratish uchun bo'sh qoldiring"
   },
   "products": {
     "title": "Mahsulotlar",
@@ -322,6 +328,58 @@
     "noProductsFound": "Mahsulotlar topilmadi.",
     "clickAddProductToCreate": "Birinchi mahsulotni yaratish uchun 'Mahsulot qo'shish' tugmasini bosing.",
     "failedToLoadProducts": "Mahsulotlarni yuklashda xatolik yuz berdi."
+  },
+  "productDetails": {
+    "loading": "Mahsulot tafsilotlari yuklanmoqda...",
+    "notFound": "Mahsulot topilmadi",
+    "available": "Omborda mavjud",
+    "outOfStock": "Omborda yo'q",
+    "description": "Mahsulot tavsifi",
+    "similar": "O'xshash mahsulotlar",
+    "failedToLoad": "O'xshash mahsulotlarni yuklashda xatolik yuz berdi",
+    "noSimilar": "O'xshash mahsulotlar topilmadi"
+  },
+  "productCard": {
+    "product": "Mahsulot",
+    "addToCart": "Savatchaga qo'shish",
+    "goToCart": "Savatchaga o'tish",
+    "addedToCartSuccess": "Mahsulot muvaffaqiyatli savatchaga qo'shildi!",
+    "kg": "kg"
+  },
+  "units": {
+    "pcs": "dona",
+    "kg": "kg",
+    "g": "gramm",
+    "l": "litr",
+    "ml": "millilitr",
+    "pack": "paket",
+    "box": "quti",
+    "bottle": "shisha",
+    "can": "banka",
+    "bag": "paket",
+    "piece": "parça",
+    "slice": "tilim",
+    "cup": "fincan",
+    "tbsp": "osh qoshiq",
+    "tsp": "choy qoshiq",
+    "bunch": "dasta",
+    "head": "bosh",
+    "clove": "tish",
+    "sprig": "shoxcha",
+    "sheet": "barg",
+    "roll": "rulon",
+    "bar": "plita",
+    "stick": "tayoq",
+    "cube": "kubik",
+    "scoop": "qoshiq",
+    "portion": "porsiya",
+    "serving": "xizmat",
+    "meal": "ovqat",
+    "set": "to'plam",
+    "pair": "juft",
+    "dozen": "o'n ikki",
+    "hundred": "yuz",
+    "thousand": "ming"
   },
   "orders": {
     "title": "Buyurtmalar",
@@ -681,6 +739,8 @@
     "select": "Tanlang...",
     "search": "Qidirish...",
     "noOptionsFound": "Variantlar topilmadi",
+    "searching": "Qidirilmoqda...",
+    "typeToSearch": "Qidirish uchun yozing...",
     "thisWeek": "Bu hafta",
     "lastWeek": "O'tgan hafta",
     "last7Days": "So'nggi 7 kun",
