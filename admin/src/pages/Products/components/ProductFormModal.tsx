@@ -5,6 +5,7 @@ import { Category } from '@yaqiin/shared/types/category';
 import { Product } from '@yaqiin/shared/types/product';
 import MaskedInput from '../../../components/MaskedInput';
 import SearchableSelect from '../../../components/SearchableSelect';
+import SequentialCategorySelect from '../../../components/SequentialCategorySelect';
 import { getUnitOptions } from '../../../utils/units';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
 
@@ -143,6 +144,7 @@ export default function ProductFormModal({ open = true, product, loading = false
     queryFn: getAllCategories,
   });
 
+
   // Load product data when editing
   useEffect(() => {
     if (product) {
@@ -245,27 +247,14 @@ export default function ProductFormModal({ open = true, product, loading = false
                 required 
               />
             </div>
-            <div>
-              <label className="block mb-1 text-white">📂 Category *</label>
-              {loadingCategories ? (
-                <p className="text-gray-400">⏳ Loading categories...</p>
-              ) : (
-                <select 
-                  className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                  value={state.categoryId} 
-                  onChange={e => dispatch({ type: 'SET_FIELD', field: 'categoryId', value: e.target.value })} 
-                  required
-                >
-                  <option value="">Select category</option>
-                  {categories && categories.length === 0 ? (
-                    <option value="" disabled>No categories available</option>
-                  ) : (
-                    categories?.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name.uz}</option>
-                    ))
-                  )}
-                </select>
-              )}
+            <div className="col-span-2">
+              <SequentialCategorySelect
+                value={state.categoryId}
+                onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'categoryId', value })}
+                placeholder="Select category"
+                className="w-full"
+                open={open}
+              />
             </div>
             <div>
               <label className="block mb-1 text-white">💰 Base Price *</label>

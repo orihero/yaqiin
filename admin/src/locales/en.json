@@ -296,7 +296,13 @@
     "iconPlaceholder": "e.g. mdi:food-apple",
     "noParent": "No Parent (Root Category)",
     "selectParentCategory": "Select parent category",
-    "parentCategoryHelp": "Leave empty to create a root category"
+    "parentCategoryHelp": "Leave empty to create a root category",
+    "mainCategory": "Main Category",
+    "subCategory": "Sub Category",
+    "selectMainCategory": "Select main category",
+    "selectSubCategory": "Select subcategory (optional)",
+    "optional": "optional",
+    "clearSelection": "Clear selection"
   },
   "products": {
     "title": "Products",

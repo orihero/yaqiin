@@ -274,7 +274,13 @@
     "iconPlaceholder": "masalan, mdi:food-apple",
     "noParent": "Ota kategoriya yo'q (asosiy kategoriya)",
     "selectParentCategory": "Ota kategoriyani tanlang",
-    "parentCategoryHelp": "Asosiy kategoriya yaratish uchun bo'sh qoldiring"
+    "parentCategoryHelp": "Asosiy kategoriya yaratish uchun bo'sh qoldiring",
+    "mainCategory": "Asosiy kategoriya",
+    "subCategory": "Past kategoriya",
+    "selectMainCategory": "Asosiy kategoriyani tanlang",
+    "selectSubCategory": "Past kategoriyani tanlang (ixtiyoriy)",
+    "optional": "ixtiyoriy",
+    "clearSelection": "Tanlovni tozalash"
   },
   "products": {
     "title": "Mahsulotlar",

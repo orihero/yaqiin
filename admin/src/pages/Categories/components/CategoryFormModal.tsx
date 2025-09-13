@@ -3,9 +3,8 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useQuery } from '@tanstack/react-query';
-import { getCategoriesHierarchy, searchCategories, getInitialCategories } from '../../../services/categoryService';
 import { Category } from '@yaqiin/shared/types/category';
-import SearchableSelectAsync from '../../../components/SearchableSelectAsync';
+import SequentialCategorySelect from '../../../components/SequentialCategorySelect';
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -38,84 +37,6 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
   const { t } = useTranslation();
   const isEdit = mode === 'edit';
   
-  // Helper function to get all descendant category IDs (to prevent circular references)
-  const getDescendantIds = (categoryId: string, categories: Category[]): string[] => {
-    const descendants: string[] = [];
-    
-    const findDescendants = (parentId: string) => {
-      categories.forEach(category => {
-        if (category.parentId === parentId) {
-          descendants.push(category._id);
-          findDescendants(category._id); // Recursively find children
-        }
-      });
-    };
-    
-    findDescendants(categoryId);
-    return descendants;
-  };
-
-  // Helper function to format categories for searchable select
-  const formatCategoriesForSelect = (categories: Category[], excludeId?: string): { value: string; label: string }[] => {
-    const formatCategory = (category: Category): { value: string; label: string } => {
-      return {
-        value: category._id,
-        label: category.name.uz,
-      };
-    };
-
-    const result: { value: string; label: string }[] = [];
-    
-    // Add "No Parent" option
-    result.push({ value: '', label: t('categories.noParent', 'No Parent (Root Category)') });
-    
-    // Get descendant IDs to prevent circular references when editing
-    const descendantIds = excludeId ? getDescendantIds(excludeId, categories) : [];
-    
-    // Add categories, preventing self-selection and circular references
-    categories.forEach(category => {
-      if (category._id !== excludeId && !descendantIds.includes(category._id)) {
-        result.push(formatCategory(category));
-      }
-    });
-    
-    return result;
-  };
-
-  // Async search function for parent categories
-  const handleCategorySearch = async (searchTerm: string): Promise<{ value: string; label: string }[]> => {
-    try {
-      const searchResults = await searchCategories(searchTerm, isEdit ? initialValues?._id : undefined);
-      return formatCategoriesForSelect(searchResults, isEdit ? initialValues?._id : undefined);
-    } catch (error) {
-      console.error('Category search error:', error);
-      return [];
-    }
-  };
-
-  // Fetch initial categories for the dropdown
-  const { data: initialCategories = [] } = useQuery<Category[]>({
-    queryKey: ['initial-categories', isEdit ? initialValues?._id : undefined],
-    queryFn: () => getInitialCategories(isEdit ? initialValues?._id : undefined),
-    enabled: open, // Only fetch when modal is open
-  });
-
-  // Format initial categories for the select
-  const initialOptions: { value: string; label: string }[] = React.useMemo(() => {
-    const options: { value: string; label: string }[] = [
-      { value: '', label: t('categories.noParent', 'No Parent (Root Category)') }
-    ];
-    
-    // Add initial categories
-    initialCategories.forEach(category => {
-      options.push({
-        value: category._id,
-        label: category.name.uz,
-      });
-    });
-    
-    return options;
-  }, [initialCategories, t]);
   const { register, handleSubmit, reset, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
       name: {
@@ -200,14 +121,13 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
             </div>
             <div className="col-span-2">
               <label className="block mb-1">{t('categories.parentCategory', 'Parent Category')}</label>
-              <SearchableSelectAsync
+              <SequentialCategorySelect
                 value={watch('parentId') || ''}
                 onChange={(value) => setValue('parentId', value)}
-                onSearch={handleCategorySearch}
-                initialOptions={initialOptions}
                 placeholder={t('categories.selectParentCategory', 'Select parent category')}
                 className="w-full"
-                debounceMs={1000}
+                open={open}
+                excludeId={isEdit ? initialValues?._id : undefined}
               />
               <div className="text-xs text-gray-400 mt-1">
                 {t('categories.parentCategoryHelp', 'Leave empty to create a root category')}

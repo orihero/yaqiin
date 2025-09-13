@@ -68,4 +68,62 @@ export const getInitialCategories = async (excludeId?: string): Promise<Category
   
   const res = await api.get(`/categories?${params.toString()}`);
   return res.data.data;
+};
+
+export const getRootCategories = async (excludeId?: string): Promise<Category[]> => {
+  const params = new URLSearchParams({ 
+    limit: '1000', // Get all root categories
+    page: '1'
+  });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  // Filter to only root categories on the frontend if backend doesn't support it
+  const allCategories = res.data.data;
+  return allCategories.filter((category: Category) => !category.parentId || category.parentId === null || category.parentId === '');
+};
+
+export const getCategoriesByParent = async (parentId?: string | null, excludeId?: string): Promise<Category[]> => {
+  if (!parentId) {
+    // For root categories, get only root categories
+    return getRootCategories(excludeId);
+  }
+  
+  // For subcategories, query with parentId
+  const params = new URLSearchParams({ parentId });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  return res.data.data;
+};
+
+export const searchRootCategories = async (searchTerm: string, excludeId?: string): Promise<Category[]> => {
+  const params = new URLSearchParams({ 
+    limit: '50',
+    search: searchTerm 
+  });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  // Filter to only root categories on the frontend if backend doesn't support it
+  const allCategories = res.data.data;
+  return allCategories.filter((category: Category) => !category.parentId || category.parentId === null || category.parentId === '');
+};
+
+export const searchCategoriesByParent = async (searchTerm: string, parentId?: string | null, excludeId?: string): Promise<Category[]> => {
+  if (!parentId) {
+    // For root categories, search only root categories
+    return searchRootCategories(searchTerm, excludeId);
+  }
+  
+  // For subcategories, search with parentId
+  const params = new URLSearchParams({ 
+    limit: '50',
+    search: searchTerm,
+    parentId 
+  });
+  if (excludeId) params.append('excludeId', excludeId);
+  
+  const res = await api.get(`/categories?${params.toString()}`);
+  return res.data.data;
 }; 

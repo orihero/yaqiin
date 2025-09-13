@@ -274,7 +274,13 @@
     "iconPlaceholder": "например, mdi:food-apple",
     "noParent": "Без родителя (корневая категория)",
     "selectParentCategory": "Выберите родительскую категорию",
-    "parentCategoryHelp": "Оставьте пустым для создания корневой категории"
+    "parentCategoryHelp": "Оставьте пустым для создания корневой категории",
+    "mainCategory": "Основная категория",
+    "subCategory": "Подкатегория",
+    "selectMainCategory": "Выберите основную категорию",
+    "selectSubCategory": "Выберите подкатегорию (необязательно)",
+    "optional": "необязательно",
+    "clearSelection": "Очистить выбор"
   },
   "products": {
     "title": "Товары",
