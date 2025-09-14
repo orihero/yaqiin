@@ -180,6 +180,19 @@ body {
     min-height: 100vh;
     /* Prevent bounce effects on iOS */
     -webkit-overflow-scrolling: touch;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light mode styles */
+.light body {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+/* Dark mode styles */
+.dark body {
+    background: #232c43;
+    color: #f3f4f6;
 }
 
 /* CSS Custom Properties for safe areas */

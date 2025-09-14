@@ -1,0 +1,133 @@
+{
+  "header": {
+    "logo": "Grover",
+    "navigation": {
+      "home": "Home",
+      "menu": "Menu",
+      "service": "Service",
+      "shop": "Shop"
+    },
+    "search": {
+      "placeholder": "Search"
+    },
+    "cart": {
+      "items": "items"
+    }
+  },
+  "hero": {
+    "tagline": "More than Faster",
+    "title": "Groceries delivered in as little as",
+    "titleHighlight": "2 hours",
+    "description": "Grocer ensures fresh grocery every morning to your family without getting out in this pandemic.",
+    "switch": {
+      "forClients": "For Clients",
+      "forBusiness": "For Business"
+    },
+    "cta": {
+      "orderNow": "Order Now",
+      "orderProcess": "Order Process"
+    },
+    "product": {
+      "freshOrange": "Fresh Orange",
+      "price": "$44.60",
+      "freeShipping": "Free Shipping"
+    },
+    "delivery": {
+      "title": "Delivery",
+      "time": "30 Min"
+    }
+  },
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "language": {
+    "ru": "Русский",
+    "uz": "O'zbekcha",
+    "en": "English"
+  },
+  "features": {
+    "tagline": "What we Serve",
+    "title": "Fruit And Vegetable Delivered To Your Home",
+    "freeShipping": {
+      "title": "Free shipping",
+      "description": "Enjoy Order in a hand using the fresness of groceries"
+    },
+    "returns": {
+      "title": "15 days returns",
+      "description": "Order in a handy way using the freshness of the groceries."
+    },
+    "secureCheckout": {
+      "title": "Secure checkout",
+      "description": "If you get rotten items - return immediately to us."
+    }
+  },
+  "whyChooseUs": {
+    "tagline": "WHY CHOOSE US",
+    "title": "Find Favorites And Discover New Ones",
+    "description": "At vero eos et accusamus et iusto odio dignissimos ducimus blanditiis praesen voluptatum deleniti.",
+    "cta": {
+      "exploreNow": "Explore Now"
+    },
+    "product": {
+      "title": "Melting Cheese",
+      "subtitle": "Red Stovery",
+      "rating": "3.8",
+      "price": "$49.66"
+    }
+  },
+  "courier": {
+    "tagline": "FAST DELIVERY",
+    "title": "Professional Courier Service",
+    "titleHighlight": "At Your Doorstep",
+    "description": "Our dedicated courier team ensures your orders are delivered fresh and on time, every time. Experience reliable delivery service with real-time tracking.",
+    "features": {
+      "fastDelivery": "Lightning-fast delivery in under 30 minutes",
+      "reliable": "Professional couriers with temperature-controlled bags",
+      "tracking": "Real-time order tracking and updates"
+    },
+    "cta": {
+      "exploreNow": "Explore Now"
+    },
+    "stats": {
+      "deliveryTime": "Delivery Time",
+      "averageTime": "Avg. 25 mins"
+    },
+    "bikeDelivery": {
+      "title": "Bike Delivery",
+      "description": "Eco-friendly bicycle service ensures quick delivery"
+    }
+  },
+  "appDownload": {
+    "tagline": "Download our app",
+    "title": "Get The Groceries App",
+    "titleHighlight": "Order More Easily.",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+    "phonePlaceholder": "App Screenshot Placeholder"
+  },
+  "footer": {
+    "logo": "Grover",
+    "description": "Fast delivery, which is active all over the world, serves with many transportation vehicles.",
+    "company": {
+      "title": "Company",
+      "aboutUs": "About Us",
+      "blog": "Blog",
+      "allProducts": "All Products",
+      "locationsMap": "Locations Map"
+    },
+    "services": {
+      "title": "Services",
+      "orderTracking": "Order tracking",
+      "wishList": "Wish List",
+      "myAccount": "My account",
+      "termsConditions": "Terms & Conditions"
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "description": "Subscribe to our weekly Newsletter and receive updates via email.",
+      "emailPlaceholder": "Enter your email",
+      "subscribe": "Subscribe"
+    },
+    "copyright": "© 2024 Grover. All rights reserved."
+  }
+}

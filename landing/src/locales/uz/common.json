@@ -1,0 +1,111 @@
+{
+  "header": {
+    "logo": "Grover",
+    "navigation": {
+      "home": "Bosh sahifa",
+      "menu": "Menyu",
+      "service": "Xizmat",
+      "shop": "Do'kon"
+    },
+    "search": {
+      "placeholder": "Qidirish"
+    },
+    "cart": {
+      "items": "mahsulot"
+    }
+  },
+  "hero": {
+    "tagline": "Tezroqdan ham tezroq",
+    "title": "Oziq-ovqat mahsulotlari",
+    "titleHighlight": "2 soatda",
+    "description": "Grocer pandemiya davrida uydan chiqmasdan oilangizga har kuni ertalab yangi oziq-ovqat mahsulotlarini ta'minlaydi.",
+    "switch": {
+      "forClients": "Mijozlar uchun",
+      "forBusiness": "Biznes uchun"
+    },
+    "cta": {
+      "orderNow": "Hozir buyurtma bering",
+      "orderProcess": "Buyurtma jarayoni"
+    },
+    "product": {
+      "freshOrange": "Yangi apelsin",
+      "price": "$44.60",
+      "freeShipping": "Bepul yetkazib berish"
+    },
+    "delivery": {
+      "title": "Yetkazib berish",
+      "time": "30 daqiqa"
+    }
+  },
+  "theme": {
+    "light": "Yorug' mavzu",
+    "dark": "Qorong'u mavzu"
+  },
+  "language": {
+    "ru": "Русский",
+    "uz": "O'zbekcha",
+    "en": "English"
+  },
+  "features": {
+    "tagline": "Biz nima taklif qilamiz",
+    "title": "Meva va sabzavotlar uyingizga yetkazib beriladi",
+    "freeShipping": {
+      "title": "Bepul yetkazib berish",
+      "description": "Mahsulotlarning yangiligidan foydalanib, qo'lda buyurtma berishdan zavqlaning"
+    },
+    "returns": {
+      "title": "15 kunlik qaytarish",
+      "description": "Mahsulotlarning yangiligidan foydalanib, qulay usulda buyurtma bering."
+    },
+    "secureCheckout": {
+      "title": "Xavfsiz to'lov",
+      "description": "Agar buzilgan mahsulotlar olsangiz - darhol bizga qaytaring."
+    }
+  },
+  "whyChooseUs": {
+    "tagline": "NIEGA BIZNI TANLASH",
+    "title": "Sevimlilaringizni toping va yangilarini kashf qiling",
+    "description": "Vero eos et accusamus et iusto odio dignissimos ducimus blanditiis praesen voluptatum deleniti.",
+    "cta": {
+      "exploreNow": "Hozir kashf qiling"
+    },
+    "product": {
+      "title": "Erigan pishloq",
+      "subtitle": "Qizil hikoya",
+      "rating": "3.8",
+      "price": "$49.66"
+    }
+  },
+  "appDownload": {
+    "tagline": "Ilovamizni yuklab oling",
+    "title": "Oziq-ovqat ilovasini oling",
+    "titleHighlight": "Osonroq buyurtma bering.",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+    "phonePlaceholder": "Ilova skrinshoti uchun joy"
+  },
+  "footer": {
+    "logo": "Grover",
+    "description": "Tez yetkazib berish, butun dunyo bo'ylab faol bo'lib, ko'plab transport vositalari bilan xizmat ko'rsatadi.",
+    "company": {
+      "title": "Kompaniya",
+      "aboutUs": "Biz haqimizda",
+      "blog": "Blog",
+      "allProducts": "Barcha mahsulotlar",
+      "locationsMap": "Joylashuvlar xaritasi"
+    },
+    "services": {
+      "title": "Xizmatlar",
+      "orderTracking": "Buyurtmani kuzatish",
+      "wishList": "Istaklar ro'yxati",
+      "myAccount": "Mening hisobim",
+      "termsConditions": "Shartlar va sharoitlar"
+    },
+    "contact": {
+      "title": "Bog'lanish",
+      "description": "Haftalik yangiliklarimizga obuna bo'ling va elektron pochta orqali yangilanishlarni oling.",
+      "emailPlaceholder": "Elektron pochtangizni kiriting",
+      "subscribe": "Obuna bo'lish"
+    },
+    "copyright": "© 2024 Grover. Barcha huquqlar himoyalangan."
+  }
+}

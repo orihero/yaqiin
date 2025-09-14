@@ -9,6 +9,8 @@ import '../index.css';
 import { retrieveLaunchParams } from '@telegram-apps/sdk';
 import './i18n';
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
 import AccountScreen from './screens/AccountScreen/index';
 import AddressScreen from './screens/AddressScreen/index';
 import HomeScreen from './screens/HomeScreen/index';
@@ -133,9 +135,11 @@ const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop closeOnClick pauseOnFocusLoss pauseOnHover />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop closeOnClick pauseOnFocusLoss pauseOnHover />
+      </QueryClientProvider>
+    </ThemeProvider>
   </React.StrictMode>
 ); 

@@ -3,6 +3,19 @@
 body {
   background: #181e2a;
   color: #f3f4f6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light mode styles */
+.light body {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Dark mode styles */
+.dark body {
+  background: #181e2a;
+  color: #f3f4f6;
 }
 
 /* Custom animations for language selector */

@@ -18,10 +18,10 @@ function Sidebar() {
     ];
 
   return (
-    <aside className="h-[92vh] w-64 bg-[#181e2a] rounded-3xl shadow-xl flex flex-col py-8 px-4 fixed top-4 left-4 z-20 border-4 border-[#232c43]">
+    <aside className="h-[92vh] w-64 bg-[#181e2a] dark:bg-gray-900 rounded-3xl shadow-xl flex flex-col py-8 px-4 fixed top-4 left-4 z-20 border-4 border-[#232c43] dark:border-gray-800">
       <div className="mb-10 flex items-center gap-2 justify-center">
         <span className="text-cyan-400 text-3xl font-bold">🏢</span>
-        <span className="text-gray-100 text-xl font-semibold tracking-wide">{t('navigation.admin')}</span>
+        <span className="text-gray-100 dark:text-white text-xl font-semibold tracking-wide">{t('navigation.admin')}</span>
       </div>
       <nav className="flex-1">
         <ul className="space-y-2">
@@ -30,8 +30,8 @@ function Sidebar() {
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 rounded-xl transition-colors font-medium text-gray-300 hover:bg-[#232c43] hover:text-cyan-400 ${
-                    isActive ? 'bg-[#232c43] text-cyan-400' : ''
+                  `flex items-center gap-3 px-4 py-2 rounded-xl transition-colors font-medium text-gray-300 dark:text-gray-400 hover:bg-[#232c43] dark:hover:bg-gray-800 hover:text-cyan-400 ${
+                    isActive ? 'bg-[#232c43] dark:bg-gray-800 text-cyan-400' : ''
                   }`
                 }
               >

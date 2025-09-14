@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom dark mode styles */
+.dark {
+  color-scheme: dark;
+}
+
+/* Ensure dark mode classes work */
+.dark .dark\:bg-dark-900 {
+  background-color: #1a2332 !important;
+}
+
+.dark .dark\:bg-dark-800 {
+  background-color: #232c43 !important;
+}
+
+.dark .dark\:bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+.dark .dark\:bg-gray-700 {
+  background-color: #374151 !important;
+}
+
+.dark .dark\:text-white {
+  color: #ffffff !important;
+}
+
+.dark .dark\:text-gray-300 {
+  color: #d1d5db !important;
+}
+
+.dark .dark\:text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.dark .dark\:border-dark-800 {
+  border-color: #232c43 !important;
+}
+
+.dark .dark\:border-gray-600 {
+  border-color: #4b5563 !important;
+}
+
+/* Supreme LL Font Face Declarations */
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Thin.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-ThinItalic.otf") format("opentype");
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Light.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-LightItalic.otf") format("opentype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Regular.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-RegularItalic.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Book.otf") format("opentype");
+    font-weight: 450;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-BookItalic.otf") format("opentype");
+    font-weight: 450;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Medium.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-MediumItalic.otf") format("opentype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-BoldItalic.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-BoldFlat.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-BoldFlatItalic.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-Black.otf") format("opentype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Supreme LL";
+    src: url("../assets/fonts/llsupreme/SupremeLL-BlackItalic.otf") format("opentype");
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+body {
+  font-family: "Supreme LL", sans-serif;
+  font-weight: 400;
+}
+
+/* Supreme LL Font Classes */
+.supreme-ll {
+    font-family: "Supreme LL", sans-serif;
+}
+
+.supreme-ll-thin {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 100;
+}
+
+.supreme-ll-light {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 300;
+}
+
+.supreme-ll-regular {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 400;
+}
+
+.supreme-ll-book {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 450;
+}
+
+.supreme-ll-medium {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 500;
+}
+
+.supreme-ll-bold {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 700;
+}
+
+.supreme-ll-black {
+    font-family: "Supreme LL", sans-serif;
+    font-weight: 900;
+}

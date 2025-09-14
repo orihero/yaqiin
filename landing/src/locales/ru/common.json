@@ -1,0 +1,111 @@
+{
+  "header": {
+    "logo": "Grover",
+    "navigation": {
+      "home": "Главная",
+      "menu": "Меню",
+      "service": "Сервис",
+      "shop": "Магазин"
+    },
+    "search": {
+      "placeholder": "Поиск"
+    },
+    "cart": {
+      "items": "товаров"
+    }
+  },
+  "hero": {
+    "tagline": "Больше чем быстрее",
+    "title": "Продукты доставляются за",
+    "titleHighlight": "2 часа",
+    "description": "Grocer обеспечивает свежие продукты каждое утро для вашей семьи, не выходя из дома во время пандемии.",
+    "switch": {
+      "forClients": "Для клиентов",
+      "forBusiness": "Для бизнеса"
+    },
+    "cta": {
+      "orderNow": "Заказать сейчас",
+      "orderProcess": "Процесс заказа"
+    },
+    "product": {
+      "freshOrange": "Свежий апельсин",
+      "price": "$44.60",
+      "freeShipping": "Бесплатная доставка"
+    },
+    "delivery": {
+      "title": "Доставка",
+      "time": "30 мин"
+    }
+  },
+  "theme": {
+    "light": "Светлая тема",
+    "dark": "Темная тема"
+  },
+  "language": {
+    "ru": "Русский",
+    "uz": "O'zbekcha",
+    "en": "English"
+  },
+  "features": {
+    "tagline": "Что мы предлагаем",
+    "title": "Фрукты и овощи доставляются к вам домой",
+    "freeShipping": {
+      "title": "Бесплатная доставка",
+      "description": "Наслаждайтесь заказом в руке, используя свежесть продуктов"
+    },
+    "returns": {
+      "title": "15 дней возврата",
+      "description": "Заказывайте удобным способом, используя свежесть продуктов."
+    },
+    "secureCheckout": {
+      "title": "Безопасная оплата",
+      "description": "Если вы получите испорченные товары - немедленно верните их нам."
+    }
+  },
+  "whyChooseUs": {
+    "tagline": "ПОЧЕМУ ВЫБРАТЬ НАС",
+    "title": "Найдите избранное и откройте новое",
+    "description": "В vero eos et accusamus et iusto odio dignissimos ducimus blanditiis praesen voluptatum deleniti.",
+    "cta": {
+      "exploreNow": "Исследовать сейчас"
+    },
+    "product": {
+      "title": "Плавленый сыр",
+      "subtitle": "Красная история",
+      "rating": "3.8",
+      "price": "$49.66"
+    }
+  },
+  "appDownload": {
+    "tagline": "Скачайте наше приложение",
+    "title": "Получите приложение для продуктов",
+    "titleHighlight": "Заказывайте проще.",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+    "phonePlaceholder": "Заглушка для скриншота приложения"
+  },
+  "footer": {
+    "logo": "Grover",
+    "description": "Быстрая доставка, которая работает по всему миру, обслуживает множеством транспортных средств.",
+    "company": {
+      "title": "Компания",
+      "aboutUs": "О нас",
+      "blog": "Блог",
+      "allProducts": "Все продукты",
+      "locationsMap": "Карта локаций"
+    },
+    "services": {
+      "title": "Сервисы",
+      "orderTracking": "Отслеживание заказа",
+      "wishList": "Список желаний",
+      "myAccount": "Мой аккаунт",
+      "termsConditions": "Условия и положения"
+    },
+    "contact": {
+      "title": "Связаться с нами",
+      "description": "Подпишитесь на нашу еженедельную рассылку и получайте обновления по электронной почте.",
+      "emailPlaceholder": "Введите ваш email",
+      "subscribe": "Подписаться"
+    },
+    "copyright": "© 2024 Grover. Все права защищены."
+  }
+}
