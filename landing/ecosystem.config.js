@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'yaqiin-landing',
-      script: 'yarn',
+      script: 'npm',
       cwd: './landing',
       instances: 1,
       autorestart: true,
@@ -21,7 +21,7 @@ module.exports = {
       log_file: './logs/combined.log',
       time: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      args: 'add && yarn build && yarn start'
+      args: 'install && npm run build && npm run start'
     }
   ]
 };
