@@ -21,7 +21,7 @@ module.exports = {
       log_file: './logs/combined.log',
       time: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      args: 'install && npm run build && npm run start'
+      args: 'npm run start'
     }
   ]
 };
