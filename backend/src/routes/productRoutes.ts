@@ -216,7 +216,7 @@ router.get('/:id/related', async (req, res, next) => {
           }).distinct('_id')
         }
       })
-      .populate('productId', '_id name images basePrice unit isActive')
+      .populate('productId', '_id name images basePrice unit unitMeasure isActive')
       .limit(10);
       
       const transformedData = relatedShopProducts.map(shopProduct => {
