@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { Order } from '@yaqiin/shared/types/order';
 import { getOrders } from '../../services/orderService';
 import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
+import { formatOrderItemPrice } from "@yaqiin/shared/utils/formatProductPrice";
 
 // If you have a getOrderById, use it. Otherwise, fetch all and filter by id for now.
 
@@ -83,7 +84,10 @@ const OrderDetailsScreen: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-[#ff7a00] font-bold text-base">
-                    {formatPrice(item.price)}<span className="text-xs font-normal text-gray-400">/{item.unit}</span>
+                    {formatOrderItemPrice(item.price, item.unit, item.unitMeasure).price}
+                    <span className="text-xs font-normal text-gray-400">
+                        /{formatOrderItemPrice(item.price, item.unit, item.unitMeasure).unit}
+                    </span>
                   </div>
                   <div className="text-xs text-gray-400">{t('order.subtotal')}: {formatPrice(item.subtotal)}</div>
                 </div>

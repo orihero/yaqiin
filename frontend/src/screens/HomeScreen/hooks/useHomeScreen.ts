@@ -62,6 +62,7 @@ export function useCart() {
 export function useHomeScreen() {
   // Use empty string for 'All products' (default)
   const [activeCategory, setActiveCategory] = useState('');
+  const [activeSubcategory, setActiveSubcategory] = useState('');
   const [activeNav, setActiveNav] = useState('Home');
 
   // Get user from store
@@ -86,11 +87,23 @@ export function useHomeScreen() {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  const categories = categoriesData ? [allProductsCategory, ...categoriesData] : [allProductsCategory];
+  
+  // Filter to show only main categories (parentId is null or undefined)
+  const mainCategories = categoriesData?.filter(cat => !cat.parentId) || [];
+  const categories = [allProductsCategory, ...mainCategories];
 
   // Find the selected category object (except for 'All products')
-  const selectedCategory = categoriesData?.find(cat => cat.name.uz === activeCategory || cat.name.ru === activeCategory);
+  const selectedCategory = mainCategories.find(cat => cat.name.uz === activeCategory || cat.name.ru === activeCategory);
   const selectedCategoryId = activeCategory && selectedCategory ? selectedCategory._id : undefined;
+
+  // Get subcategories for the selected main category
+  const subcategories = categoriesData?.filter(cat => 
+    cat.parentId && selectedCategory && cat.parentId === selectedCategory._id
+  ) || [];
+
+  // Find the selected subcategory object
+  const selectedSubcategory = subcategories.find(cat => cat.name.uz === activeSubcategory || cat.name.ru === activeSubcategory);
+  const selectedSubcategoryId = activeSubcategory && selectedSubcategory ? selectedSubcategory._id : undefined;
 
   // Infinite query for products
   const {
@@ -103,8 +116,8 @@ export function useHomeScreen() {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['products', selectedCategoryId, shopId],
-    queryFn: ({ pageParam = 1 }: { pageParam?: number }) => getProducts(pageParam, 8, '', selectedCategoryId, shopId),
+    queryKey: ['products', selectedCategoryId, selectedSubcategoryId, shopId],
+    queryFn: ({ pageParam = 1 }: { pageParam?: number }) => getProducts(pageParam, 8, '', selectedSubcategoryId || selectedCategoryId, shopId),
     getNextPageParam: (lastPage: ProductListResponse) => {
       if (!lastPage.meta) return undefined;
       const { page, totalPages } = lastPage.meta;
@@ -119,6 +132,8 @@ export function useHomeScreen() {
   return {
     activeCategory,
     setActiveCategory,
+    activeSubcategory,
+    setActiveSubcategory,
     activeNav,
     setActiveNav,
     products,
@@ -126,6 +141,8 @@ export function useHomeScreen() {
     isError,
     error,
     categories,
+    subcategories,
+    selectedCategory,
     isLoadingCategories,
     isCategoriesError,
     categoriesError,

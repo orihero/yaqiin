@@ -5,7 +5,7 @@ import { useCartStore } from "../../store/cartStore";
 import { Icon } from "@iconify/react";
 import { useTranslation } from 'react-i18next';
 import ProductCard from "../../components/ProductCard";
-import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
+import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
 import BottomSheet from "../HomeScreen/components/BottomSheet";
 import { toast } from 'react-toastify';
 
@@ -179,8 +179,10 @@ const ProductDetails: React.FC = () => {
                                                     : ""}
                                             </div>
                                             <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
-                                                {formatPrice(relatedProduct.price || relatedProduct.basePrice)}
-                                                <span className="text-xs font-normal text-gray-400">/{t(`units.${relatedProduct.unit?.toLowerCase()}`) || relatedProduct.unit}</span>
+                                                {formatProductPrice(relatedProduct).price}
+                                                <span className="text-xs font-normal text-gray-400">
+                                                    /{formatProductPrice(relatedProduct).unit}
+                                                </span>
                                             </div>
                                             <button
                                                 className="absolute -bottom-3 -right-3 bg-[#ff7a00] rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-4 border-white"
@@ -212,10 +214,10 @@ const ProductDetails: React.FC = () => {
             {/* Bottom Bar */}
             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md h-20 py-3 px-6 flex justify-between items-center z-50 mx-auto ">
                 <span className="text-white text-2xl font-bold">
-                    {formatPrice(product.price || product.basePrice)}{" "}
-                        <span className="text-sm font-normal text-gray-500">
-                            /{t(`units.${product.unit?.toLowerCase()}`) || product.unit}
-                        </span>
+                    {formatProductPrice(product).price}
+                    <span className="text-sm font-normal text-gray-500">
+                        /{formatProductPrice(product).unit}
+                    </span>
                 </span>
                 
                 {!isInCart ? (
@@ -255,9 +257,9 @@ const ProductDetails: React.FC = () => {
                                 "Product"}
                         </div>
                         <div className="text-[#ff7a00] font-bold text-base mb-2">
-                            {formatPrice(product.price || product.basePrice)}
+                            {formatProductPrice(product).price}
                             <span className="text-xs font-normal text-gray-400">
-                                /{t(`units.${product.unit?.toLowerCase()}`) || product.unit}
+                                /{formatProductPrice(product).unit}
                             </span>
                         </div>
                         {/* Quantity controls */}

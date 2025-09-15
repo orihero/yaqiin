@@ -4,7 +4,7 @@ import { useHomeScreen } from "./hooks/useHomeScreen";
 import { useNavigate } from "react-router-dom";
 import TabBar from "../../components/TabBar";
 import { useCartStore } from "../../store/cartStore";
-import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
+import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
 import BottomSheet from "./components/BottomSheet";
 import { Product } from "@yaqiin/shared/types/product";
 import { useTranslation } from 'react-i18next';
@@ -13,11 +13,15 @@ const HomeScreen = () => {
     const {
         activeCategory,
         setActiveCategory,
+        activeSubcategory,
+        setActiveSubcategory,
         products,
         isLoading,
         isError,
         error,
         categories,
+        subcategories,
+        selectedCategory,
         isLoadingCategories,
         isCategoriesError,
         categoriesError,
@@ -138,9 +142,10 @@ const HomeScreen = () => {
                                         ? "bg-[#232c43] text-white shadow"
                                         : "bg-white text-[#232c43] border border-gray-200"
                                         }`}
-                                    onClick={() =>
-                                        setActiveCategory(isAll ? "" : label)
-                                    }
+                                    onClick={() => {
+                                        setActiveCategory(isAll ? "" : label);
+                                        setActiveSubcategory(""); // Reset subcategory when main category changes
+                                    }}
                                     style={{ width: "fit-content" }}
                                 >
                                     {label}
@@ -148,6 +153,50 @@ const HomeScreen = () => {
                             );
                         })}
                     </div>
+                    
+                    {/* Subcategories Row - Only show when a main category is selected */}
+                    {activeCategory && subcategories.length > 0 && (
+                        <div className="flex gap-3 pb-2 px-4">
+                            <button
+                                className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
+                                    activeSubcategory === ""
+                                        ? "bg-[#232c43] text-white shadow"
+                                        : "bg-white text-[#232c43] border border-gray-200"
+                                }`}
+                                onClick={() => setActiveSubcategory("")}
+                                style={{ width: "fit-content" }}
+                            >
+                                {(() => {
+                                    const lang = i18n.language;
+                                    const nameObj = selectedCategory?.name as Record<string, string>;
+                                    const parentName = nameObj?.[lang] || nameObj?.uz || nameObj?.ru || Object.values(nameObj || {})[0] || "";
+                                    return `All ${parentName}`;
+                                })()}
+                            </button>
+                            {subcategories.map((subcat) => {
+                                const key = subcat._id || subcat.name?.uz || String(subcat.name.uz) || "subcat";
+                                const lang = i18n.language;
+                                const nameObj = subcat.name as Record<string, string>;
+                                const label = nameObj[lang] || nameObj.uz || nameObj.ru || Object.values(nameObj)[0] || "";
+                                
+                                return (
+                                    <button
+                                        key={key}
+                                        className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
+                                            activeSubcategory === label
+                                                ? "bg-[#232c43] text-white shadow"
+                                                : "bg-white text-[#232c43] border border-gray-200"
+                                        }`}
+                                        onClick={() => setActiveSubcategory(label)}
+                                        style={{ width: "fit-content" }}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                    
                     {/* Popular Fruits Section */}
                     {/*
                     <div className="flex items-center justify-between mb-3">
@@ -208,9 +257,9 @@ const HomeScreen = () => {
                                         </div>
                                         <div className="flex items-center w-full justify-between mt-auto">
                                             <span className="text-[#ff7a00] font-bold text-base">
-                                                {formatPrice(product.price || product.basePrice)}
+                                                {formatProductPrice(product).price}
                                                 <span className="text-xs font-normal text-gray-400">
-                                                    /{product.unit}
+                                                    /{formatProductPrice(product).unit}
                                                 </span>
                                             </span>
                                             <button
@@ -268,12 +317,9 @@ const HomeScreen = () => {
                                 "Product"}
                         </div>
                         <div className="text-[#ff7a00] font-bold text-base mb-2">
-                            $
-                            {selectedProduct.price?.toFixed
-                                ? selectedProduct.price.toFixed(2)
-                                : selectedProduct.price}
+                            {formatProductPrice(selectedProduct).price}
                             <span className="text-xs font-normal text-gray-400">
-                                /{t('productCard.kg')}
+                                /{formatProductPrice(selectedProduct).unit}
                             </span>
                         </div>
                         {/* Quantity controls */}

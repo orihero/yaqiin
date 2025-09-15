@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useQuery } from '@tanstack/react-query';
+import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
 import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
 import React from "react";
 import { useTranslation } from 'react-i18next';
@@ -73,9 +74,9 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                             : ""}
                     </div>
                     <div className="text-[#ff7a00] font-bold text-base">
-                        {formatPrice(item.product.price || item.product.basePrice)}
+                        {formatProductPrice(item.product).price}
                         <span className="text-xs font-normal text-gray-400">
-                            /{t('productCard.kg')}
+                            /{formatProductPrice(item.product).unit}
                         </span>
                     </div>
                 </div>
@@ -170,6 +171,7 @@ const MyCartScreen = () => {
             price: price,
             quantity: item.quantity,
             unit: item.product.unit,
+            unitMeasure: item.product.unitMeasure,
             subtotal: price * item.quantity,
             image: item.product.images?.[0] || '',
         };

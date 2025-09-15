@@ -112,7 +112,7 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
     // If user later selects a subcategory, it will override this
     onChange(mainCategoryId);
     // Reset user interaction flag after a short delay
-    setTimeout(() => setIsUserInteracting(false), 100);
+    setTimeout(() => setIsUserInteracting(false), 500);
   };
 
   // Handle subcategory selection
@@ -122,7 +122,7 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
     // Set the subcategory as the final selected value
     onChange(subCategoryId);
     // Reset user interaction flag after a short delay
-    setTimeout(() => setIsUserInteracting(false), 100);
+    setTimeout(() => setIsUserInteracting(false), 500);
   };
 
   // Search function for main categories
@@ -203,7 +203,9 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
   useEffect(() => {
     // Only reset subcategory if the main category actually changed
     // This prevents clearing when the same main category is selected
-    setSelectedSubCategory('');
+    if (selectedMainCategory) {
+      setSelectedSubCategory('');
+    }
   }, [selectedMainCategory]);
 
   // Reset initialization and user interaction when modal is closed
@@ -272,7 +274,7 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
               setSelectedSubCategory('');
               onChange(''); // Clear the selected value
               // Reset user interaction flag after a short delay
-              setTimeout(() => setIsUserInteracting(false), 100);
+              setTimeout(() => setIsUserInteracting(false), 500);
             }}
             className="text-sm text-gray-400 hover:text-white transition-colors"
             disabled={disabled}

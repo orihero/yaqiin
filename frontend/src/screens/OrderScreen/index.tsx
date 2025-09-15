@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Order } from '@yaqiin/shared/types/order';
 import type { OrderListResponse } from '../../services/orderService';
 import { formatPrice } from "@yaqiin/shared/utils/formatPrice";
+import { formatOrderItemPrice } from "@yaqiin/shared/utils/formatProductPrice";
 
 const statusTabs = [
   { label: 'order.all', fallbackLabel: 'All', value: 'all' },
@@ -170,12 +171,15 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
                       {item.name}
                     </div>
                     <div className="text-xs text-gray-400">
-                      {t('order.quantity')}: {item.quantity} {item.unit}
+                      {t('order.quantity')}: {item.quantity} {item.unitMeasure ? `${item.unitMeasure} ${item.unit}` : item.unit}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-[#ff7a00] font-semibold text-sm">
-                      {formatPrice(item.price)}
+                      {formatOrderItemPrice(item.price, item.unit, item.unitMeasure).price}
+                      <span className="text-xs font-normal text-gray-400">
+                          /{formatOrderItemPrice(item.price, item.unit, item.unitMeasure).unit}
+                      </span>
                     </div>
                     <div className="text-xs text-gray-400">
                       {t('order.subtotal')}: {formatPrice(item.subtotal)}

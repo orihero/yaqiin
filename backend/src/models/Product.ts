@@ -64,6 +64,7 @@ export interface IProduct extends Document {
   images?: string[];
   basePrice: number; // Changed from price to basePrice
   unit: string;
+  unitMeasure?: string; // Optional unit measure field (e.g., "100mg", "1kg", "500ml")
   baseStock: IProductStock; // Changed from stock to baseStock
   attributes?: IProductAttribute[];
   tags?: string[];
@@ -83,6 +84,7 @@ const ProductSchema = new Schema<IProduct>({
   images: [{ type: String }],
   basePrice: { type: Number, required: true }, // Changed from price to basePrice
   unit: { type: String, required: true },
+  unitMeasure: { type: String }, // Optional unit measure field
   baseStock: { type: ProductStockSchema, required: true }, // Changed from stock to baseStock
   attributes: [ProductAttributeSchema],
   tags: [{ type: String }],

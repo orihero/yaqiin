@@ -90,8 +90,12 @@ const SearchableSelectAsync: React.FC<SearchableSelectAsyncProps> = ({
   const handleClose = () => {
     setIsOpen(false);
     setSearchTerm('');
-    setOptions(initialOptions);
-    setHasSearched(false);
+    // Don't reset options to initialOptions if we have a selected value
+    // This prevents the selected option from disappearing
+    if (!value) {
+      setOptions(initialOptions);
+      setHasSearched(false);
+    }
   };
 
   // Handle option selection
@@ -99,7 +103,8 @@ const SearchableSelectAsync: React.FC<SearchableSelectAsyncProps> = ({
     onChange(option.value);
     setIsOpen(false);
     setSearchTerm('');
-    setOptions(initialOptions);
+    // Keep the selected option in the options array for display
+    setOptions([option]);
     setHasSearched(false);
   };
 
@@ -123,6 +128,17 @@ const SearchableSelectAsync: React.FC<SearchableSelectAsyncProps> = ({
       }
     };
   }, []);
+
+  // Ensure selected option is always available for display
+  useEffect(() => {
+    if (value && !options.find(option => option.value === value)) {
+      // If we have a value but it's not in current options, try to find it in initial options
+      const selectedOption = initialOptions.find(option => option.value === value);
+      if (selectedOption) {
+        setOptions([selectedOption]);
+      }
+    }
+  }, [value, options, initialOptions]);
 
   const selectedOption = options.find(option => option.value === value);
 

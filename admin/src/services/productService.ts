@@ -23,6 +23,7 @@ export const createProduct = async (input: Partial<Product> & { images?: File[];
     form.append('categoryId', input.categoryId as string);
     form.append('basePrice', String(input.basePrice));
     form.append('unit', input.unit as string);
+    if (input.unitMeasure) form.append('unitMeasure', input.unitMeasure);
     form.append('baseStock', JSON.stringify(input.baseStock));
     form.append('isActive', String(input.isActive));
     input.images.forEach((file) => form.append('images', file));
@@ -54,6 +55,7 @@ export const updateProduct = async (input: Partial<Product> & { _id: string; ima
     form.append('categoryId', input.categoryId as string);
     form.append('basePrice', String(input.basePrice));
     form.append('unit', input.unit as string);
+    if (input.unitMeasure) form.append('unitMeasure', input.unitMeasure);
     form.append('baseStock', JSON.stringify(input.baseStock));
     form.append('isActive', String(input.isActive));
     input.images.forEach((file) => form.append('images', file));

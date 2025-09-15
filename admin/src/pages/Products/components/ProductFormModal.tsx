@@ -27,6 +27,7 @@ interface ProductFormState {
   categoryId: string;
   basePrice: number;
   unit: string;
+  unitMeasure: string;
   baseStockQuantity: number;
   isActive: boolean;
   descUz: string;
@@ -55,6 +56,7 @@ const initialState: ProductFormState = {
   categoryId: '',
   basePrice: 0,
   unit: '',
+  unitMeasure: '',
   baseStockQuantity: 0,
   isActive: true,
   descUz: '',
@@ -117,6 +119,7 @@ function productFormReducer(state: ProductFormState, action: ProductFormAction):
         categoryId: action.product.categoryId || '',
         basePrice: action.product.basePrice || 0,
         unit: action.product.unit || '',
+        unitMeasure: action.product.unitMeasure || '',
         baseStockQuantity: action.product.baseStock?.quantity || 0,
         isActive: action.product.isActive ?? true,
         descUz: action.product.description?.uz || '',
@@ -165,7 +168,7 @@ export default function ProductFormModal({ open = true, product, loading = false
     e.preventDefault();
     const { nameUz, categoryId, basePrice, unit, baseStockQuantity, descUz, descRu } = state;
     
-    if (!nameUz || !categoryId || !basePrice || !unit || !baseStockQuantity || !descUz || !descRu) {
+    if (!nameUz || !categoryId || !basePrice || !unit || !descUz || !descRu) {
       dispatch({ type: 'SET_FIELD', field: 'formError', value: 'Please fill in all required fields.' });
       return;
     }
@@ -181,7 +184,8 @@ export default function ProductFormModal({ open = true, product, loading = false
         categoryId: state.categoryId,
         basePrice: state.basePrice,
         unit: state.unit,
-        baseStock: { quantity: state.baseStockQuantity, unit: state.unit },
+        unitMeasure: state.unitMeasure || undefined,
+        baseStock: state.baseStockQuantity ? { quantity: state.baseStockQuantity, unit: state.unit } : undefined,
         isActive: state.isActive,
         images: state.images.length > 0 ? state.images : undefined,
         imageUrls: validUrls.length > 0 ? validUrls : undefined,
@@ -277,12 +281,24 @@ export default function ProductFormModal({ open = true, product, loading = false
               />
             </div>
             <div>
-              <label className="block mb-1 text-white">📊 Base Stock Quantity *</label>
+              <label className="block mb-1 text-white">📏 Unit Measure</label>
+              <input 
+                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
+                value={state.unitMeasure} 
+                onChange={e => dispatch({ type: 'SET_FIELD', field: 'unitMeasure', value: e.target.value })} 
+                placeholder="e.g., 100mg, 1kg, 500ml"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-white">
+                📊 Base Stock Quantity
+                <span className="text-gray-400 text-xs ml-1">(optional)</span>
+              </label>
               <MaskedInput
                 type="number"
                 value={state.baseStockQuantity}
                 onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'baseStockQuantity', value })}
-                placeholder="Enter quantity"
+                placeholder="Enter quantity (optional)"
                 className="w-full px-3 py-2 rounded bg-[#1a2236] text-white"
               />
             </div>

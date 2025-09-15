@@ -1,6 +1,7 @@
 import { Router, Request } from 'express';
 import Product from '../models/Product';
 import ShopProduct from '../models/ShopProduct';
+import Category from '../models/Category';
 import { parseQuery } from '../utils/queryHelper';
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
@@ -52,7 +53,13 @@ router.get('/', async (req, res, next) => {
 
       // Add category filter
       if (categoryId) {
-        const categoryProductIds = await Product.find({ categoryId }).distinct('_id');
+        // First, find all subcategories of the selected category
+        const subcategories = await Category.find({ parentId: categoryId }).distinct('_id');
+        
+        // Include both the main category and all its subcategories
+        const allCategoryIds = [categoryId, ...subcategories];
+        
+        const categoryProductIds = await Product.find({ categoryId: { $in: allCategoryIds } }).distinct('_id');
         if (query.productId) {
           // Intersect the existing productIds with category productIds
           const existingProductIds = query.productId.$in;
@@ -66,7 +73,7 @@ router.get('/', async (req, res, next) => {
         ShopProduct.find(query)
           .skip(skip)
           .limit(limitNum)
-          .populate('productId', 'name description categoryId images basePrice unit baseStock isActive isFeatured'),
+          .populate('productId', 'name description categoryId images basePrice unit unitMeasure baseStock isActive isFeatured'),
         ShopProduct.countDocuments(query)
       ]);
 
@@ -82,6 +89,7 @@ router.get('/', async (req, res, next) => {
           images: product.images,
           price: shopProduct.price, // Use shop-specific price
           unit: product.unit,
+          unitMeasure: product.unitMeasure,
           stock: shopProduct.stock, // Use shop-specific stock
           attributes: product.attributes,
           tags: product.tags,
@@ -158,6 +166,7 @@ router.get('/:id', async (req, res, next) => {
         images: product.images,
         price: shopProduct.price, // Use shop-specific price
         unit: product.unit,
+        unitMeasure: product.unitMeasure,
         stock: shopProduct.stock, // Use shop-specific stock
         attributes: product.attributes,
         tags: product.tags,
@@ -220,6 +229,7 @@ router.get('/:id/related', async (req, res, next) => {
           price: shopProduct.price, // Use shop-specific price
           basePrice: product.basePrice,
           unit: product.unit,
+          unitMeasure: product.unitMeasure,
           isActive: shopProduct.isActive, // Use shop-specific active status
         };
       });
@@ -272,6 +282,7 @@ router.get('/by-ids', async (req, res, next) => {
           images: product.images,
           price: shopProduct.price, // Use shop-specific price
           unit: product.unit,
+          unitMeasure: product.unitMeasure,
           stock: shopProduct.stock, // Use shop-specific stock
           attributes: product.attributes,
           tags: product.tags,
@@ -307,6 +318,7 @@ router.post('/', upload.array('images', 10), async (req: Request, res, next) => 
     if (typeof body.name === 'string') body.name = JSON.parse(body.name);
     if (typeof body.description === 'string') body.description = JSON.parse(body.description);
     if (typeof body.baseStock === 'string') body.baseStock = JSON.parse(body.baseStock);
+    if (typeof body.unitMeasure === 'string') body.unitMeasure = JSON.parse(body.unitMeasure);
     
     // Handle images
     const baseUrl = req.protocol + '://' + req.get('host');
@@ -360,6 +372,7 @@ router.put('/:id', upload.array('images', 10), async (req: Request, res, next) =
     if (typeof body.name === 'string') body.name = JSON.parse(body.name);
     if (typeof body.description === 'string') body.description = JSON.parse(body.description);
     if (typeof body.baseStock === 'string') body.baseStock = JSON.parse(body.baseStock);
+    if (typeof body.unitMeasure === 'string') body.unitMeasure = JSON.parse(body.unitMeasure);
     
     const baseUrl = req.protocol + '://' + req.get('host');
     let imageUrls: string[] = [];

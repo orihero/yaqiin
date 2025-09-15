@@ -2,6 +2,7 @@ import React from "react";
 import { Icon } from "@iconify/react";
 import type { Product } from "@yaqiin/shared/types/product";
 import { useTranslation } from 'react-i18next';
+import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
 
 interface ProductCardProps {
     product: Product;
@@ -42,8 +43,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     : ""}
             </div>
             <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
-                ${(product.price || product.basePrice)?.toFixed ? (product.price || product.basePrice).toFixed(2) : (product.price || product.basePrice)}
-                <span className="text-xs font-normal text-gray-400">/{t('productCard.kg')}</span>
+                {formatProductPrice(product).price}
+                <span className="text-xs font-normal text-gray-400">
+                    /{formatProductPrice(product).unit}
+                </span>
             </div>
             <button
                 className="absolute -bottom-3 -right-3 bg-[#ff7a00] rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-4 border-white"

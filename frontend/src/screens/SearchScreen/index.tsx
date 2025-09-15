@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import debounce from 'lodash.debounce';
 import { Icon } from '@iconify/react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { formatPrice } from '@yaqiin/shared/utils/formatPrice';
+import { formatProductPrice } from '@yaqiin/shared/utils/formatProductPrice';
 import { getProducts } from '../../services/productService';
 import type { Product } from '@yaqiin/shared/types/product';
 import SearchFilterButton from './components/SearchFilterButton';
@@ -185,9 +185,9 @@ const SearchScreen: React.FC = () => {
                       </div>
                       <div className="flex items-center w-full justify-between mt-auto">
                         <span className="text-[#ff7a00] font-bold text-base">
-                          {formatPrice(product.price || product.basePrice)}
+                          {formatProductPrice(product).price}
                           <span className="text-xs font-normal text-gray-400">
-                            /{product.unit}
+                            /{formatProductPrice(product).unit}
                           </span>
                         </span>
                         <button
@@ -250,13 +250,9 @@ const SearchScreen: React.FC = () => {
                 t('productCard.product')}
             </div>
             <div className="text-[#ff7a00] font-bold text-base mb-2">
-              ${
-                selectedProduct.price?.toFixed
-                  ? selectedProduct.price.toFixed(2)
-                  : selectedProduct.price
-              }
+              {formatProductPrice(selectedProduct).price}
               <span className="text-xs font-normal text-gray-400">
-                /{t('productCard.kg')}
+                /{formatProductPrice(selectedProduct).unit}
               </span>
             </div>
             {/* Quantity controls */}

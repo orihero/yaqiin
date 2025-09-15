@@ -4,6 +4,7 @@ export interface OrderItem {
   price: number;
   quantity: number;
   unit: string;
+  unitMeasure?: string; // Optional unit measure field (e.g., "100mg", "1kg", "500ml")
   subtotal: number;
   image?: string; // product image URL
 }

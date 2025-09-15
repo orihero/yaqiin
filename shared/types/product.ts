@@ -36,6 +36,7 @@ export interface Product {
   images?: string[];
   basePrice: number; // Base price, can be overridden by shop
   unit: string;
+  unitMeasure?: string; // Optional unit measure field (e.g., "100mg", "1kg", "500ml")
   baseStock: ProductStock; // Base stock info, can be overridden by shop
   attributes?: ProductAttribute[];
   tags?: string[];
