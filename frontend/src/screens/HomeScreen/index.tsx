@@ -156,7 +156,7 @@ const HomeScreen = () => {
                     
                     {/* Subcategories Row - Only show when a main category is selected */}
                     {activeCategory && subcategories.length > 0 && (
-                        <div className="flex gap-3 pb-2 px-4">
+                        <div className="flex gap-3 overflow-x-auto pl-1 pr-4 pb-2 scrollbar-hide items-center min-h-14">
                             <button
                                 className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all ${
                                     activeSubcategory === ""
@@ -252,11 +252,11 @@ const HomeScreen = () => {
                                         />
                                     </div>
                                     <div className="p-2 flex flex-col">
-                                        <div className="text-[#232c43] font-semibold text-base mb-1 text-left w-full">
+                                        <div className="text-[#232c43] font-semibold text-base mb-1 text-left w-full h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                                             {displayName}
                                         </div>
                                         <div className="flex items-center w-full justify-between mt-auto">
-                                            <span className="text-[#ff7a00] font-bold text-base">
+                                            <span className="text-[#ff7a00] font-bold text-sm">
                                                 {formatProductPrice(product).price}
                                                 <span className="text-xs font-normal text-gray-400">
                                                     /{formatProductPrice(product).unit}

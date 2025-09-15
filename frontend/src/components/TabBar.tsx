@@ -19,7 +19,7 @@ const TabBar: React.FC<{ current: string }> = ({ current }) => {
     ];
     return (
         <SafeArea 
-            className="fixed bottom-0 left-0 w-full max-w-md mx-auto shadow-lg flex justify-between items-center px-2 py-3 z-40 bg-[#232c43]"
+            className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md shadow-lg flex justify-between items-center px-2 py-3 z-40 bg-[#232c43]"
             edges={['bottom']}
         >
             {tabs.map((tab) => (

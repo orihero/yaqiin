@@ -119,7 +119,7 @@ const SearchScreen: React.FC = () => {
       {/* Main Content Card */}
       <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
         {/* Compact Navy Header with inline search bar */}
-        <div className="w-full flex items-center px-4 pt-6 pb-4" style={{ background: '#232c43', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
+        <div className="w-full flex items-center px-4 pt-6 pb-4" style={{ background: '#232c43', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px))' }}>
           <button
             className="bg-white bg-opacity-100 rounded-full p-2 mr-3 flex-shrink-0"
             onClick={() => window.history.back()}
@@ -144,12 +144,12 @@ const SearchScreen: React.FC = () => {
            ref={listRef}
            className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
            style={{
-             minHeight: "calc(100vh - 280px)",
-             maxHeight: "calc(100vh - 280px)",
+             minHeight: "calc(100vh - 250px)",
+             maxHeight: "calc(100vh - 250px)",
            }}
          >
           {/* Product Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mt-4">
             {isLoading ? (
               <div className="col-span-2 text-center text-gray-400 py-8">{t('search.loading')}</div>
             ) : products.length ? (
@@ -180,11 +180,11 @@ const SearchScreen: React.FC = () => {
                       />
                     </div>
                     <div className="p-2 flex flex-col">
-                      <div className="text-[#232c43] font-semibold text-base mb-1 text-left w-full">
+                      <div className="text-[#232c43] font-semibold text-base mb-1 text-left w-full h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {displayName}
                       </div>
                       <div className="flex items-center w-full justify-between mt-auto">
-                        <span className="text-[#ff7a00] font-bold text-base">
+                        <span className="text-[#ff7a00] font-bold text-sm">
                           {formatProductPrice(product).price}
                           <span className="text-xs font-normal text-gray-400">
                             /{formatProductPrice(product).unit}

@@ -63,7 +63,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                     }}
                 />
                 <div className="flex-1 flex flex-col justify-between">
-                    <div className="font-semibold text-base text-[#232c43]">
+                    <div className="font-semibold text-base text-[#232c43] h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {item.product.name?.uz ||
                             item.product.name?.ru ||
                             t('productCard.product')}
@@ -73,7 +73,7 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                             ? `${item.product.nutritionalInfo.calories} cal`
                             : ""}
                     </div>
-                    <div className="text-[#ff7a00] font-bold text-base">
+                    <div className="text-[#ff7a00] font-bold text-sm">
                         {formatProductPrice(item.product).price}
                         <span className="text-xs font-normal text-gray-400">
                             /{formatProductPrice(item.product).unit}

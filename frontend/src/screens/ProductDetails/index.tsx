@@ -34,6 +34,11 @@ const ProductDetails: React.FC = () => {
     // BottomSheet state
     const [sheetOpen, setSheetOpen] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    
+    // Full-screen image state
+    const [fullscreenImageOpen, setFullscreenImageOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     if (isLoading) return <div className="text-center py-12">{t('productDetails.loading')}</div>;
     if (isError || !product)
@@ -45,6 +50,7 @@ const ProductDetails: React.FC = () => {
 
     // Open sheet with product
     const handleAddClick = () => {
+        setSelectedProduct(product);
         setQuantity(1);
         setSheetOpen(true);
     };
@@ -52,8 +58,10 @@ const ProductDetails: React.FC = () => {
     // Confirm add/update
     const handleConfirm = () => {
         try {
-            addToCart(product, quantity);
+            const productToAdd = selectedProduct || product;
+            addToCart(productToAdd, quantity);
             setSheetOpen(false);
+            setSelectedProduct(null);
             toast.success(t('productCard.addedToCartSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
@@ -79,34 +87,43 @@ const ProductDetails: React.FC = () => {
         navigate('/cart');
     };
 
+    // Handle image click to open fullscreen
+    const handleImageClick = (index: number = 0) => {
+        setCurrentImageIndex(index);
+        setFullscreenImageOpen(true);
+    };
+
+    // Navigate between images
+    const handlePreviousImage = () => {
+        if (product.images && product.images.length > 0) {
+            setCurrentImageIndex((prev) => 
+                prev === 0 ? product.images!.length - 1 : prev - 1
+            );
+        }
+    };
+
+    const handleNextImage = () => {
+        if (product.images && product.images.length > 0) {
+            setCurrentImageIndex((prev) => 
+                prev === product.images!.length - 1 ? 0 : prev + 1
+            );
+        }
+    };
+
     return (
         <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide safe-area" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-            {/* Product Image */}
-            <div
-                className="bg-[#fff] rounded-[54px]"
-                style={{
-                    minHeight: "calc(100vh - 200px)",
-                    maxHeight: "calc(100vh - 200px)",
-                }}
-            >
-                <div className="w-full bg-[#F6F6F6] h-70 rounded-b-[60px] flex flex-col items-center overflow-hidden">
-                    <button
-                        className="absolute left-4 bg-white rounded-full p-2 z-20"
-                        style={{ top: 'max(1.5rem, env(safe-area-inset-top, 0px))' }}
-                        onClick={() => navigate(-1)}
-                    >
-                        <Icon
-                            icon="mdi:arrow-left"
-                            className="text-2xl text-[#232c43]"
-                        />
-                    </button>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                {/* Product Image */}
+                <div className="w-full bg-white h-70 rounded-b-[60px] flex flex-col items-center justify-center overflow-hidden">
                     <img
                         src={
                             product.images?.[0] ||
                             "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                         }
                         alt={product.name.uz}
-                        className="w-full h-70 object-cover"
+                        className="w-full h-70 object-contain cursor-pointer"
+                        onClick={() => handleImageClick(0)}
                         onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src =
@@ -115,8 +132,7 @@ const ProductDetails: React.FC = () => {
                     />
                 </div>
                 {/* Product Info */}
-                <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
-                    <div className="bg-white px-4 pt-6 pb-8 flex-1 flex flex-col">
+                <div className="max-w-md mx-auto w-full bg-white  px-4 pt-6 pb-8 mb-20">
                         <div className="flex items-center justify-between mb-2">
                             <h1 className="text-2xl font-bold text-[#232c43]">
                                 {product.name.uz}
@@ -150,55 +166,59 @@ const ProductDetails: React.FC = () => {
                                 </div>
                             )}
                             {relatedProducts && relatedProducts.length > 0 ? (
-                                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                                <div className="grid grid-cols-2 gap-4">
                                     {relatedProducts.map((relatedProduct) => (
                                         <div
                                             key={relatedProduct._id}
-                                            className="bg-white rounded-2xl shadow-md p-4 flex flex-col items-center relative min-w-[150px] cursor-pointer hover:shadow-lg transition"
+                                            className="bg-[#f8f8f8] rounded-2xl pt-0 pb-2 flex flex-col border border-gray-100 cursor-pointer"
                                             onClick={() => navigate(`/product/${relatedProduct._id}`)}
                                         >
-                                            <img
-                                                src={
-                                                    relatedProduct.images?.[0] ||
-                                                    "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
-                                                }
-                                                alt={relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
-                                                className="w-24 h-24 rounded-2xl object-cover mb-2 shadow-sm"
-                                                onError={(e) => {
-                                                    e.currentTarget.onerror = null;
-                                                    e.currentTarget.src =
-                                                        "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
-                                                }}
-                                            />
-                                            <div className="font-bold text-base text-[#232c43] text-center mb-0.5">
-                                                {relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
-                                            </div>
-                                            <div className="text-xs text-gray-400 mb-1 text-center">
-                                                {relatedProduct.nutritionalInfo?.calories
-                                                    ? `${relatedProduct.nutritionalInfo.calories} cal`
-                                                    : ""}
-                                            </div>
-                                            <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
-                                                {formatProductPrice(relatedProduct).price}
-                                                <span className="text-xs font-normal text-gray-400">
-                                                    /{formatProductPrice(relatedProduct).unit}
-                                                </span>
-                                            </div>
-                                            <button
-                                                className="absolute -bottom-3 -right-3 bg-[#ff7a00] rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-4 border-white"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    try {
-                                                        addToCart(relatedProduct, 1);
-                                                    } catch (error: any) {
-                                                        console.error('Failed to add to cart:', error);
-                                                        alert(error.message || t('common.addToCartFailed'));
+                                            <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-transparent">
+                                                <img
+                                                    src={
+                                                        relatedProduct.images?.[0] ||
+                                                        "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                                                     }
-                                                }}
-                                                aria-label={t('productCard.addToCart')}
-                                            >
-                                                <Icon icon="mdi:plus" className="text-white text-xl" />
-                                            </button>
+                                                    alt={relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
+                                                    className="w-full h-full object-cover rounded-t-2xl"
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null;
+                                                        e.currentTarget.src =
+                                                            "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="p-2 flex flex-col">
+                                                <div className="text-[#232c43] font-semibold text-base mb-1 text-left w-full h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                                    {relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
+                                                </div>
+                                                <div className="flex items-center w-full justify-between mt-auto">
+                                                    <span className="text-[#ff7a00] font-bold text-sm">
+                                                        {formatProductPrice(relatedProduct).price}
+                                                        <span className="text-xs font-normal text-gray-400">
+                                                            /{formatProductPrice(relatedProduct).unit}
+                                                        </span>
+                                                    </span>
+                                                    <button
+                                                        className="bg-[#ff7a00] rounded-lg p-2 flex items-center justify-center ml-2"
+                                                        style={{
+                                                            width: 32,
+                                                            height: 32,
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedProduct(relatedProduct);
+                                                            setQuantity(1);
+                                                            setSheetOpen(true);
+                                                        }}
+                                                    >
+                                                        <Icon
+                                                            icon="mdi:plus"
+                                                            className="text-white text-lg"
+                                                        />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -208,58 +228,71 @@ const ProductDetails: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
                 </div>
             </div>
             {/* Bottom Bar */}
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md h-20 py-3 px-6 flex justify-between items-center z-50 mx-auto ">
-                <span className="text-white text-2xl font-bold">
-                    {formatProductPrice(product).price}
-                    <span className="text-sm font-normal text-gray-500">
-                        /{formatProductPrice(product).unit}
+            <div className="bg-[#232c43] fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-25 py-3 pb-6 px-6 flex justify-between items-center z-50 mx-auto ">
+                <div className="flex items-center gap-4">
+                    <button
+                        className="bg-white rounded-full p-2"
+                        onClick={() => navigate(-1)}
+                    >
+                        <Icon
+                            icon="mdi:arrow-left"
+                            className="text-xl text-[#232c43]"
+                        />
+                    </button>
+                    <span className="text-white text-xl font-bold">
+                        {formatProductPrice(product).price}
+                        <span className="text-sm font-normal text-gray-500">
+                            /{formatProductPrice(product).unit}
+                        </span>
                     </span>
-                </span>
+                </div>
                 
                 {!isInCart ? (
                     <button
-                        className="bg-[#ff7a00] text-white font-bold py-2 px-6 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
+                        className="bg-[#ff7a00] text-white font-bold py-2 px-2 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
                         onClick={handleAddClick}
                     >
                         {t('productCard.addToCart')}
                     </button>
                 ) : (
                     <button
-                        className="bg-[#ff7a00] text-white font-bold py-4 px-6 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
+                        className="bg-[#ff7a00] text-white font-bold py-2 px-2 rounded-full text-sm shadow-md hover:bg-[#e66a00] transition-colors"
                         onClick={handleGoToCart}
                     >
                         {t('productCard.goToCart')}
                     </button>
                 )}
             </div>
-            <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
-                {product && (
+            <BottomSheet open={sheetOpen} onClose={() => {
+                setSheetOpen(false);
+                setSelectedProduct(null);
+            }}>
+                {(selectedProduct || product) && (
                     <div className="flex flex-col items-center">
                         <img
                             src={
-                                product.images?.[0] ||
+                                (selectedProduct || product).images?.[0] ||
                                 "https://via.placeholder.com/80x80?text=No+Image"
                             }
                             alt={
-                                product.name?.uz ||
-                                product.name?.ru ||
+                                (selectedProduct || product).name?.uz ||
+                                (selectedProduct || product).name?.ru ||
                                 t('productCard.product')
                             }
                             className="w-20 h-20 rounded-xl object-cover mb-2"
                         />
                         <div className="font-semibold text-lg text-[#232c43] mb-1">
-                            {product.name?.uz ||
-                                product.name?.ru ||
+                            {(selectedProduct || product).name?.uz ||
+                                (selectedProduct || product).name?.ru ||
                                 "Product"}
                         </div>
                         <div className="text-[#ff7a00] font-bold text-base mb-2">
-                            {formatProductPrice(product).price}
+                            {formatProductPrice(selectedProduct || product).price}
                             <span className="text-xs font-normal text-gray-400">
-                                /{formatProductPrice(product).unit}
+                                /{formatProductPrice(selectedProduct || product).unit}
                             </span>
                         </div>
                         {/* Quantity controls */}
@@ -298,6 +331,65 @@ const ProductDetails: React.FC = () => {
                     </div>
                 )}
             </BottomSheet>
+
+            {/* Full-screen Image Modal */}
+            {fullscreenImageOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+                    {/* Close button */}
+                    <button
+                        className="absolute top-30 right-4 bg-white bg-opacity-20 rounded-full p-2 z-10"
+                        onClick={() => setFullscreenImageOpen(false)}
+                    >
+                        <Icon icon="mdi:close" className="text-black text-2xl" />
+                    </button>
+
+                    {/* Previous button */}
+                    {product.images && product.images.length > 1 && (
+                        <button
+                            className="absolute left-4 bg-white bg-opacity-20 rounded-full p-2 z-10"
+                            onClick={handlePreviousImage}
+                        >
+                            <Icon icon="mdi:chevron-left" className="text-white text-2xl" />
+                        </button>
+                    )}
+
+                    {/* Next button */}
+                    {product.images && product.images.length > 1 && (
+                        <button
+                            className="absolute right-4 bg-white bg-opacity-20 rounded-full p-2 z-10"
+                            onClick={handleNextImage}
+                        >
+                            <Icon icon="mdi:chevron-right" className="text-white text-2xl" />
+                        </button>
+                    )}
+
+                    {/* Image */}
+                    <div className="w-full h-full flex items-center justify-center p-4">
+                        <img
+                            src={
+                                product.images?.[currentImageIndex] ||
+                                "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
+                            }
+                            alt={product.name.uz}
+                            className="max-w-full max-h-full object-contain"
+                            onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src =
+                                    "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
+                            }}
+                        />
+                    </div>
+
+                    {/* Image counter */}
+                    {product.images && product.images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            <span className="text-white text-sm">
+                                {currentImageIndex + 1} / {product.images.length}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

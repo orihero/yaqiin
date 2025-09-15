@@ -34,7 +34,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                         "https://via.placeholder.com/100x100?text=No+Image";
                 }}
             />
-            <div className="font-bold text-base text-[#232c43] text-center mb-0.5">
+            <div className="font-bold text-base text-[#232c43] text-center mb-0.5 h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                 {product.name?.uz || product.name?.ru || t('productCard.product')}
             </div>
             <div className="text-xs text-gray-400 mb-1 text-center">
@@ -42,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     ? `${product.nutritionalInfo.calories} cal`
                     : ""}
             </div>
-            <div className="text-[#ff7a00] font-bold text-base mb-2 text-center">
+            <div className="text-[#ff7a00] font-bold text-sm mb-2 text-center">
                 {formatProductPrice(product).price}
                 <span className="text-xs font-normal text-gray-400">
                     /{formatProductPrice(product).unit}

@@ -49,9 +49,11 @@ export const useCartStore = create<CartState>((set, get) => ({
       } else {
         // Check if adding this product would create multiple shops
         if (state.cart.length > 0 && state.cart[0].product.shopId !== product.shopId) {
-          throw new Error('All items in cart must be from the same shop');
+          // Clear cart and add new product from different shop
+          newCart = [{ product, quantity }];
+        } else {
+          newCart = [...state.cart, { product, quantity }];
         }
-        newCart = [...state.cart, { product, quantity }];
       }
       saveCart(newCart);
       return { cart: newCart };
