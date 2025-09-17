@@ -186,7 +186,28 @@ router.post(
       // Find the shop and client, then send Telegram notification
       const shop = await Shop.findById(order.shopId);
       const client = await User.findById(order.customerId);
-      await sendOrderCreatedTelegramNotification(order, shop, client);
+      
+      // Fetch product images for the order items
+      const productIds = order.items.map((item: any) => item.productId);
+      const Product = require('../models/Product').default;
+      const products = await Product.find({ _id: { $in: productIds } }).select('images name');
+      
+      // Create a map of productId to images for quick lookup
+      const productImagesMap = new Map();
+      products.forEach((product: any) => {
+        productImagesMap.set(product._id.toString(), product.images || []);
+      });
+      
+      // Add images to order items
+      const orderWithImages = {
+        ...order.toObject(),
+        items: order.items.map((item: any) => ({
+          ...item,
+          images: productImagesMap.get(item.productId.toString()) || []
+        }))
+      };
+      
+      await sendOrderCreatedTelegramNotification(orderWithImages, shop, client);
       // --- End notification logic ---
 
       res
@@ -248,7 +269,28 @@ router.post(
       // Send Telegram notification to shop group
       const shop = await Shop.findById(order.shopId);
       const client = await User.findById(order.customerId);
-      await sendOrderCreatedTelegramNotification(order, shop, client);
+      
+      // Fetch product images for the order items
+      const productIds = order.items.map((item: any) => item.productId);
+      const Product = require('../models/Product').default;
+      const products = await Product.find({ _id: { $in: productIds } }).select('images name');
+      
+      // Create a map of productId to images for quick lookup
+      const productImagesMap = new Map();
+      products.forEach((product: any) => {
+        productImagesMap.set(product._id.toString(), product.images || []);
+      });
+      
+      // Add images to order items
+      const orderWithImages = {
+        ...order.toObject(),
+        items: order.items.map((item: any) => ({
+          ...item,
+          images: productImagesMap.get(item.productId.toString()) || []
+        }))
+      };
+      
+      await sendOrderCreatedTelegramNotification(orderWithImages, shop, client);
       res.status(201).json({ success: true, data: order, message: "Order created" });
     } catch (err: any) {
       console.error("[Order Create - Client] Error:", err);

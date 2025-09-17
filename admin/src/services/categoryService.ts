@@ -34,7 +34,7 @@ export const bulkDeleteCategories = async (categoryIds: string[]) => {
 };
 
 export const getAllCategories = async (): Promise<Category[]> => {
-  const res = await api.get('/categories');
+  const res = await api.get('/categories?limit=1000'); // Get all categories
   return res.data.data;
 };
 

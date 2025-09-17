@@ -224,7 +224,13 @@ const Products: React.FC = () => {
                     )}
                   </td>
                   <td className="py-3 px-4">{product.name.uz}</td>
-                  <td className="py-3 px-4">{categories?.find(c => c._id === product.categoryId)?.name.uz || product.categoryId}</td>
+                  <td className="py-3 px-4">
+                    {categories?.find(c => c._id === product.categoryId)?.name.uz || (
+                      <span className="text-red-400 italic" title={`Category ID: ${product.categoryId}`}>
+                        Unknown Category
+                      </span>
+                    )}
+                  </td>
                   <td className="py-3 px-4">{formatPriceWithCurrency(product.basePrice.toString())}</td>
                   <td className="py-3 px-4">{formatNumber(product.baseStock.quantity.toString())} {product.baseStock.unit}</td>
                   <td className="py-3 px-4 text-center flex gap-3 justify-center">

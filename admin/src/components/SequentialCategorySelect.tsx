@@ -58,25 +58,24 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
 
   // Initialize the component with the current value (only once and not during user interaction)
   useEffect(() => {
-    if (!isInitialized && !isUserInteracting && initialMainCategories.length > 0 && allCategories.length > 0) {
+    if (!isInitialized && !isUserInteracting && allCategories.length > 0) {
       if (value && value !== '') {
-        // Check if it's a main category (root category with parentId null/empty)
-        const mainCategory = initialMainCategories.find(cat => cat._id === value);
-        if (mainCategory) {
-          setSelectedMainCategory(value);
-          setSelectedSubCategory('');
-        } else {
-          // The value might be a subcategory, find its parent
-          const subcategory = allCategories.find(cat => cat._id === value);
-          if (subcategory && subcategory.parentId) {
+        // Find the category in all categories
+        const category = allCategories.find(cat => cat._id === value);
+        if (category) {
+          if (category.parentId) {
             // It's a subcategory, set the parent as main category and this as subcategory
-            setSelectedMainCategory(subcategory.parentId);
+            setSelectedMainCategory(category.parentId);
             setSelectedSubCategory(value);
           } else {
-            // Unknown category, treat as main category
+            // It's a main category (root category with parentId null/empty)
             setSelectedMainCategory(value);
             setSelectedSubCategory('');
           }
+        } else {
+          // Category not found, treat as main category
+          setSelectedMainCategory(value);
+          setSelectedSubCategory('');
         }
       } else {
         // Empty value means no selection
@@ -85,13 +84,13 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
       }
       setIsInitialized(true);
     }
-  }, [value, initialMainCategories, allCategories, isInitialized, isUserInteracting]);
+  }, [value, allCategories, isInitialized, isUserInteracting]);
 
   // Prevent re-initialization when value changes due to user interaction
   useEffect(() => {
     // If we already have selections and the value matches our current subcategory or main category,
     // don't re-initialize
-    if (isInitialized && value) {
+    if (isInitialized && value && !isUserInteracting) {
       if (selectedSubCategory && value === selectedSubCategory) {
         // Value matches our subcategory selection, don't re-initialize
         return;
@@ -101,7 +100,7 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
         return;
       }
     }
-  }, [value, isInitialized, selectedMainCategory, selectedSubCategory]);
+  }, [value, isInitialized, selectedMainCategory, selectedSubCategory, isUserInteracting]);
 
   // Handle main category selection
   const handleMainCategoryChange = (mainCategoryId: string) => {
@@ -215,6 +214,18 @@ const SequentialCategorySelect: React.FC<SequentialCategorySelectProps> = ({
       setIsUserInteracting(false);
     }
   }, [open]);
+
+  // Re-initialize when value changes (for switching between different products)
+  useEffect(() => {
+    if (isInitialized && !isUserInteracting && allCategories.length > 0) {
+      // Check if the current selections don't match the value
+      const currentValue = selectedSubCategory || selectedMainCategory;
+      if (currentValue !== value) {
+        // Reset and re-initialize
+        setIsInitialized(false);
+      }
+    }
+  }, [value, isInitialized, isUserInteracting, allCategories, selectedMainCategory, selectedSubCategory]);
 
   return (
     <div className={`space-y-3 ${className}`}>

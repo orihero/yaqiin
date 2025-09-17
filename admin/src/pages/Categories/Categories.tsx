@@ -128,7 +128,7 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
           style={{ paddingLeft: `${16 + indentLevel}px` }}
         >
           {/* Checkbox */}
-          <div className="flex items-center mr-3">
+          <div className="flex items-center mr-3 flex-shrink-0">
             <input
               type="checkbox"
               checked={isSelected}
@@ -138,7 +138,7 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
           </div>
 
           {/* Expand/Collapse Button */}
-          <div className="flex items-center mr-3">
+          <div className="flex items-center mr-3 flex-shrink-0">
             {hasChildren ? (
               <button
                 onClick={() => toggleExpanded(category._id)}
@@ -156,7 +156,7 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
           </div>
 
           {/* Category Icon */}
-          <div className="flex items-center mr-3">
+          <div className="flex items-center mr-3 flex-shrink-0">
             {category.icon ? (
               <Icon icon={category.icon} width={20} height={20} className="text-blue-400" />
             ) : (
@@ -165,9 +165,9 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
           </div>
 
           {/* Category Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-white truncate">
                   {category.name.uz}
                 </h3>
@@ -177,8 +177,8 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                   category.isActive 
                     ? 'bg-green-900 text-green-300' 
                     : 'bg-red-900 text-red-300'
@@ -186,18 +186,18 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
                   {category.isActive ? t('common.active') : t('common.inactive')}
                 </span>
                 {directProductCount > 0 && (
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                    {directProductCount} {t('categories.products', 'products')}
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-300 whitespace-nowrap">
+                    {directProductCount}
                   </span>
                 )}
                 {totalProductCount > directProductCount && (
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-900 text-purple-300">
-                    {totalProductCount} {t('categories.totalProducts', 'total')}
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-900 text-purple-300 whitespace-nowrap">
+                    {totalProductCount}
                   </span>
                 )}
                 {hasChildren && (
-                  <span className="text-xs text-gray-400">
-                    {category.children.length} {t('categories.subcategories', 'subcategories')}
+                  <span className="text-xs text-gray-400 whitespace-nowrap hidden lg:inline">
+                    {category.children.length}
                   </span>
                 )}
               </div>
@@ -205,20 +205,20 @@ const CategoryAccordion: React.FC<CategoryAccordionProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-1 ml-2 flex-shrink-0">
             <button 
               onClick={() => onEditCategory(category)} 
               className="p-1 hover:text-blue-400 transition" 
               title={t('common.edit')}
             >
-              <Icon icon="mdi:pencil" width={18} height={18} />
+              <Icon icon="mdi:pencil" width={16} height={16} />
             </button>
             <button 
               onClick={() => onDeleteCategory(category)} 
               className="p-1 hover:text-red-400 transition" 
               title={t('common.delete')}
             >
-              <Icon icon="mdi:delete" width={18} height={18} />
+              <Icon icon="mdi:delete" width={16} height={16} />
             </button>
           </div>
         </div>
@@ -375,90 +375,100 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-[#1a2236] text-white">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">📂 {t('categories.title')}</h1>
-          {selectedCategories.size > 0 && (
-            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-              {selectedCategories.size} selected
-            </span>
-          )}
-        </div>
-        <div className="flex gap-3">
-          {selectedCategories.size > 0 && (
+    <div className="h-full flex flex-col bg-[#1a2236] text-white overflow-hidden">
+      {/* Header Section */}
+      <div className="flex-shrink-0 p-6 pb-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">📂 {t('categories.title')}</h1>
+            {selectedCategories.size > 0 && (
+              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                {selectedCategories.size} selected
+              </span>
+            )}
+          </div>
+          <div className="flex gap-3">
+            {selectedCategories.size > 0 && (
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleteMutation.isPending}
+              >
+                <Icon icon="mdi:delete-sweep" className="inline-block mr-1" /> 
+                🗑️ Delete ({selectedCategories.size})
+              </button>
+            )}
             <button
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleteMutation.isPending}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+              onClick={() => { setEditCategory(null); setShowModal(true); }}
             >
-              <Icon icon="mdi:delete-sweep" className="inline-block mr-2" /> 
-              🗑️ Delete Selected ({selectedCategories.size})
+              <Icon icon="mdi:plus" className="inline-block mr-1" /> ➕ {t('categories.addCategory')}
             </button>
-          )}
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
-            onClick={() => { setEditCategory(null); setShowModal(true); }}
-          >
-            <Icon icon="mdi:plus" className="inline-block mr-2" /> ➕ {t('categories.addCategory')}
-          </button>
-        </div>
-      </div>
-      <div className="mb-4 flex items-center">
-        <input
-          className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
-          placeholder={t('categories.searchCategory', 'Search Category')}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <span className="ml-4 text-gray-400">{t('navigation.dashboard')} • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">{t('categories.title')}</span></span>
-      </div>
-      <div className="bg-[#232b42] rounded-xl overflow-hidden">
-        {/* Header with select all checkbox */}
-        <div className="border-b border-[#2e3650] px-4 py-3 bg-[#1a2236]">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              checked={hierarchicalCategories.length > 0 && selectedCategories.size === getAllCategoryIds(hierarchicalCategories).length}
-              onChange={handleSelectAll}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span className="ml-3 text-sm font-medium text-gray-300">
-              {t('common.selectAll', 'Select All')}
-            </span>
           </div>
         </div>
+        <div className="flex items-center">
+          <input
+            className="bg-[#232b42] text-white px-4 py-2 rounded-lg w-80 focus:outline-none focus:ring"
+            placeholder={t('categories.searchCategory', 'Search Category')}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <span className="ml-4 text-gray-400 text-sm">{t('navigation.dashboard')} • <span className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs ml-2">{t('categories.title')}</span></span>
+        </div>
+      </div>
 
-        {/* Accordion Content */}
-        <div className="min-h-[400px]">
-          {isLoading ? (
-            <div className="text-center py-16">
-              <div className="text-2xl mb-4">⏳</div>
-              <div className="text-lg font-medium text-gray-300">{t('common.loading')}</div>
+      {/* Table Container */}
+      <div
+        className="flex-1 flex flex-col min-h-0 px-6 pb-6"
+        style={{ maxWidth: "calc(100vw - 300px)" }} // Assuming sidebar width is 260px
+      >
+        <div className="bg-[#232b42] rounded-xl overflow-hidden flex flex-col h-full">
+          {/* Header with select all checkbox */}
+          <div className="flex-shrink-0 border-b border-[#2e3650] px-4 py-3 bg-[#1a2236]">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={hierarchicalCategories.length > 0 && selectedCategories.size === getAllCategoryIds(hierarchicalCategories).length}
+                onChange={handleSelectAll}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-3 text-sm font-medium text-gray-300">
+                {t('common.selectAll', 'Select All')}
+              </span>
             </div>
-          ) : error ? (
-            <div className="text-center py-16">
-              <div className="text-2xl mb-4 text-red-400">❌</div>
-              <div className="text-lg font-medium text-red-400">{String(error.message)}</div>
-            </div>
-          ) : !hierarchicalCategories.length ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="flex flex-col items-center">
-                <Icon icon="mdi:folder-outline" className="text-5xl mb-4" />
-                <div className="text-lg font-medium">📭 {t('categories.noCategoriesFound', 'No categories found.')}</div>
-                <div className="text-sm">Click "Add Category" to create your first category</div>
+          </div>
+
+          {/* Accordion Content */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto">
+            {isLoading ? (
+              <div className="text-center py-16">
+                <div className="text-2xl mb-4">⏳</div>
+                <div className="text-lg font-medium text-gray-300">{t('common.loading')}</div>
               </div>
-            </div>
-          ) : (
-            <CategoryAccordion
-              categories={hierarchicalCategories}
-              selectedCategories={selectedCategories}
-              onSelectCategory={handleSelectCategory}
-              onEditCategory={(category) => { setEditCategory(category); setShowModal(true); }}
-              onDeleteCategory={setDeleteCategory}
-              productCounts={productCounts}
-            />
-          )}
+            ) : error ? (
+              <div className="text-center py-16">
+                <div className="text-2xl mb-4 text-red-400">❌</div>
+                <div className="text-lg font-medium text-red-400">{String(error.message)}</div>
+              </div>
+            ) : !hierarchicalCategories.length ? (
+              <div className="text-center py-16 text-gray-400">
+                <div className="flex flex-col items-center">
+                  <Icon icon="mdi:folder-outline" className="text-5xl mb-4" />
+                  <div className="text-lg font-medium">📭 {t('categories.noCategoriesFound', 'No categories found.')}</div>
+                  <div className="text-sm">Click "Add Category" to create your first category</div>
+                </div>
+              </div>
+            ) : (
+              <CategoryAccordion
+                categories={hierarchicalCategories}
+                selectedCategories={selectedCategories}
+                onSelectCategory={handleSelectCategory}
+                onEditCategory={(category) => { setEditCategory(category); setShowModal(true); }}
+                onDeleteCategory={setDeleteCategory}
+                productCounts={productCounts}
+              />
+            )}
+          </div>
         </div>
       </div>
       {/* Category Modal (Add) */}

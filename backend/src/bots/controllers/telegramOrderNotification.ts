@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
 import courierBot from '../../bots/courierBot';
-import { escapeMarkdownV2, escapeMarkdownV2Url } from '../../utils/telegram';
+import { escapeMarkdownV2, escapeMarkdownV2Url, sendTelegramPhotoAlbum } from '../../utils/telegram';
 import { t } from '../../utils/i18n';
 
 /**
@@ -33,26 +33,47 @@ ${t(mockCtx, 'clientLabel')} ${escapeMarkdownV2(clientName)}`;
     orderText += `\n${escapeMarkdownV2(productLine)}`;
   }
   orderText += `\n\n${escapeMarkdownV2(t(mockCtx, 'totalLabel'))} ${escapeMarkdownV2(String(order.pricing.total))}`;
+  
   // Buttons: Confirm/Accept
   const callbackRow = [
     Markup.button.callback(`✅ ${t(mockCtx, 'acceptBtn')}`, `order_accept_${order._id}`),
   ];
   const keyboard = [callbackRow];
-  const payload = {
-    chat_id: shop.orders_chat_id,
-    text: orderText,
-    parse_mode: 'MarkdownV2',
-    reply_markup: Markup.inlineKeyboard(keyboard).reply_markup,
-  };
+  
   try {
+    // Collect all product images from order items
+    const allProductImages: string[] = [];
+    order.items.forEach((item: any) => {
+      if (item.images && Array.isArray(item.images)) {
+        allProductImages.push(...item.images);
+      }
+    });
+    
+    // Remove duplicates and filter out empty strings
+    const uniqueImages = [...new Set(allProductImages)].filter(img => img && img.trim() !== '');
+    
+    // Send order message with buttons
     await courierBot.telegram.sendMessage(
       shop.orders_chat_id,
       orderText,
-      { reply_markup: payload.reply_markup, parse_mode: 'MarkdownV2' }
+      { 
+        reply_markup: Markup.inlineKeyboard(keyboard).reply_markup, 
+        parse_mode: 'MarkdownV2' 
+      }
     );
+    
+    // Send product images as album if there are any
+    if (uniqueImages.length > 0) {
+      console.log(`[Order Create] Sending ${uniqueImages.length} product images to Telegram group`);
+      await sendTelegramPhotoAlbum(shop.orders_chat_id, uniqueImages, `🖼️ Mahsulot rasmlari - Buyurtma #${order._id}`);
+    } else {
+      console.log('[Order Create] No product images found for this order');
+    }
+    
   } catch (err: any) {
-    console.error('[Order Create] Telegram sendMessage error (order group):', err);
-    throw { on: { method: 'sendMessage', payload }, response: err };
+    console.error('[Order Create] Telegram notification error:', err);
+    // Don't throw error to avoid breaking order creation
+    // Just log the error and continue
   }
 }
 

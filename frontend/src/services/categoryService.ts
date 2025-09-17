@@ -15,6 +15,6 @@ export const getCategories = async (page = 1, limit = 20, search = ''): Promise<
 };
 
 export const getAllCategories = async (): Promise<Category[]> => {
-  const res = await api.get('/categories');
+  const res = await api.get('/categories?limit=1000'); // Get all categories
   return res.data.data;
 }; 
