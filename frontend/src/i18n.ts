@@ -40,6 +40,10 @@ const resources = {
         failedToLoadProducts: 'Failed to load products.',
         noMoreProducts: 'No more products',
       },
+      search: {
+        placeholder: 'Search products...',
+        enterKeyHint: 'done'
+      },
       common: {
         filter: 'Filter',
         priceRange: 'Price Range',
@@ -328,6 +332,10 @@ const resources = {
       },
       auth: {
         relaunchRequired: 'Вы не можете использовать приложение в данный момент, пожалуйста, перезапустите'
+      },
+      search: {
+        placeholder: 'Поиск продуктов...',
+        enterKeyHint: 'done'
       },
       home: {
         title: 'Ежедневные продукты',
@@ -632,6 +640,10 @@ const resources = {
       auth: {
         relaunchRequired: 'Hozirda ilovadan foydalana olmaysiz, iltimos, qayta ishga tushiring'
       },
+      search: {
+        placeholder: 'Mahsulotlarni qidirish...',
+        enterKeyHint: 'done'
+      },
       home: {
         title: 'Kundalik oziq-ovqat',
         title1: 'Kundalik',
@@ -641,7 +653,7 @@ const resources = {
         allProducts: 'Barcha mahsulotlar',
         allSubcategories: 'Barcha kichik kategoriyalar',
         popularFruits: 'Mashhur mevalar',
-        seeAll: 'Hammasini ko‘rish',
+        seeAll: 'Hammasini ko\'rish',
         loadingProducts: 'Mahsulotlar yuklanmoqda...',
         failedToLoadProducts: 'Mahsulotlarni yuklab boʻlmadi.',
         noMoreProducts: 'Mahsulotlar tugadi',

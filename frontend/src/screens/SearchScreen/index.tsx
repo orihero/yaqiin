@@ -109,6 +109,13 @@ const SearchScreen: React.FC = () => {
     setSearch(e.target.value);
     debouncedSetSearch(e.target.value);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputRef.current?.blur(); // This will close the keyboard
+    }
+  };
   const handleApplyFilters = () => {
     setQueryFilters(f => ({ ...f, categoryId: selectedCategory, priceRange }));
     setFilterOpen(false);
@@ -136,6 +143,8 @@ const SearchScreen: React.FC = () => {
               placeholder={t('search.placeholder')}
               value={search}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              enterKeyHint="done"
             />
             {/* <SearchFilterButton onClick={() => setFilterOpen(true)} /> */}
           </div>
