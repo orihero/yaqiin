@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('theme');
+          if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.add('light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+    <script type="module" crossorigin src="/assets/index-BouADcV8.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-hAnnmPxK.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html> 
