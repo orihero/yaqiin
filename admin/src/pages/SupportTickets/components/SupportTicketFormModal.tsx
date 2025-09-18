@@ -72,7 +72,7 @@ const SupportTicketFormModal: React.FC<SupportTicketFormModalProps> = ({ open, o
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 backdrop-blur-sm bg-black/30" onClick={onClose} />
-      <div className="w-[400px] bg-[#232b42] p-8 h-full shadow-xl overflow-y-auto">
+      <div className="w-1/2 bg-[#232b42] p-8 h-full shadow-xl overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{ticket ? 'Edit Ticket' : 'Add Ticket'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

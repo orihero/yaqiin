@@ -69,15 +69,15 @@ export function useHomeScreen() {
   const user = useUserStore(state => state.user);
   const shopId = user?.shopId;
 
-  // Fetch categories from backend
+  // Fetch categories from backend (only active categories)
   const {
     data: categoriesData,
     isLoading: isLoadingCategories,
     isError: isCategoriesError,
     error: categoriesError,
   } = useQuery({
-    queryKey: ['categories', 'all'],
-    queryFn: () => getAllCategories(),
+    queryKey: ['categories', 'all', 'active'],
+    queryFn: () => getAllCategories(true), // Only get active categories
   });
   // Prepend 'All products' pseudo-category
   const allProductsCategory = {
@@ -88,17 +88,17 @@ export function useHomeScreen() {
     updatedAt: new Date(),
   };
   
-  // Filter to show only main categories (parentId is null or undefined)
-  const mainCategories = categoriesData?.filter(cat => !cat.parentId) || [];
+  // Filter to show only active main categories (parentId is null or undefined and isActive is true)
+  const mainCategories = categoriesData?.filter(cat => !cat.parentId && cat.isActive) || [];
   const categories = [allProductsCategory, ...mainCategories];
 
   // Find the selected category object (except for 'All products')
   const selectedCategory = mainCategories.find(cat => cat.name.uz === activeCategory || cat.name.ru === activeCategory);
   const selectedCategoryId = activeCategory && selectedCategory ? selectedCategory._id : undefined;
 
-  // Get subcategories for the selected main category
+  // Get active subcategories for the selected main category
   const subcategories = categoriesData?.filter(cat => 
-    cat.parentId && selectedCategory && cat.parentId === selectedCategory._id
+    cat.parentId && selectedCategory && cat.parentId === selectedCategory._id && cat.isActive
   ) || [];
 
   // Find the selected subcategory object

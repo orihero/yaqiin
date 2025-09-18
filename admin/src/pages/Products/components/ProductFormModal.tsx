@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAllCategories } from '../../../services/categoryService';
 import { Category } from '@yaqiin/shared/types/category';
@@ -8,6 +8,8 @@ import SearchableSelect from '../../../components/SearchableSelect';
 import SequentialCategorySelect from '../../../components/SequentialCategorySelect';
 import { getUnitOptions } from '../../../utils/units';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
+import TranslationButton from '../../../components/TranslationButton';
+import { useTranslation } from '../../../hooks/useTranslation';
 
 // ProductFormModal: Right-side drawer modal for adding/editing products. Follows admin panel modal conventions.
 
@@ -36,6 +38,7 @@ interface ProductFormState {
   imagePreviews: string[];
   imageUrls: string[];
   formError: string | null;
+  lastEditedField: string | null; // Track which field was last edited to avoid translation loops
 }
 
 // Define action types
@@ -57,7 +60,7 @@ const initialState: ProductFormState = {
   basePrice: 0,
   unit: '',
   unitMeasure: '',
-  baseStockQuantity: 0,
+  baseStockQuantity: 1000,
   isActive: true,
   descUz: '',
   descRu: '',
@@ -65,6 +68,7 @@ const initialState: ProductFormState = {
   imagePreviews: [],
   imageUrls: [],
   formError: null,
+  lastEditedField: null,
 };
 
 // Reducer function
@@ -141,6 +145,24 @@ export default function ProductFormModal({ open = true, product, loading = false
   const isEdit = !!product;
   const [state, dispatch] = useReducer(productFormReducer, initialState);
   const [imagePreview, setImagePreview] = useState<{ images: string[]; initialIndex: number } | null>(null);
+  const { translateProductName, translateProductDescription, isTranslating, error: translationError, clearError } = useTranslation();
+  
+  // State for tracking auto-translation
+  const [autoTranslating, setAutoTranslating] = useState<{
+    nameUz: boolean;
+    nameRu: boolean;
+    descUz: boolean;
+    descRu: boolean;
+  }>({
+    nameUz: false,
+    nameRu: false,
+    descUz: false,
+    descRu: false
+  });
+  
+  // Debounce timers for automatic translation
+  const nameTranslationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const descriptionTranslationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: categories, isLoading: loadingCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -161,8 +183,6 @@ export default function ProductFormModal({ open = true, product, loading = false
       dispatch({ type: 'RESET_FORM' });
     }
   }, [open, product]);
-
-  if (!open) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,6 +240,116 @@ export default function ProductFormModal({ open = true, product, loading = false
     setImagePreview({ images, initialIndex });
   };
 
+  // Debounced translation functions for automatic translation
+  const debouncedTranslateName = useCallback(async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz', sourceText: string) => {
+    if (!sourceText.trim()) return;
+
+    const targetField = targetLanguage === 'uz' ? 'nameUz' : 'nameRu';
+    setAutoTranslating(prev => ({ ...prev, [targetField]: true }));
+    
+    clearError();
+    const translatedText = await translateProductName(sourceText, sourceLanguage, targetLanguage);
+    
+    setAutoTranslating(prev => ({ ...prev, [targetField]: false }));
+    
+    if (translatedText) {
+      dispatch({ type: 'SET_FIELD', field: targetField, value: translatedText });
+    }
+  }, [translateProductName, clearError]);
+
+  const debouncedTranslateDescription = useCallback(async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz', sourceText: string) => {
+    if (!sourceText.trim()) return;
+
+    const targetField = targetLanguage === 'uz' ? 'descUz' : 'descRu';
+    setAutoTranslating(prev => ({ ...prev, [targetField]: true }));
+    
+    clearError();
+    const translatedText = await translateProductDescription(sourceText, sourceLanguage, targetLanguage);
+    
+    setAutoTranslating(prev => ({ ...prev, [targetField]: false }));
+    
+    if (translatedText) {
+      dispatch({ type: 'SET_FIELD', field: targetField, value: translatedText });
+    }
+  }, [translateProductDescription, clearError]);
+
+  // Manual translation functions (for button clicks)
+  const handleTranslateName = async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz') => {
+    const sourceText = sourceLanguage === 'uz' ? state.nameUz : state.nameRu;
+    if (!sourceText.trim()) return;
+
+    clearError();
+    const translatedText = await translateProductName(sourceText, sourceLanguage, targetLanguage);
+    
+    if (translatedText) {
+      const field = targetLanguage === 'uz' ? 'nameUz' : 'nameRu';
+      dispatch({ type: 'SET_FIELD', field, value: translatedText });
+    }
+  };
+
+  const handleTranslateDescription = async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz') => {
+    const sourceText = sourceLanguage === 'uz' ? state.descUz : state.descRu;
+    if (!sourceText.trim()) return;
+
+    clearError();
+    const translatedText = await translateProductDescription(sourceText, sourceLanguage, targetLanguage);
+    
+    if (translatedText) {
+      const field = targetLanguage === 'uz' ? 'descUz' : 'descRu';
+      dispatch({ type: 'SET_FIELD', field, value: translatedText });
+    }
+  };
+
+  // Handle field changes with automatic translation
+  const handleFieldChange = (field: keyof ProductFormState, value: string, autoTranslate: boolean = true) => {
+    dispatch({ type: 'SET_FIELD', field, value });
+    dispatch({ type: 'SET_FIELD', field: 'lastEditedField', value: field });
+
+    if (!autoTranslate) return;
+
+    // Clear existing timeout
+    if (field.includes('name') && nameTranslationTimeoutRef.current) {
+      clearTimeout(nameTranslationTimeoutRef.current);
+    }
+    if (field.includes('desc') && descriptionTranslationTimeoutRef.current) {
+      clearTimeout(descriptionTranslationTimeoutRef.current);
+    }
+
+    // Set new timeout for automatic translation
+    if (field === 'nameUz' && value.trim()) {
+      nameTranslationTimeoutRef.current = setTimeout(() => {
+        debouncedTranslateName('uz', 'ru', value);
+      }, 1000); // 1 second delay
+    } else if (field === 'nameRu' && value.trim()) {
+      nameTranslationTimeoutRef.current = setTimeout(() => {
+        debouncedTranslateName('ru', 'uz', value);
+      }, 1000); // 1 second delay
+    } else if (field === 'descUz' && value.trim()) {
+      descriptionTranslationTimeoutRef.current = setTimeout(() => {
+        debouncedTranslateDescription('uz', 'ru', value);
+      }, 1500); // 1.5 second delay for longer text
+    } else if (field === 'descRu' && value.trim()) {
+      descriptionTranslationTimeoutRef.current = setTimeout(() => {
+        debouncedTranslateDescription('ru', 'uz', value);
+      }, 1500); // 1.5 second delay for longer text
+    }
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (nameTranslationTimeoutRef.current) {
+        clearTimeout(nameTranslationTimeoutRef.current);
+      }
+      if (descriptionTranslationTimeoutRef.current) {
+        clearTimeout(descriptionTranslationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Early return after all hooks have been called
+  if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50">
       <div
@@ -227,31 +357,59 @@ export default function ProductFormModal({ open = true, product, loading = false
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className="fixed top-0 right-0 h-full w-full max-w-xl bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
-        <h2 className="text-xl font-bold mb-4 text-white">{isEdit ? '✏️ Edit Product' : '➕ Add Product'}</h2>
-        {error && <div className="text-red-400 mb-2">❌ {error}</div>}
+       <div className="fixed top-0 right-0 h-full w-full bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+         <div className="flex justify-between items-center mb-4">
+           <h2 className="text-xl font-bold text-white">{isEdit ? '✏️ Edit Product' : '➕ Add Product'}</h2>
+           <button
+             onClick={onClose}
+             className="text-gray-400 hover:text-white text-2xl transition-colors"
+             title="Close"
+           >
+             ×
+           </button>
+         </div>
+        {error && <div className="text-red-400 mb-2">❌ {typeof error === 'string' ? error : (error as any)?.message || 'An error occurred'}</div>}
         {state.formError && <div className="text-red-400 mb-2">⚠️ {state.formError}</div>}
+        {translationError && <div className="text-yellow-400 mb-2">🌐 Translation Error: {typeof translationError === 'string' ? translationError : (translationError as any)?.message || 'Translation failed'}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4">
+           <div className="grid grid-cols-1 gap-4">
+             <div>
+               <label className="block mb-1 text-white">📝 Name (Uzbek) *</label>
+               <div className="flex gap-2">
+                 <input 
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white" 
+                   value={state.nameUz} 
+                   onChange={e => handleFieldChange('nameUz', e.target.value)} 
+                   required 
+                 />
+                 <TranslationButton
+                   onClick={() => handleTranslateName('ru', 'uz')}
+                   disabled={!state.nameRu.trim()}
+                   loading={isTranslating}
+                   autoTranslating={autoTranslating.nameUz}
+                   title="Translate from Russian"
+                 />
+               </div>
+             </div>
+             <div>
+               <label className="block mb-1 text-white">📝 Name (Russian) *</label>
+               <div className="flex gap-2">
+                 <input 
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white" 
+                   value={state.nameRu} 
+                   onChange={e => handleFieldChange('nameRu', e.target.value)} 
+                   required 
+                 />
+                 <TranslationButton
+                   onClick={() => handleTranslateName('uz', 'ru')}
+                   disabled={!state.nameUz.trim()}
+                   loading={isTranslating}
+                   autoTranslating={autoTranslating.nameRu}
+                   title="Translate from Uzbek"
+                 />
+               </div>
+             </div>
             <div>
-              <label className="block mb-1 text-white">📝 Name (Uzbek) *</label>
-              <input 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                value={state.nameUz} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'nameUz', value: e.target.value })} 
-                required 
-              />
-            </div>
-            <div>
-              <label className="block mb-1 text-white">📝 Name (Russian) *</label>
-              <input 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                value={state.nameRu} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'nameRu', value: e.target.value })} 
-                required 
-              />
-            </div>
-            <div className="col-span-2">
               <SequentialCategorySelect
                 value={state.categoryId}
                 onChange={(value) => dispatch({ type: 'SET_FIELD', field: 'categoryId', value })}
@@ -302,27 +460,51 @@ export default function ProductFormModal({ open = true, product, loading = false
                 className="w-full px-3 py-2 rounded bg-[#1a2236] text-white"
               />
             </div>
-            <div className="col-span-2">
-              <label className="block mb-1 text-white">📄 Description (Uzbek) *</label>
-              <textarea 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                rows={2} 
-                value={state.descUz} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'descUz', value: e.target.value })} 
-                required 
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1 text-white">📄 Description (Russian) *</label>
-              <textarea 
-                className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
-                rows={2} 
-                value={state.descRu} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'descRu', value: e.target.value })} 
-                required 
-              />
-            </div>
-            <div className="col-span-2">
+             <div>
+               <label className="block mb-1 text-white">📄 Description (Uzbek) *</label>
+               <div className="flex gap-2">
+                 <textarea 
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white" 
+                   rows={4} 
+                   value={state.descUz} 
+                   onChange={e => handleFieldChange('descUz', e.target.value)} 
+                   required 
+                 />
+                 <div className="flex flex-col gap-1">
+                   <TranslationButton
+                     onClick={() => handleTranslateDescription('ru', 'uz')}
+                     disabled={!state.descRu.trim()}
+                     loading={isTranslating}
+                     autoTranslating={autoTranslating.descUz}
+                     title="Translate from Russian"
+                     className="h-8"
+                   />
+                 </div>
+               </div>
+             </div>
+             <div>
+               <label className="block mb-1 text-white">📄 Description (Russian) *</label>
+               <div className="flex gap-2">
+                 <textarea 
+                   className="flex-1 px-3 py-2 rounded bg-[#1a2236] text-white" 
+                   rows={4} 
+                   value={state.descRu} 
+                   onChange={e => handleFieldChange('descRu', e.target.value)} 
+                   required 
+                 />
+                 <div className="flex flex-col gap-1">
+                   <TranslationButton
+                     onClick={() => handleTranslateDescription('uz', 'ru')}
+                     disabled={!state.descUz.trim()}
+                     loading={isTranslating}
+                     autoTranslating={autoTranslating.descRu}
+                     title="Translate from Uzbek"
+                     className="h-8"
+                   />
+                 </div>
+               </div>
+             </div>
+            <div>
               <label className="block mb-1 text-white">🖼️ Product Images</label>
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="block mb-2" />
               
@@ -337,7 +519,7 @@ export default function ProductFormModal({ open = true, product, loading = false
                           src={src} 
                           alt={`Product ${idx + 1}`} 
                           className="w-full h-full object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" 
-                          onClick={() => handleImagePreview(product.images, idx)}
+                          onClick={() => handleImagePreview(product.images || [], idx)}
                           title="Click to preview"
                         />
                       </div>
@@ -378,15 +560,15 @@ export default function ProductFormModal({ open = true, product, loading = false
                 <button type="button" className="mt-2 px-3 py-1 rounded bg-blue-700 hover:bg-blue-800 text-white text-sm" onClick={handleAddImageUrl}>➕ Add Image URL</button>
               </div>
             </div>
-            <div className="col-span-2 flex items-center mt-2">
-              <input 
-                type="checkbox" 
-                id="isActive" 
-                checked={state.isActive} 
-                onChange={e => dispatch({ type: 'SET_FIELD', field: 'isActive', value: e.target.checked })} 
-              />
-              <label htmlFor="isActive" className="ml-2 text-white">✅ Active</label>
-            </div>
+             <div className="flex items-center mt-2">
+               <input 
+                 type="checkbox" 
+                 id="isActive" 
+                 checked={state.isActive} 
+                 onChange={e => dispatch({ type: 'SET_FIELD', field: 'isActive', value: e.target.checked })} 
+               />
+               <label htmlFor="isActive" className="ml-2 text-white">✅ Active</label>
+             </div>
           </div>
           <div className="flex justify-end gap-2 mt-6">
             <button type="button" className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700" onClick={onClose}>❌ Cancel</button>

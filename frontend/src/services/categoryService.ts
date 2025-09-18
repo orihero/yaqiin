@@ -7,14 +7,17 @@ export interface CategoryListResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-export const getCategories = async (page = 1, limit = 20, search = ''): Promise<CategoryListResponse> => {
+export const getCategories = async (page = 1, limit = 20, search = '', activeOnly = true): Promise<CategoryListResponse> => {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search) params.append('search', search);
+  if (activeOnly) params.append('isActive', 'true');
   const res = await api.get(`/categories?${params.toString()}`);
   return res.data;
 };
 
-export const getAllCategories = async (): Promise<Category[]> => {
-  const res = await api.get('/categories?limit=1000'); // Get all categories
+export const getAllCategories = async (activeOnly = true): Promise<Category[]> => {
+  const params = new URLSearchParams({ limit: '1000' });
+  if (activeOnly) params.append('isActive', 'true');
+  const res = await api.get(`/categories?${params.toString()}`);
   return res.data.data;
 }; 

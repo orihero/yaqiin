@@ -80,7 +80,7 @@ export default function CategoryFormModal({ open, mode, loading, error, details,
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-      <div className="fixed top-0 right-0 h-full w-full max-w-xl bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+      <div className="fixed top-0 right-0 h-full w-1/2 bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
         <h2 className="text-xl font-bold mb-4">{isEdit ? t('categories.editCategory') : t('categories.addCategory')}</h2>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         {renderDetails(details)}

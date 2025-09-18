@@ -94,8 +94,8 @@ const SearchScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([10, 50]);
   const { data: categoriesData } = useQuery({
-    queryKey: ['categories', 'all'],
-    queryFn: getAllCategories,
+    queryKey: ['categories', 'all', 'active'],
+    queryFn: () => getAllCategories(true), // Only get active categories
   });
   const categories = categoriesData || [];
 

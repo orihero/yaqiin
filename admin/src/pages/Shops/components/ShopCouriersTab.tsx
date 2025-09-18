@@ -139,7 +139,7 @@ export default function ShopCouriersTab({ shopId }: ShopCouriersTabProps) {
             style={{ backdropFilter: 'blur(8px)' }}
             onClick={() => setAddCourierModalOpen(false)}
           />
-          <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+          <div className="fixed top-0 right-0 h-full w-1/2 bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
             <h2 className="text-xl font-bold mb-4">Add Courier to Shop</h2>
             <div className="mb-4">
               <input

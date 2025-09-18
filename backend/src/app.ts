@@ -16,6 +16,7 @@ import supportTicketRoutes from "./routes/supportTicketRoutes";
 import excelImportRoutes from "./routes/excelImportRoutes";
 import customExcelImportRoutes from "./routes/customExcelImportRoutes";
 import imageGenerationRoutes from "./routes/imageGenerationRoutes";
+import translationRoutes from "./routes/translationRoutes";
 // import outreachRoutes from "./routes/outreachRoutes"; // Temporarily disabled
 import morgan from "morgan";
 import cors from "cors";
@@ -59,6 +60,7 @@ app.use("/api/support-tickets", supportTicketRoutes);
 app.use("/api/excel-import", excelImportRoutes);
 app.use("/api/custom-excel-import", customExcelImportRoutes);
 app.use("/api/image-generation", imageGenerationRoutes);
+app.use("/api/translation", translationRoutes);
 // app.use("/api/outreach", outreachRoutes); // Temporarily disabled
 app.use("/api/auth", authRoutes);
 

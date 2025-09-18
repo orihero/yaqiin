@@ -79,7 +79,7 @@ const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
         <div className="mb-6">
           <div className="text-sm font-semibold text-[#232c43] mb-2">{t('common.categories')}</div>
           <div className="flex flex-wrap gap-2">
-            {categories.map(cat => (
+            {categories.filter(cat => cat.isActive).map(cat => (
               <button
                 key={cat._id}
                 className={`px-4 py-2 rounded-full text-sm font-medium border ${selectedCategory === cat._id ? 'bg-[#232c43] text-white' : 'bg-gray-100 text-[#232c43]'}`}
