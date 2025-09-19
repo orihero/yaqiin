@@ -240,39 +240,6 @@ export default function ProductFormModal({ open = true, product, loading = false
     setImagePreview({ images, initialIndex });
   };
 
-  // Debounced translation functions for automatic translation
-  const debouncedTranslateName = useCallback(async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz', sourceText: string) => {
-    if (!sourceText.trim()) return;
-
-    const targetField = targetLanguage === 'uz' ? 'nameUz' : 'nameRu';
-    setAutoTranslating(prev => ({ ...prev, [targetField]: true }));
-    
-    clearError();
-    const translatedText = await translateProductName(sourceText, sourceLanguage, targetLanguage);
-    
-    setAutoTranslating(prev => ({ ...prev, [targetField]: false }));
-    
-    if (translatedText) {
-      dispatch({ type: 'SET_FIELD', field: targetField, value: translatedText });
-    }
-  }, [translateProductName, clearError]);
-
-  const debouncedTranslateDescription = useCallback(async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz', sourceText: string) => {
-    if (!sourceText.trim()) return;
-
-    const targetField = targetLanguage === 'uz' ? 'descUz' : 'descRu';
-    setAutoTranslating(prev => ({ ...prev, [targetField]: true }));
-    
-    clearError();
-    const translatedText = await translateProductDescription(sourceText, sourceLanguage, targetLanguage);
-    
-    setAutoTranslating(prev => ({ ...prev, [targetField]: false }));
-    
-    if (translatedText) {
-      dispatch({ type: 'SET_FIELD', field: targetField, value: translatedText });
-    }
-  }, [translateProductDescription, clearError]);
-
   // Manual translation functions (for button clicks)
   const handleTranslateName = async (sourceLanguage: 'ru' | 'uz', targetLanguage: 'ru' | 'uz') => {
     const sourceText = sourceLanguage === 'uz' ? state.nameUz : state.nameRu;
@@ -304,35 +271,6 @@ export default function ProductFormModal({ open = true, product, loading = false
   const handleFieldChange = (field: keyof ProductFormState, value: string, autoTranslate: boolean = true) => {
     dispatch({ type: 'SET_FIELD', field, value });
     dispatch({ type: 'SET_FIELD', field: 'lastEditedField', value: field });
-
-    if (!autoTranslate) return;
-
-    // Clear existing timeout
-    if (field.includes('name') && nameTranslationTimeoutRef.current) {
-      clearTimeout(nameTranslationTimeoutRef.current);
-    }
-    if (field.includes('desc') && descriptionTranslationTimeoutRef.current) {
-      clearTimeout(descriptionTranslationTimeoutRef.current);
-    }
-
-    // Set new timeout for automatic translation
-    if (field === 'nameUz' && value.trim()) {
-      nameTranslationTimeoutRef.current = setTimeout(() => {
-        debouncedTranslateName('uz', 'ru', value);
-      }, 1000); // 1 second delay
-    } else if (field === 'nameRu' && value.trim()) {
-      nameTranslationTimeoutRef.current = setTimeout(() => {
-        debouncedTranslateName('ru', 'uz', value);
-      }, 1000); // 1 second delay
-    } else if (field === 'descUz' && value.trim()) {
-      descriptionTranslationTimeoutRef.current = setTimeout(() => {
-        debouncedTranslateDescription('uz', 'ru', value);
-      }, 1500); // 1.5 second delay for longer text
-    } else if (field === 'descRu' && value.trim()) {
-      descriptionTranslationTimeoutRef.current = setTimeout(() => {
-        debouncedTranslateDescription('ru', 'uz', value);
-      }, 1500); // 1.5 second delay for longer text
-    }
   };
 
   // Cleanup timeouts on unmount
@@ -357,7 +295,7 @@ export default function ProductFormModal({ open = true, product, loading = false
         style={{ backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       />
-       <div className="fixed top-0 right-0 h-full w-full bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
+       <div className="fixed top-0 right-0 h-full w-2/3 bg-[#232b42] shadow-2xl p-8 overflow-y-auto transition-transform duration-300 transform translate-x-0">
          <div className="flex justify-between items-center mb-4">
            <h2 className="text-xl font-bold text-white">{isEdit ? '✏️ Edit Product' : '➕ Add Product'}</h2>
            <button
@@ -438,7 +376,7 @@ export default function ProductFormModal({ open = true, product, loading = false
                 className="w-full"
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block mb-1 text-white">📏 Unit Measure</label>
               <input 
                 className="w-full px-3 py-2 rounded bg-[#1a2236] text-white" 
@@ -446,7 +384,7 @@ export default function ProductFormModal({ open = true, product, loading = false
                 onChange={e => dispatch({ type: 'SET_FIELD', field: 'unitMeasure', value: e.target.value })} 
                 placeholder="e.g., 100mg, 1kg, 500ml"
               />
-            </div>
+            </div> */}
             <div>
               <label className="block mb-1 text-white">
                 📊 Base Stock Quantity
