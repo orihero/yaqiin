@@ -230,9 +230,17 @@ mainBot.on("message", async (ctx: CustomContext) => {
           `[mainBot] Storing shopId and location in registration state for new user: telegramId=${telegramId}, shopId=${shop._id}`
         );
         
-        // Move to building number step
-        state.step = "building";
-        await ctx.reply(t(ctx, "enterBlock"));
+        // Move to dwelling type selection step
+        state.step = "dwellingType";
+        await ctx.reply(
+          t(ctx, "selectDwellingType"),
+          Markup.keyboard([
+            [t(ctx, "multiStoreyBuilding")],
+            [t(ctx, "house")]
+          ])
+            .oneTime()
+            .resize()
+        );
         return;
       } else {
         // 🚫 Out of service area message
@@ -415,7 +423,49 @@ mainBot.on("message", async (ctx: CustomContext) => {
       return;
     }
 
-    // Handle building, entrance, and apartment number steps
+    // Handle dwelling type selection
+    if (state.step === "dwellingType") {
+      const dwellingType = ctx.message.text;
+      // Check if user selected multi-storey building
+      if (
+        dwellingType === t(ctx, "multiStoreyBuilding") ||
+        dwellingType.includes("qavatli") ||
+        dwellingType.includes("этажн") ||
+        dwellingType.includes("storey")
+      ) {
+        state.dwellingType = "building";
+        state.step = "building";
+        await ctx.reply(t(ctx, "enterBlock"));
+        return;
+      }
+      // Check if user selected house
+      else if (
+        dwellingType === t(ctx, "house") ||
+        dwellingType.includes("Hovli") ||
+        dwellingType.includes("Дом") ||
+        dwellingType.includes("House")
+      ) {
+        state.dwellingType = "house";
+        state.step = "houseNumber";
+        await ctx.reply(t(ctx, "enterHouseNumber"));
+        return;
+      }
+      // Invalid selection - ask again
+      else {
+        await ctx.reply(
+          t(ctx, "selectDwellingType"),
+          Markup.keyboard([
+            [t(ctx, "multiStoreyBuilding")],
+            [t(ctx, "house")]
+          ])
+            .oneTime()
+            .resize()
+        );
+        return;
+      }
+    }
+
+    // Handle building, entrance, and apartment number steps (for multi-storey buildings)
     if (state.step === "building") {
       state.building = ctx.message.text;
       state.step = "entrance";
@@ -433,7 +483,7 @@ mainBot.on("message", async (ctx: CustomContext) => {
     if (state.step === "apartment") {
       state.apartment = ctx.message.text;
       
-      // Complete registration with all details
+      // Complete registration for multi-storey building
       const user = new User({
         telegramId,
         firstName: state.firstName || ctx.from.first_name,
@@ -470,7 +520,79 @@ mainBot.on("message", async (ctx: CustomContext) => {
       });
       await user.save();
       console.log(
-        `[mainBot] New user registered with complete details: userId=${user._id}, telegramId=${telegramId}, shopId=${user.shopId}`
+        `[mainBot] New user registered with building details: userId=${user._id}, telegramId=${telegramId}, shopId=${user.shopId}`
+      );
+      registrationState.delete(telegramId);
+      
+      // Set user in session for proper language detection
+      sessionUserMap.set(ctx, user);
+      
+      // Get shop info for welcome message
+      const shop = await findShopForLocation(state.location.latitude, state.location.longitude);
+      
+      if (shop) {
+        // Send shop info with photo first
+        await sendShopInfo(ctx, shop);
+      }
+      
+      // Send registration completion message
+      await ctx.reply(t(ctx, "registrationComplete"), getMainMenuKeyboard(ctx));
+      
+      // Also send the mini app button
+      await ctx.reply(
+        t(ctx, "openMiniApp"),
+        Markup.inlineKeyboard([
+          Markup.button.webApp(
+            t(ctx, "openMiniAppBtn"),
+            "https://yaqiin-frontend.vercel.app/?expand=true&disable_closing=true"
+          ),
+        ])
+      );
+      return;
+    }
+
+    // Handle house number (for houses)
+    if (state.step === "houseNumber") {
+      state.houseNumber = ctx.message.text;
+      
+      // Complete registration for house
+      const user = new User({
+        telegramId,
+        firstName: state.firstName || ctx.from.first_name,
+        lastName: state.lastName || ctx.from.last_name,
+        phoneNumber: state.phoneNumber,
+        role: "client",
+        status: "active",
+        shopId: state.shopId,
+        preferences: {
+          language: state.language,
+          notifications: {
+            orderUpdates: true,
+            promotions: true,
+            newProducts: true,
+          },
+        },
+        addresses: [
+          {
+            title: "Telegram Location",
+            street: "",
+            city: "",
+            district: "",
+            postalCode: "",
+            building: state.houseNumber, // Store house number in building field
+            entrance: "",
+            apartment: "",
+            coordinates: {
+              lat: state.location.latitude,
+              lng: state.location.longitude,
+            },
+            isDefault: true,
+          },
+        ],
+      });
+      await user.save();
+      console.log(
+        `[mainBot] New user registered with house details: userId=${user._id}, telegramId=${telegramId}, shopId=${user.shopId}`
       );
       registrationState.delete(telegramId);
       

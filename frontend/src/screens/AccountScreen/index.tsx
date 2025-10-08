@@ -98,8 +98,7 @@ const AccountScreen: React.FC = () => {
     <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide">
       <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
         <div
-          className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
-          style={{ minHeight: 'calc(100vh - 90px)', maxHeight: 'calc(100vh - 90px)' }}
+          className="bg-white rounded-b-[52px] pt-20 px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
         >
           <ProfileHeader title={t('account.title')} />
           

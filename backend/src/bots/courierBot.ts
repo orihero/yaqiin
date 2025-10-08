@@ -474,58 +474,8 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
           await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, "packed", user);
         }
         
-        // Send to all couriers with 'Picked up' and 'Reject' buttons
-        const couriers = await User.find({ role: "courier" });
-        let orderText = `🚚 <b>${t(ctx, "orderReadyLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
-        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
-        orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
-        for (const item of order.items) {
-          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
-        }
-        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
-        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
-        for (const courier of couriers) {
-          if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
-            // Send order details message
-            await ctx.telegram.sendMessage(
-              courier.telegramId,
-              orderText,
-              {
-                parse_mode: 'HTML',
-                reply_markup: {
-                  inline_keyboard: [
-                    [
-                     { text: '🚚 ' + t(ctx, "pickedUpBtn"), callback_data: `order_courier_picked_${order._id}` },
-                     { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_courier_reject_${order._id}` }
-                    ]
-                  ]
-                }
-              }
-            );
-            
-            // Send delivery location to courier
-            if (order.deliveryAddress && order.deliveryAddress.coordinates) {
-              const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
-              const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
-              
-              // Send location message with address
-              await ctx.telegram.sendMessage(
-                courier.telegramId,
-                locationText + addressText,
-                { parse_mode: 'HTML' }
-              );
-              
-              // Send actual location coordinates
-              await ctx.telegram.sendLocation(
-                courier.telegramId,
-                order.deliveryAddress.coordinates.lat,
-                order.deliveryAddress.coordinates.lng
-              );
-            }
-          } else {
-            console.error('[Order Notify] Invalid or missing telegramId for courier:', courier);
-          }
-        }
+        // Couriers are already notified at order creation, no need to send again
+        // They will get updated via their existing notification when they check status
       } else {
         await ctx.answerCbQuery(t(ctx, "orderCannotBeFinished"));
         return;
@@ -822,56 +772,8 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
           }
         }
       } else if (newStatus === "packed") {
-        // Send to all couriers if order was packed
-        const couriers = await User.find({ role: "courier" });
-        let orderText = `🚚 <b>${t(ctx, "orderReadyLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
-        orderText += `<b>${t(ctx, "clientLabel")}:</b> ${order.customerId}\n`;
-        orderText += `\n<b>${t(ctx, "productsLabel")}</b>`;
-        for (const item of order.items) {
-          orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
-        }
-        orderText += `\n\n<b>${t(ctx, "totalLabel")}:</b> ${order.pricing.total}`;
-        orderText += `\n\n<b>${t(ctx, "nextStepLabel")}:</b> ${t(ctx, "pressPickedUpOrReject")}`;
-        for (const courier of couriers) {
-          if (courier.telegramId && /^\d+$/.test(courier.telegramId)) {
-            // Send order details message
-            await ctx.telegram.sendMessage(
-              courier.telegramId,
-              orderText,
-              {
-                parse_mode: 'HTML',
-                reply_markup: {
-                  inline_keyboard: [
-                    [
-                     { text: '🚚 ' + t(ctx, "pickedUpBtn"), callback_data: `order_courier_picked_${order._id}` },
-                     { text: '❌ ' + t(ctx, "rejectBtn"), callback_data: `order_courier_reject_${order._id}` }
-                    ]
-                  ]
-                }
-              }
-            );
-            
-            // Send delivery location to courier
-            if (order.deliveryAddress && order.deliveryAddress.coordinates) {
-              const locationText = `📍 <b>${t(ctx, "deliveryLocationLabel")}</b>\n<b>${t(ctx, "orderIdLabel")}:</b> <code>${order._id}</code>\n`;
-              const addressText = `${order.deliveryAddress.street}, ${order.deliveryAddress.district}, ${order.deliveryAddress.city}`;
-              
-              // Send location message with address
-              await ctx.telegram.sendMessage(
-                courier.telegramId,
-                locationText + addressText,
-                { parse_mode: 'HTML' }
-              );
-              
-              // Send actual location coordinates
-              await ctx.telegram.sendLocation(
-                courier.telegramId,
-                order.deliveryAddress.coordinates.lat,
-                order.deliveryAddress.coordinates.lng
-              );
-            }
-          }
-        }
+        // Couriers are already notified at order creation, no need to send again
+        // They will get updated via their existing notification when they check status
       }
     } else {
       await ctx.answerCbQuery(t(ctx, "noPermissionToChangeStatus"));
@@ -879,7 +781,225 @@ courierBot.on("callback_query", async (ctx: CustomContext) => {
     }
     return;
   }
+  
+  // Match courier confirm (new order acceptance)
+  const courierConfirmMatch = data.match(/^courier_confirm_(.+)$/);
+  if (courierConfirmMatch) {
+    const orderId = courierConfirmMatch[1];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    
+    if (user.role === "courier") {
+      // Courier confirms order - assign courier and move to appropriate status
+      if (!order.courierId) {
+        order.courierId = user._id as mongoose.Types.ObjectId;
+        await order.save();
+      }
+      
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+      await ctx.answerCbQuery("✅ Buyurtma qabul qilindi");
+      
+      // Send status update message with next action buttons
+      await sendCourierOrderStatusMessage(ctx, order, user);
+      
+      // Notify orders group
+      const Shop = require("../models/Shop").default;
+      const shop = await Shop.findById(order.shopId);
+      if (shop) {
+        await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, order.status, user);
+      }
+    }
+    return;
+  }
+  
+  // Match courier reject (new order rejection)
+  const courierRejectNewMatch = data.match(/^courier_reject_(.+)$/);
+  if (courierRejectNewMatch) {
+    const orderId = courierRejectNewMatch[1];
+    await ctx.answerCbQuery("❌ Buyurtma rad etildi");
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.reply("Buyurtma rad etildi");
+    return;
+  }
+  
+  // Match courier status change actions
+  const courierStatusMatch = data.match(/^courier_status_(.+)_(.+)$/);
+  if (courierStatusMatch) {
+    const newStatus = courierStatusMatch[1];
+    const orderId = courierStatusMatch[2];
+    const order = await Order.findById(orderId);
+    if (!order) return ctx.answerCbQuery(t(ctx, "orderNotFound"));
+    if (!ctx.from) return ctx.answerCbQuery(t(ctx, "userNotFound"));
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return ctx.answerCbQuery(t(ctx, "userNotFoundInDB"));
+    
+    if (user.role === "courier") {
+      // Handle rejection statuses
+      if (newStatus === "rejected_by_courier") {
+        await ctx.reply(t(ctx, "pleaseProvideRejectionReason"));
+        customReasonMap.set(userId, { orderId, role: "courier" });
+        return;
+      }
+      
+      // Update order status
+      await Order.updateStatus(orderId, newStatus, (user._id as mongoose.Types.ObjectId).toString());
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+      
+      // Status-specific messages
+      const statusMessages: Record<string, string> = {
+        'operator_confirmed': '✅ Buyurtma tasdiqlandi',
+        'packing': '📦 Buyurtma tayyorlanmoqda',
+        'packed': '📦 Buyurtma tayyor',
+        'courier_picked': '🚚 Buyurtma olib ketildi',
+        'delivered': '🎉 Buyurtma yetkazildi',
+        'paid': '💰 To\'lov qabul qilindi'
+      };
+      
+      const message = statusMessages[newStatus] || `Holat o'zgartirildi: ${newStatus}`;
+      await ctx.reply(message);
+      
+      // Send updated status message with new action buttons
+      await sendCourierOrderStatusMessage(ctx, order, user);
+      
+      // Notify orders group
+      const Shop = require("../models/Shop").default;
+      const shop = await Shop.findById(order.shopId);
+      if (shop) {
+        await sendOrderStatusUpdateToGroup(ctx.telegram, order, shop, newStatus, user);
+      }
+    }
+    return;
+  }
 });
+
+/**
+ * Send order status message to courier with appropriate action buttons
+ */
+async function sendCourierOrderStatusMessage(ctx: any, orderOrId: any, courier: any) {
+  const User = require("../models/User").default;
+  
+  // Reload order to get latest status
+  const order = typeof orderOrId === 'string' 
+    ? await Order.findById(orderOrId) 
+    : (orderOrId._id ? await Order.findById(orderOrId._id) : orderOrId);
+  
+  if (!order) {
+    console.error('[Courier] Order not found');
+    return;
+  }
+  
+  const client = await User.findById(order.customerId);
+  const clientName = client ? `${client.firstName || ''} ${client.lastName || ''}`.trim() : 'Client';
+  
+  let orderText = `📋 <b>Buyurtma ${order.orderNumber}</b>\n`;
+  orderText += `<b>Status:</b> ${getStatusLabel(order.status)}\n`;
+  orderText += `<b>Mijoz:</b> ${clientName}\n\n`;
+  orderText += `<b>Mahsulotlar:</b>`;
+  
+  for (const item of order.items) {
+    orderText += `\n- ${item.name} x${item.quantity} (${item.price} x ${item.quantity} = ${item.subtotal})`;
+  }
+  
+  orderText += `\n\n<b>Jami:</b> ${order.pricing.total}`;
+  
+  // Add address info
+  if (order.deliveryAddress) {
+    const addr = order.deliveryAddress;
+    orderText += `\n\n📍 <b>Manzil:</b>`;
+    if (addr.street) orderText += `\n${addr.street}`;
+    if (addr.city) orderText += `, ${addr.city}`;
+    if (addr.district) orderText += `, ${addr.district}`;
+    if (addr.building) orderText += `\nBino: ${addr.building}`;
+    if (addr.entrance) orderText += `, Podyezd: ${addr.entrance}`;
+    if (addr.apartment) orderText += `, Xonadon: ${addr.apartment}`;
+  }
+  
+  // Get action buttons based on current status
+  const buttons = getCourierActionButtons(order);
+  
+  await ctx.telegram.sendMessage(
+    courier.telegramId,
+    orderText,
+    {
+      parse_mode: 'HTML',
+      reply_markup: buttons.length > 0 ? { inline_keyboard: buttons } : undefined
+    }
+  );
+}
+
+/**
+ * Get action buttons for courier based on order status
+ */
+function getCourierActionButtons(order: any): any[][] {
+  const buttons: any[][] = [];
+  
+  const statusTransitions: Record<string, { label: string; status: string }[]> = {
+    'created': [
+      { label: '✅ Tasdiqlash', status: 'operator_confirmed' },
+      { label: '❌ Rad etish', status: 'rejected_by_courier' }
+    ],
+    'operator_confirmed': [
+      { label: '📦 Tayyorlashni boshlash', status: 'packing' },
+      { label: '❌ Rad etish', status: 'rejected_by_courier' }
+    ],
+    'packing': [
+      { label: '📦 Tayyor', status: 'packed' },
+      { label: '❌ Rad etish', status: 'rejected_by_courier' }
+    ],
+    'packed': [
+      { label: '🚚 Olib ketish', status: 'courier_picked' },
+      { label: '❌ Rad etish', status: 'rejected_by_courier' }
+    ],
+    'courier_picked': [
+      { label: '🎉 Yetkazildi', status: 'delivered' },
+      { label: '❌ Rad etish', status: 'rejected_by_courier' }
+    ],
+    'delivered': [
+      { label: '💰 To\'lov qabul qilindi', status: 'paid' }
+    ],
+    'paid': [],
+    'rejected_by_shop': [],
+    'rejected_by_courier': [],
+    'cancelled_by_client': []
+  };
+  
+  const transitions = statusTransitions[order.status] || [];
+  if (transitions.length > 0) {
+    const row: any[] = [];
+    transitions.forEach((t) => {
+      row.push({ 
+        text: t.label, 
+        callback_data: `courier_status_${t.status}_${order._id}` 
+      });
+    });
+    buttons.push(row);
+  }
+  
+  return buttons;
+}
+
+/**
+ * Get human-readable status label
+ */
+function getStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    'created': '📝 Yaratildi',
+    'operator_confirmed': '✅ Tasdiqlandi',
+    'packing': '📦 Tayyorlanmoqda',
+    'packed': '📦 Tayyor',
+    'courier_picked': '🚚 Kuryer oldi',
+    'delivered': '🎯 Yetkazildi',
+    'paid': '💵 To\'landi',
+    'rejected_by_shop': '❌ Do\'kon rad etdi',
+    'rejected_by_courier': '❌ Kuryer rad etdi',
+    'cancelled_by_client': '🚫 Mijoz bekor qildi'
+  };
+  
+  return labels[status] || status;
+}
 
 export default courierBot;
 

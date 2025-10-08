@@ -6,8 +6,9 @@ import { Icon } from "@iconify/react";
 import { useTranslation } from 'react-i18next';
 import ProductCard from "../../components/ProductCard";
 import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
-import BottomSheet from "../HomeScreen/components/BottomSheet";
+import ProductQuantitySheet from "../../components/ProductQuantitySheet";
 import { toast } from 'react-toastify';
+import { Product } from "@yaqiin/shared/types";
 
 const ProductDetails: React.FC = () => {
     const { id: productId } = useParams<{ id: string }>();
@@ -31,9 +32,8 @@ const ProductDetails: React.FC = () => {
     const isInCart = !!cartItem;
     const cartQuantity = cartItem?.quantity || 0;
 
-    // BottomSheet state
+    // ProductQuantitySheet state
     const [sheetOpen, setSheetOpen] = useState(false);
-    const [quantity, setQuantity] = useState(1);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     
     // Full-screen image state
@@ -51,14 +51,12 @@ const ProductDetails: React.FC = () => {
     // Open sheet with product
     const handleAddClick = () => {
         setSelectedProduct(product);
-        setQuantity(1);
         setSheetOpen(true);
     };
 
     // Confirm add/update
-    const handleConfirm = () => {
+    const handleConfirm = (productToAdd: Product, quantity: number) => {
         try {
-            const productToAdd = selectedProduct || product;
             addToCart(productToAdd, quantity);
             setSheetOpen(false);
             setSelectedProduct(null);
@@ -115,14 +113,14 @@ const ProductDetails: React.FC = () => {
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {/* Product Image */}
-                <div className="w-full bg-white h-70 rounded-b-[60px] flex flex-col items-center justify-center overflow-hidden">
+                <div className="w-full bg-white h-70 rounded-b-[60px] flex items-center justify-center overflow-hidden">
                     <img
                         src={
                             product.images?.[0] ||
                             "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                         }
                         alt={product.name.uz}
-                        className="w-full h-70 object-contain cursor-pointer"
+                        className="w-full h-full object-contain cursor-pointer"
                         onClick={() => handleImageClick(0)}
                         onError={(e) => {
                             e.currentTarget.onerror = null;
@@ -173,14 +171,14 @@ const ProductDetails: React.FC = () => {
                                             className="bg-[#f8f8f8] rounded-2xl pt-0 pb-2 flex flex-col border border-gray-100 cursor-pointer"
                                             onClick={() => navigate(`/product/${relatedProduct._id}`)}
                                         >
-                                            <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-transparent">
+                                            <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-white flex items-center justify-center">
                                                 <img
                                                     src={
                                                         relatedProduct.images?.[0] ||
                                                         "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                                                     }
                                                     alt={relatedProduct.name?.uz || relatedProduct.name?.ru || t('productCard.product')}
-                                                    className="w-full h-full object-cover rounded-t-2xl"
+                                                    className="w-full h-full object-contain"
                                                     onError={(e) => {
                                                         e.currentTarget.onerror = null;
                                                         e.currentTarget.src =
@@ -208,7 +206,6 @@ const ProductDetails: React.FC = () => {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedProduct(relatedProduct);
-                                                            setQuantity(1);
                                                             setSheetOpen(true);
                                                         }}
                                                     >
@@ -266,71 +263,15 @@ const ProductDetails: React.FC = () => {
                     </button>
                 )}
             </div>
-            <BottomSheet open={sheetOpen} onClose={() => {
-                setSheetOpen(false);
-                setSelectedProduct(null);
-            }}>
-                {(selectedProduct || product) && (
-                    <div className="flex flex-col items-center">
-                        <img
-                            src={
-                                (selectedProduct || product).images?.[0] ||
-                                "https://via.placeholder.com/80x80?text=No+Image"
-                            }
-                            alt={
-                                (selectedProduct || product).name?.uz ||
-                                (selectedProduct || product).name?.ru ||
-                                t('productCard.product')
-                            }
-                            className="w-20 h-20 rounded-xl object-cover mb-2"
-                        />
-                        <div className="font-semibold text-lg text-[#232c43] mb-1">
-                            {(selectedProduct || product).name?.uz ||
-                                (selectedProduct || product).name?.ru ||
-                                "Product"}
-                        </div>
-                        <div className="text-[#ff7a00] font-bold text-base mb-2">
-                            {formatProductPrice(selectedProduct || product).price}
-                            <span className="text-xs font-normal text-gray-400">
-                                /{formatProductPrice(selectedProduct || product).unit}
-                            </span>
-                        </div>
-                        {/* Quantity controls */}
-                        <div className="flex flex-row items-center gap-4 my-4">
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                                onClick={() =>
-                                    setQuantity((q) => Math.max(1, q - 1))
-                                }
-                            >
-                                <Icon icon="mdi:minus" />
-                            </button>
-                            <input
-                                type="text"
-                                value={quantity}
-                                className="min-w-4 max-w-20 outline-none text-right text-[#333]"
-                                onChange={(e) =>
-                                    setQuantity(() =>
-                                        Number(e.target.value || 1)
-                                    )
-                                }
-                            />
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                                onClick={() => setQuantity((q) => q + 1)}
-                            >
-                                <Icon icon="mdi:plus" />
-                            </button>
-                        </div>
-                        <button
-                            className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
-                            onClick={handleConfirm}
-                        >
-                            {t('productCard.addToCart')}
-                        </button>
-                    </div>
-                )}
-            </BottomSheet>
+            <ProductQuantitySheet
+                open={sheetOpen}
+                product={selectedProduct || product}
+                onClose={() => {
+                    setSheetOpen(false);
+                    setSelectedProduct(null);
+                }}
+                onConfirm={handleConfirm}
+            />
 
             {/* Full-screen Image Modal */}
             {fullscreenImageOpen && (

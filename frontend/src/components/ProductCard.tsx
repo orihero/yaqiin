@@ -21,19 +21,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="bg-white rounded-2xl shadow-md p-4 flex flex-col items-center relative min-w-[150px] cursor-pointer hover:shadow-lg transition"
             onClick={() => onClick?.(product)}
         >
-            <img
-                src={
-                    product.images?.[0] ||
-                    "https://via.placeholder.com/100x100?text=No+Image"
-                }
-                alt={product.name?.uz || product.name?.ru || t('productCard.product')}
-                className="w-24 h-24 rounded-2xl object-cover mb-2 shadow-sm"
-                onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src =
-                        "https://via.placeholder.com/100x100?text=No+Image";
-                }}
-            />
+            <div className="w-24 h-24 rounded-2xl mb-2 shadow-sm bg-white flex items-center justify-center overflow-hidden">
+                <img
+                    src={
+                        product.images?.[0] ||
+                        "https://via.placeholder.com/100x100?text=No+Image"
+                    }
+                    alt={product.name?.uz || product.name?.ru || t('productCard.product')}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src =
+                            "https://via.placeholder.com/100x100?text=No+Image";
+                    }}
+                />
+            </div>
             <div className="font-bold text-base text-[#232c43] text-center mb-0.5 h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                 {product.name?.uz || product.name?.ru || t('productCard.product')}
             </div>

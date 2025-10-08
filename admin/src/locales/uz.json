@@ -607,7 +607,12 @@
     "key": "Kalit",
     "type": "Turi",
     "value": "Qiymat",
-    "options": "Variantlar"
+    "options": "Variantlar",
+    "businessSettings": "Biznes sozlamalari",
+    "deliveryFee": "Yetkazib berish narxi",
+    "serviceFee": "Xizmat to'lovi",
+    "loadingBusinessSettings": "Biznes sozlamalari yuklanmoqda...",
+    "failedToLoadBusinessSettings": "Biznes sozlamalarni yuklashda xatolik."
   },
   "modals": {
     "confirmDelete": "Ushbu elementni o'chirishni xohlaysizmi?",

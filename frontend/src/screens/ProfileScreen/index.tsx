@@ -69,43 +69,50 @@ const ProfileScreen: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#232c43] flex flex-col items-center pt-6 pb-0 safe-area" style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
-      {/* Header */}
-      <div className="w-full max-w-md px-4">
-        <Header
-          title={t('profile.title')}
-          // rightIcon="mdi:magnify"
-          onRightIconClick={handleHeaderSearchClick}
-        />
-      </div>
-      {/* Card */}
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg px-6 pt-8 pb-6 flex flex-col items-center relative z-10 mx-4">
-        <div className="-mt-16 mb-2">
-          <Avatar
-            src=""
-            alt="Profile"
-            name={user.firstName || user.username || 'User'}
-            size="xl"
-            className="border-4 border-white shadow-md"
-          />
+    <div className="h-screen flex flex-col relative overflow-hidden scrollbar-hide safe-area" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      {/* Main Content Card */}
+      <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
+        <div className="bg-white rounded-b-[52px] px-6 pt-8 pb-8 mb-[52px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide">
+          {/* Header */}
+          <div className="mb-4" style={{ paddingTop: 'max(0rem, env(safe-area-inset-top, 0px))' }}>
+            <Header
+              title={t('profile.title')}
+              // rightIcon="mdi:magnify"
+              onRightIconClick={handleHeaderSearchClick}
+            />
+          </div>
+          
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center mb-6">
+            <Avatar
+              src=""
+              alt="Profile"
+              name={user.firstName || user.username || 'User'}
+              size="xl"
+              className="shadow-md"
+            />
+            <div className="text-xl font-bold text-[#232c43] text-center mt-4">{user.firstName || user.username || 'User'}</div>
+            <div className="text-sm text-gray-400 text-center mt-1">{user.email || ''}</div>
+          </div>
+
+          {/* Options List */}
+          <div className="w-full flex flex-col gap-3">
+            {options.map((opt) => (
+              <button
+                key={opt.label}
+                className="flex items-center w-full bg-[#f3f4f6] rounded-xl px-4 py-3 text-left focus:outline-none hover:bg-gray-100 transition"
+                onClick={() => opt.onClick(navigate)}
+              >
+                <Icon icon={opt.icon} className="text-[#232c43] text-xl mr-4" />
+                <span className="flex-1 text-base font-semibold text-[#232c43]">{opt.label}</span>
+                <Icon icon="mdi:chevron-right" className="text-gray-400 text-2xl" />
+              </button>
+            ))}
+          </div>
+          {/* Logout button moved to settings page */}
         </div>
-        <div className="text-xl font-bold text-[#232c43] text-center mt-2">{user.firstName || user.username || 'User'}</div>
-        <div className="text-sm text-gray-400 text-center mb-6">{user.email || ''}</div>
-        <div className="w-full flex flex-col gap-3 mb-8">
-          {options.map((opt) => (
-            <button
-              key={opt.label}
-              className="flex items-center w-full bg-[#f3f4f6] rounded-xl px-4 py-3 text-left focus:outline-none hover:bg-gray-100 transition"
-              onClick={() => opt.onClick(navigate)}
-            >
-              <Icon icon={opt.icon} className="text-[#232c43] text-xl mr-4" />
-              <span className="flex-1 text-base font-semibold text-[#232c43]">{opt.label}</span>
-              <Icon icon="mdi:chevron-right" className="text-gray-400 text-2xl" />
-            </button>
-          ))}
-        </div>
-        {/* Logout button moved to settings page */}
       </div>
+      {/* Bottom Navigation */}
       <TabBar current="Profile" />
     </div>
   );

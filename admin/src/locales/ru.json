@@ -636,7 +636,12 @@
     "key": "Ключ",
     "type": "Тип",
     "value": "Значение",
-    "options": "Опции"
+    "options": "Опции",
+    "businessSettings": "Бизнес настройки",
+    "deliveryFee": "Стоимость доставки",
+    "serviceFee": "Сервисный сбор",
+    "loadingBusinessSettings": "Загрузка бизнес настроек...",
+    "failedToLoadBusinessSettings": "Не удалось загрузить бизнес настройки."
   },
   "modals": {
     "confirmDelete": "Вы уверены, что хотите удалить этот элемент?",

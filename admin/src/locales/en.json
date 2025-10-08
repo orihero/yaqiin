@@ -658,7 +658,12 @@
     "key": "Key",
     "type": "Type",
     "value": "Value",
-    "options": "Options"
+    "options": "Options",
+    "businessSettings": "Business Settings",
+    "deliveryFee": "Delivery Fee",
+    "serviceFee": "Service Fee",
+    "loadingBusinessSettings": "Loading business settings...",
+    "failedToLoadBusinessSettings": "Failed to load business settings."
   },
   "modals": {
     "confirmDelete": "Are you sure you want to delete this item?",

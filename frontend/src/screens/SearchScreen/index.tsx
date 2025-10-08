@@ -1,19 +1,18 @@
-import React, { useState, useRef } from 'react';
-import debounce from 'lodash.debounce';
 import { Icon } from '@iconify/react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { formatProductPrice } from '@yaqiin/shared/utils/formatProductPrice';
-import { getProducts } from '../../services/productService';
 import type { Product } from '@yaqiin/shared/types/product';
-import SearchFilterButton from './components/SearchFilterButton';
-import { useCartStore } from '../../store/cartStore';
-import FilterBottomSheet from './components/FilterBottomSheet';
-import { getAllCategories } from '../../services/categoryService';
-import { useNavigate } from 'react-router-dom';
+import { formatProductPrice } from '@yaqiin/shared/utils/formatProductPrice';
+import debounce from 'lodash.debounce';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import BottomSheet from '../HomeScreen/components/BottomSheet';
+import { useNavigate } from 'react-router-dom';
+import ProductQuantitySheet from '../../components/ProductQuantitySheet';
 import TabBar from '../../components/TabBar';
+import { getAllCategories } from '../../services/categoryService';
+import { getProducts } from '../../services/productService';
+import { useCartStore } from '../../store/cartStore';
 import { useUserStore } from '../../store/userStore';
+import FilterBottomSheet from './components/FilterBottomSheet';
 
 const SearchScreen: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -70,22 +69,18 @@ const SearchScreen: React.FC = () => {
   const addToCart = useCartStore(state => state.addToCart);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState(1);
   const handleAddClick = (product: Product) => {
     setSelectedProduct(product);
-    setQuantity(1);
     setSheetOpen(true);
   };
-  const handleConfirm = () => {
-    if (selectedProduct) {
-      try {
-        addToCart(selectedProduct, quantity);
-        setSheetOpen(false);
-        setSelectedProduct(null);
-      } catch (error: any) {
-        console.error('Failed to add to cart:', error);
-        alert(error.message || t('common.addToCartFailed'));
-      }
+  const handleConfirm = (product: Product, quantity: number) => {
+    try {
+      addToCart(product, quantity);
+      setSheetOpen(false);
+      setSelectedProduct(null);
+    } catch (error: any) {
+      console.error('Failed to add to cart:', error);
+      alert(error.message || t('common.addToCartFailed'));
     }
   };
 
@@ -149,14 +144,10 @@ const SearchScreen: React.FC = () => {
             {/* <SearchFilterButton onClick={() => setFilterOpen(true)} /> */}
           </div>
         </div>
-                 <div
-           ref={listRef}
-           className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
-           style={{
-             minHeight: "calc(100vh - 250px)",
-             maxHeight: "calc(100vh - 250px)",
-           }}
-         >
+        <div
+          ref={listRef}
+          className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
+        >
           {/* Product Grid */}
           <div className="grid grid-cols-2 gap-4 mt-4">
             {isLoading ? (
@@ -173,14 +164,14 @@ const SearchScreen: React.FC = () => {
                     className="bg-[#f8f8f8] rounded-2xl pt-0 pb-2 flex flex-col border border-gray-100 cursor-pointer"
                     onClick={() => navigate(`/product/${product._id}`)}
                   >
-                    <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-transparent">
+                    <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-white flex items-center justify-center">
                       <img
                         src={
                           product.images?.[0] ||
                           'https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png'
                         }
                         alt={displayName}
-                        className="w-full h-full object-cover rounded-t-2xl"
+                        className="w-full h-full object-contain"
                         onError={e => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src =
@@ -238,62 +229,13 @@ const SearchScreen: React.FC = () => {
         setPriceRange={setPriceRange}
         onApply={handleApplyFilters}
       />
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
-        {selectedProduct && (
-          <div className="flex flex-col items-center">
-            <img
-              src={
-                selectedProduct.images?.[0] ||
-                'https://via.placeholder.com/80x80?text=No+Image'
-              }
-              alt={
-                selectedProduct.name?.uz ||
-                selectedProduct.name?.ru ||
-                t('productCard.product')
-              }
-              className="w-20 h-20 rounded-xl object-cover mb-2"
-            />
-            <div className="font-semibold text-lg text-[#232c43] mb-1">
-              {selectedProduct.name?.uz ||
-                selectedProduct.name?.ru ||
-                t('productCard.product')}
-            </div>
-            <div className="text-[#ff7a00] font-bold text-base mb-2">
-              {formatProductPrice(selectedProduct).price}
-              <span className="text-xs font-normal text-gray-400">
-                /{formatProductPrice(selectedProduct).unit}
-              </span>
-            </div>
-            {/* Quantity controls */}
-            <div className="flex flex-row items-center gap-4 my-4">
-              <button
-                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              >
-                <Icon icon="mdi:minus" />
-              </button>
-              <input
-                type="text"
-                value={quantity}
-                className="min-w-4 max-w-20 outline-none text-right text-[#333]"
-                onChange={e => setQuantity(Number(e.target.value || 1))}
-              />
-              <button
-                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                onClick={() => setQuantity(q => q + 1)}
-              >
-                <Icon icon="mdi:plus" />
-              </button>
-            </div>
-            <button
-              className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
-              onClick={handleConfirm}
-            >
-              {t('productCard.addToCart')}
-            </button>
-          </div>
-        )}
-      </BottomSheet>
+      <ProductQuantitySheet
+        open={sheetOpen}
+        product={selectedProduct}
+        onClose={() => setSheetOpen(false)}
+        onConfirm={handleConfirm}
+        initialQuantity={1}
+      />
       <TabBar current="Search" />
     </div>
   );

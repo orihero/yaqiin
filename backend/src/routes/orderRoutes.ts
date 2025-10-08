@@ -198,13 +198,22 @@ router.post(
         productImagesMap.set(product._id.toString(), product.images || []);
       });
       
-      // Add images to order items
+      // Add images to order items - properly convert subdocuments to plain objects
       const orderWithImages = {
         ...order.toObject(),
-        items: order.items.map((item: any) => ({
-          ...item,
-          images: productImagesMap.get(item.productId.toString()) || []
-        }))
+        items: order.items.map((item: any) => {
+          // Convert mongoose subdocument to plain object
+          const itemObj = item.toObject ? item.toObject() : item;
+          return {
+            productId: itemObj.productId,
+            name: itemObj.name,
+            price: itemObj.price,
+            quantity: itemObj.quantity,
+            unit: itemObj.unit,
+            subtotal: itemObj.subtotal,
+            images: productImagesMap.get(itemObj.productId.toString()) || []
+          };
+        })
       };
       
       await sendOrderCreatedTelegramNotification(orderWithImages, shop, client);
@@ -281,13 +290,22 @@ router.post(
         productImagesMap.set(product._id.toString(), product.images || []);
       });
       
-      // Add images to order items
+      // Add images to order items - properly convert subdocuments to plain objects
       const orderWithImages = {
         ...order.toObject(),
-        items: order.items.map((item: any) => ({
-          ...item,
-          images: productImagesMap.get(item.productId.toString()) || []
-        }))
+        items: order.items.map((item: any) => {
+          // Convert mongoose subdocument to plain object
+          const itemObj = item.toObject ? item.toObject() : item;
+          return {
+            productId: itemObj.productId,
+            name: itemObj.name,
+            price: itemObj.price,
+            quantity: itemObj.quantity,
+            unit: itemObj.unit,
+            subtotal: itemObj.subtotal,
+            images: productImagesMap.get(itemObj.productId.toString()) || []
+          };
+        })
       };
       
       await sendOrderCreatedTelegramNotification(orderWithImages, shop, client);

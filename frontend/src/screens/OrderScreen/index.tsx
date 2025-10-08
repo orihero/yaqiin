@@ -57,10 +57,10 @@ function getGroupForStatus(status: string): 'in_progress' | 'finished' {
 }
 
 // Order Card Component with Accordion
-const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void }> = ({ order, onNavigate }) => {
+const OrderCard: React.FC<{ order: Order; }> = ({ order, }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const firstItem = order.items[0];
 
@@ -68,33 +68,38 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
   const renderProductImages = () => {
     if (order.items.length === 1) {
       return (
-        <img
-          src={firstItem?.image || 'https://via.placeholder.com/64x64?text=No+Image'}
-          alt={firstItem?.name || t('productCard.product')}
-          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
-        />
+        <div className="w-16 h-16 rounded-xl bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
+          <img
+            src={firstItem?.image || 'https://via.placeholder.com/64x64?text=No+Image'}
+            alt={firstItem?.name || t('productCard.product')}
+            className="w-full h-full object-contain"
+          />
+        </div>
       );
     }
 
     // Stack multiple images
     const maxImagesToShow = 3;
     const imagesToShow = order.items.slice(0, maxImagesToShow);
-    
+
     return (
       <div className="relative w-16 h-16 flex-shrink-0">
         {imagesToShow.map((item, index) => (
-          <img
+          <div
             key={item.productId || index}
-            src={item.image || 'https://via.placeholder.com/64x64?text=No+Image'}
-            alt={item.name}
-            className={`absolute w-12 h-12 rounded-lg object-cover border-2 border-white shadow-sm ${
-              index === 0 ? 'z-30' : index === 1 ? 'z-20' : 'z-10'
-            }`}
+            className={`absolute w-12 h-12 rounded-lg border-2 border-white shadow-sm bg-white flex items-center justify-center overflow-hidden ${index === 0 ? 'z-30' : index === 1 ? 'z-20' : 'z-10'
+              }`}
             style={{
               left: `${index * 8}px`,
               top: `${index * 4}px`,
             }}
-          />
+          >
+            <img
+              src={item.image || 'https://via.placeholder.com/64x64?text=No+Image'}
+              alt={item.name}
+              className="w-full h-full object-contain"
+            />
+          </div>
         ))}
         {order.items.length > maxImagesToShow && (
           <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#232c43] text-white text-xs rounded-full flex items-center justify-center border-2 border-white shadow-sm z-40">
@@ -108,17 +113,16 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
   return (
     <div className="bg-[#f6f6f6] rounded-2xl shadow-sm overflow-hidden">
       {/* Main Order Info */}
-      <div 
+      <div
         className="px-4 py-4 cursor-pointer"
-        onClick={() => onNavigate(order._id)}
       >
         <div className="flex items-center gap-4">
           {renderProductImages()}
           <div className="flex-1 min-w-0">
-                         <div className="font-semibold text-base text-[#232c43] truncate">
-               {firstItem?.name || t('productCard.product')}
-               {order.items.length > 1 && t('order.moreItems', { count: order.items.length - 1 })}
-             </div>
+            <div className="font-semibold text-base text-[#232c43] truncate">
+              {firstItem?.name || t('productCard.product')}
+              {order.items.length > 1 && t('order.moreItems', { count: order.items.length - 1 })}
+            </div>
             <div className="text-xs text-gray-400 mb-1">
               {t('order.orderDate')}: {new Date(order.createdAt).toLocaleDateString()}
             </div>
@@ -142,9 +146,9 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
               }}
               className="p-1 rounded-full bg-white shadow-sm"
             >
-              <Icon 
-                icon={isExpanded ? "mdi:chevron-up" : "mdi:chevron-down"} 
-                className="text-lg text-[#232c43]" 
+              <Icon
+                icon={isExpanded ? "mdi:chevron-up" : "mdi:chevron-down"}
+                className="text-lg text-[#232c43]"
               />
             </button>
           </div>
@@ -161,11 +165,13 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
             <div className="space-y-3">
               {order.items.map((item, index) => (
                 <div key={item.productId || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <img
-                    src={item.image || 'https://via.placeholder.com/48x48?text=No+Image'}
-                    alt={item.name}
-                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                  />
+                  <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img
+                      src={item.image || 'https://via.placeholder.com/48x48?text=No+Image'}
+                      alt={item.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm text-[#232c43] truncate">
                       {item.name}
@@ -178,7 +184,7 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
                     <div className="text-[#ff7a00] font-semibold text-sm">
                       {formatOrderItemPrice(item.price, item.unit, item.unitMeasure).price}
                       <span className="text-xs font-normal text-gray-400">
-                          /{formatOrderItemPrice(item.price, item.unit, item.unitMeasure).unit}
+                        /{formatOrderItemPrice(item.price, item.unit, item.unitMeasure).unit}
                       </span>
                     </div>
                     <div className="text-xs text-gray-400">
@@ -188,7 +194,7 @@ const OrderCard: React.FC<{ order: Order; onNavigate: (orderId: string) => void 
                 </div>
               ))}
             </div>
-            
+
             {/* Order Summary */}
             <div className="mt-4 p-3 bg-gray-50 rounded-xl">
               <div className="text-sm font-semibold text-[#232c43] mb-2">
@@ -230,13 +236,13 @@ const OrderScreen: React.FC = () => {
   const filteredOrders: Order[] = React.useMemo(() => {
     if (!orders) return [] as Order[];
     let filtered = orders;
-    
+
     // Filter by status tab
     if (activeTab !== 'all') {
       const group = activeTab as 'in_progress' | 'finished';
       filtered = orders.filter((o) => getGroupForStatus(o.status) === group);
     }
-    
+
     // Sort by date (most recent first)
     return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [orders, activeTab]);
@@ -254,7 +260,7 @@ const OrderScreen: React.FC = () => {
           style={{ minHeight: 'calc(100vh - 90px)', maxHeight: 'calc(100vh - 90px)' }}
         >
           {/* Header */}
-          <div className="flex items-center mb-6 pt-6 px-0">
+          <div className="flex items-center mb-6 pt-6 px-0 mt-20">
             <button
               className="bg-white rounded-full p-2 mr-3 flex-shrink-0 shadow"
               onClick={() => navigate('/profile')}
@@ -266,17 +272,16 @@ const OrderScreen: React.FC = () => {
               {t('order.orders') || 'Orders'}
             </h1>
           </div>
-          
+
           {/* Status Tabs */}
           <div className="flex gap-3 overflow-x-auto pl-1 pr-4 mb-4 scrollbar-hide items-center min-h-14 sticky top-0 bg-[#fff] z-45">
             {statusTabs.map((tab) => (
               <button
                 key={tab.value}
-                className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all font-semibold ${
-                  (activeTab === tab.value || (activeTab === 'all' && tab.value === 'all'))
+                className={`px-5 py-2 rounded-full text-sm whitespace-nowrap transition-all font-semibold ${(activeTab === tab.value || (activeTab === 'all' && tab.value === 'all'))
                     ? 'bg-[#232c43] text-white shadow'
                     : 'bg-white text-[#232c43] border border-gray-200'
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab.value)}
                 style={{ width: 'fit-content' }}
               >
@@ -284,7 +289,7 @@ const OrderScreen: React.FC = () => {
               </button>
             ))}
           </div>
-          
+
           {/* Orders List */}
           <div className="flex flex-col gap-4">
             {isLoading ? (
@@ -297,10 +302,9 @@ const OrderScreen: React.FC = () => {
               <div className="text-center text-gray-400 py-8">{t('order.noOrders')}</div>
             ) : (
               filteredOrders.map((order) => (
-                <OrderCard 
-                  key={order._id} 
-                  order={order} 
-                  onNavigate={handleOrderClick}
+                <OrderCard
+                  key={order._id}
+                  order={order}
                 />
               ))
             )}

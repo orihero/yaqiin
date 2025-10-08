@@ -27,6 +27,7 @@ const Settings: React.FC = () => {
   
   const TABS = [
     { key: 'featureFlags', label: t('settings.featureFlags') },
+    { key: 'businessSettings', label: t('settings.businessSettings') },
     // Future tabs can be added here
   ];
   const [currentTab, setCurrentTab] = useState('featureFlags');
@@ -44,10 +45,20 @@ const Settings: React.FC = () => {
     },
   });
 
+  // Fetch business settings (type = 'business', no flagType)
+  const { data: businessData, isLoading: isBusinessLoading, isError: isBusinessError, error: businessError } = useQuery<Setting[], Error>({
+    queryKey: ['business-settings'],
+    queryFn: async () => {
+      const res = await getSettings(1, 100);
+      return (res.data as Setting[]).filter((s) => s.type === 'business' && !s.flagType);
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: (input: Partial<Setting>) => createSetting(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['business-settings'] });
       setShowModal(false);
     },
   });
@@ -56,6 +67,7 @@ const Settings: React.FC = () => {
     mutationFn: (input: Partial<Setting> & { _id: string }) => updateSetting(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['business-settings'] });
       setEditFlag(null);
     },
   });
@@ -64,11 +76,16 @@ const Settings: React.FC = () => {
     mutationFn: (id: string) => deleteSetting(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['business-settings'] });
       setDeleteTarget(null);
     },
   });
 
   const handleFlagChange = (setting: Setting, newValue: any) => {
+    updateMutation.mutate({ ...setting, value: newValue });
+  };
+
+  const handleBusinessSettingChange = (setting: Setting, newValue: any) => {
     updateMutation.mutate({ ...setting, value: newValue });
   };
 
@@ -181,6 +198,57 @@ const Settings: React.FC = () => {
                       <button
                         className="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-xs"
                         onClick={() => handleDelete(flag)}
+                        title={t('common.delete')}
+                      >
+                        🗑️ {t('common.delete')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+      {/* Business Settings Tab */}
+      {currentTab === 'businessSettings' && (
+        <div className="bg-[#232b42] rounded-xl overflow-x-auto p-8 text-gray-200">
+          {isBusinessLoading && <div>{t('settings.loadingBusinessSettings')}</div>}
+          {isBusinessError && <div className="text-red-400">Error: {businessError?.message || t('settings.failedToLoadBusinessSettings')}</div>}
+          {!isBusinessLoading && !isBusinessError && (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-gray-400">
+                  <th className="py-2 px-4">{t('settings.key')}</th>
+                  <th className="py-2 px-4">{t('settings.value')}</th>
+                  <th className="py-2 px-4">{t('common.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {businessData?.map((setting) => (
+                  <tr key={setting._id} className="border-b border-gray-700 last:border-b-0">
+                    <td className="py-2 px-4 font-mono">{setting.key}</td>
+                    <td className="py-2 px-4">
+                      <input
+                        className="bg-gray-800 text-white px-2 py-1 rounded border border-gray-600 w-64"
+                        type="number"
+                        step="0.01"
+                        value={typeof setting.value === 'number' ? setting.value : ''}
+                        onChange={e => handleBusinessSettingChange(setting, parseFloat(e.target.value) || 0)}
+                        disabled={updateMutation.isPending}
+                      />
+                    </td>
+                    <td className="py-2 px-4 flex gap-2">
+                      <button
+                        className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-xs"
+                        onClick={() => handleEdit(setting)}
+                        title={t('common.edit')}
+                      >
+                        ✏️ {t('common.edit')}
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-xs"
+                        onClick={() => handleDelete(setting)}
                         title={t('common.delete')}
                       >
                         🗑️ {t('common.delete')}

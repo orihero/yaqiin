@@ -8,7 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { useSwipeable } from "react-swipeable";
 import { toast } from 'react-toastify';
 import TabBar from "../../components/TabBar";
+import CheckoutModal from "../../components/CheckoutModal";
 import { createOrder } from '../../services/orderService';
+import { getSettings } from '../../services/settingService';
 import type { CartItem as CartItemType } from "../../store/cartStore";
 import { useCartStore } from "../../store/cartStore";
 import { useUserStore } from '../../store/userStore';
@@ -45,23 +47,25 @@ function CartItem({ item, updateQuantity, removeFromCart }: CartItemProps) {
                     }`}
                 style={{ position: "relative", zIndex: 1 }}
             >
-                <img
-                    src={
-                        item.product.images?.[0] ||
-                        "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
-                    }
-                    alt={
-                        item.product.name?.uz ||
-                        item.product.name?.ru ||
-                        "Product"
-                    }
-                    className="w-20 h-20 rounded-xl object-cover mr-4"
-                    onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src =
-                            "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
-                    }}
-                />
+                <div className="w-20 h-20 rounded-xl mr-4 bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img
+                        src={
+                            item.product.images?.[0] ||
+                            "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
+                        }
+                        alt={
+                            item.product.name?.uz ||
+                            item.product.name?.ru ||
+                            "Product"
+                        }
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                                "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png";
+                        }}
+                    />
+                </div>
                 <div className="flex-1 flex flex-col justify-between">
                     <div className="font-semibold text-base text-[#232c43] h-10 overflow-hidden" style={{ lineHeight: '1.25rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {item.product.name?.uz ||
@@ -146,10 +150,37 @@ const MyCartScreen = () => {
         }
     });
 
+    // Fetch settings for delivery fee and service fee
+    const { data: settingsData } = useQuery({
+        queryKey: ['settings'],
+        queryFn: async () => {
+            const res = await getSettings();
+            return res.data;
+        }
+    });
+
     const [isCheckoutLoading, setCheckoutLoading] = React.useState(false);
     const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
+    const [showCheckoutModal, setShowCheckoutModal] = React.useState(false);
 
-    const getTotal = () => cart.reduce((sum, item) => sum + (item.product.price || item.product.basePrice) * item.quantity, 0);
+    const getItemsTotal = () => cart.reduce((sum, item) => sum + (item.product.price || item.product.basePrice) * item.quantity, 0);
+
+    // Helper: get pricing breakdown including delivery fee
+    const getPricing = () => {
+        const itemsTotal = getItemsTotal();
+        // Get delivery_fee and service_fee from settings
+        const deliveryFeeSetting = settingsData?.find((s: any) => s.key === 'delivery_fee' && s.isActive);
+        const serviceFeeSetting = settingsData?.find((s: any) => s.key === 'service_fee' && s.isActive);
+        const deliveryFee = deliveryFeeSetting ? Number(deliveryFeeSetting.value) : 0;
+        const serviceFee = serviceFeeSetting ? Number(serviceFeeSetting.value) : 0;
+        const tax = 0;
+        const discount = 0;
+        const total = itemsTotal + deliveryFee + serviceFee + tax - discount;
+        return { itemsTotal, deliveryFee, serviceFee, tax, discount, total };
+    };
+
+    // Get current pricing
+    const pricing = getPricing();
 
     // Helper: get default address
     const getDefaultAddress = (userObj: any) => {
@@ -177,32 +208,23 @@ const MyCartScreen = () => {
         };
     });
 
-    // Helper: build pricing
+    // Helper: build pricing for API
     const buildPricing = () => {
-        const itemsTotal = getTotal();
-        const deliveryFee = 0; // TODO: calculate or fetch delivery fee
-        const serviceFee = 0; // TODO: calculate or fetch service fee
-        const tax = 0;
-        const discount = 0;
-        const total = itemsTotal + deliveryFee + serviceFee + tax - discount;
-        return { itemsTotal, deliveryFee, serviceFee, tax, discount, total };
+        return pricing;
     };
 
-    const handleCheckout = async () => {
+    const handleCheckout = () => {
+        setCheckoutError(null);
+        setShowCheckoutModal(true);
+    };
+
+    const handleCheckoutConfirm = async (address: any, paymentMethod: 'cash' | 'card') => {
         setCheckoutError(null);
         setCheckoutLoading(true);
         try {
             const userObj = userData || user;
             if (!userObj) throw new Error(t('cart.userNotLoaded') || 'User not loaded');
-            const address = getDefaultAddress(userObj);
-            console.log('====================================')
-            console.log(JSON.stringify({ userObj, address }, null, 2))
-            console.log('====================================')
-            if (!address) throw new Error(t('cart.noAddress') || 'No delivery address found.');
             const shopId = getShopIdFromCart();
-            console.log('====================================');
-            console.log(JSON.stringify({ userObj, address, shopId }, null, 2));
-            console.log('====================================');
             if (!shopId) throw new Error(t('cart.multipleShops') || 'All items must be from the same shop.');
             const items = buildOrderItems();
             const payload: any = {
@@ -210,13 +232,13 @@ const MyCartScreen = () => {
                 items,
                 deliveryAddress: {
                     title: address.title,
-                    street: address.street,
-                    city: address.city,
-                    district: address.district,
+                    street: address.street || '',
+                    city: address.city || '',
+                    district: address.district || '',
                     coordinates: address.coordinates,
                     notes: address.notes || '',
                 },
-                paymentMethod: 'cash_on_delivery',
+                paymentMethod: paymentMethod === 'cash' ? 'cash_on_delivery' : 'bank_transfer',
             };
             await createOrder(payload);
             clearCart();
@@ -228,7 +250,13 @@ const MyCartScreen = () => {
             toast.error(err?.message || fallback);
         } finally {
             setCheckoutLoading(false);
+            setShowCheckoutModal(false);
         }
+    };
+
+    const handleAddNewAddress = () => {
+        setShowCheckoutModal(false);
+        navigate('/address');
     };
 
     return (
@@ -237,27 +265,23 @@ const MyCartScreen = () => {
             <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
                 <div
                     className="bg-white rounded-b-[52px] px-4 pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
-                    style={{
-                        minHeight: "calc(100vh - 140px)",
-                        maxHeight: "calc(100vh - 140px)",
-                    }}
                 >
                     {/* Header with Total and Checkout */}
-                    <div className="flex items-center justify-between " style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
-                        <div className="flex-1">
-                            <h1 className="text-xl font-bold text-[#232c43] leading-tight">
-                                {t('home.title1')} {t('home.title2')}
-                            </h1>
-                        </div>
+                    <div className="flex " style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px) + 1.5rem)' }}>
                         {cart.length > 0 && (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-between w-full mx-4">
                                 <div className="text-right">
                                     <div className="text-xs text-gray-500">
                                         {t('cart.totalAmount')}
                                     </div>
                                     <div className="text-sm font-semibold text-[#232c43]">
-                                        {formatPrice(getTotal())}
+                                        {formatPrice(pricing.total)}
                                     </div>
+                                    {pricing.deliveryFee > 0 && (
+                                        <div className="text-xs text-gray-400">
+                                            {t('cart.includesDelivery')} {formatPrice(pricing.deliveryFee)}
+                                        </div>
+                                    )}
                                 </div>
                                 <button
                                     className="bg-[#232c43] text-white rounded-full px-4 py-2 text-sm font-semibold shadow-md disabled:opacity-60"
@@ -294,6 +318,17 @@ const MyCartScreen = () => {
             </div>
             {/* Bottom Navigation */}
             <TabBar current="My Cart" />
+
+            {/* Checkout Modal */}
+            <CheckoutModal
+                open={showCheckoutModal}
+                onClose={() => setShowCheckoutModal(false)}
+                onConfirm={handleCheckoutConfirm}
+                onAddNewAddress={handleAddNewAddress}
+                addresses={userData?.addresses || user?.addresses || []}
+                totalAmount={pricing.total}
+                isLoading={isCheckoutLoading}
+            />
         </div>
     );
 };

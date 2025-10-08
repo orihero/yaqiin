@@ -77,7 +77,9 @@ const OrderDetailsScreen: React.FC = () => {
           <div className="w-full mb-4">
             {order.items.map((item) => (
               <div key={item.productId} className="flex items-center gap-3 py-2 border-b last:border-b-0">
-                <img src={item.image || 'https://via.placeholder.com/64x64?text=No+Image'} alt={item.name} className="w-12 h-12 rounded-xl object-cover" />
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <img src={item.image || 'https://via.placeholder.com/64x64?text=No+Image'} alt={item.name} className="w-full h-full object-contain" />
+                </div>
                 <div className="flex-1">
                   <div className="font-semibold text-base text-[#232c43]">{item.name}</div>
                   <div className="text-xs text-gray-400">{t('order.quantity')}: {item.quantity}</div>

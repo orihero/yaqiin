@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import TabBar from "../../components/TabBar";
 import { useCartStore } from "../../store/cartStore";
 import { formatProductPrice } from "@yaqiin/shared/utils/formatProductPrice";
-import BottomSheet from "./components/BottomSheet";
+import ProductQuantitySheet from "../../components/ProductQuantitySheet";
 import { Product } from "@yaqiin/shared/types/product";
 import { useTranslation } from 'react-i18next';
 
@@ -33,29 +33,26 @@ const HomeScreen = () => {
     const navigate = useNavigate();
     const { addToCart } = useCartStore();
 
-    // BottomSheet state
+    // ProductQuantitySheet state
     const [sheetOpen, setSheetOpen] = React.useState(false);
     const [selectedProduct, setSelectedProduct] =
         React.useState<Product | null>(null);
-    const [quantity, setQuantity] = React.useState(1);
 
     // Open sheet with product
     const handleAddClick = (product: Product) => {
         setSelectedProduct(product);
-        setQuantity(1);
         setSheetOpen(true);
     };
+
     // Confirm add/update
-    const handleConfirm = () => {
-        if (selectedProduct) {
-            try {
-                addToCart(selectedProduct, quantity);
-                setSheetOpen(false);
-                setSelectedProduct(null);
-            } catch (error: any) {
-                console.error('Failed to add to cart:', error);
-                alert(error.message || t('common.addToCartFailed'));
-            }
+    const handleConfirm = (product: Product, quantity: number) => {
+        try {
+            addToCart(product, quantity);
+            setSheetOpen(false);
+            setSelectedProduct(null);
+        } catch (error: any) {
+            console.error('Failed to add to cart:', error);
+            alert(error.message || t('common.addToCartFailed'));
         }
     };
 
@@ -87,11 +84,7 @@ const HomeScreen = () => {
             <div className="max-w-md mx-auto w-full px-0 pb-0 flex-1 flex flex-col overflow-hidden scrollbar-hide">
                 <div
                     ref={listRef}
-                    className="bg-white rounded-b-[52px] px-4  pb-8 mb-[88px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
-                    style={{
-                        minHeight: "calc(100vh - 140px)",
-                        maxHeight: "calc(100vh - 140px)",
-                    }}
+                    className="bg-white rounded-b-[52px] px-4  pb-8 mb-[52px] flex-1 flex flex-col z-45 overflow-auto scrollbar-hide"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between " style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top, 0px))' }}>
@@ -128,7 +121,7 @@ const HomeScreen = () => {
                             if (!isAll) {
                                 // Try to use the user's language, fallback to uz, ru, or any available
                                 const lang = i18n.language;
-                                const nameObj = cat.name as Record<string, string>;
+                                const nameObj = cat.name as unknown as Record<string, string>;
                                 label = nameObj[lang] || nameObj.uz || nameObj.ru || Object.values(nameObj)[0] || "";
                             }
                             return (
@@ -168,15 +161,15 @@ const HomeScreen = () => {
                             >
                                 {(() => {
                                     const lang = i18n.language;
-                                    const nameObj = selectedCategory?.name as Record<string, string>;
+                                    const nameObj = selectedCategory?.name as unknown as Record<string, string>;
                                     const parentName = nameObj?.[lang] || nameObj?.uz || nameObj?.ru || Object.values(nameObj || {})[0] || "";
-                                    return `All ${parentName}`;
+                                    return t('home.allCategory', { category: parentName });
                                 })()}
                             </button>
                             {subcategories.map((subcat) => {
                                 const key = subcat._id || subcat.name?.uz || String(subcat.name.uz) || "subcat";
                                 const lang = i18n.language;
-                                const nameObj = subcat.name as Record<string, string>;
+                                const nameObj = subcat.name as unknown as Record<string, string>;
                                 const label = nameObj[lang] || nameObj.uz || nameObj.ru || Object.values(nameObj)[0] || "";
                                 
                                 return (
@@ -236,14 +229,14 @@ const HomeScreen = () => {
                                         navigate(`/product/${product._id}`)
                                     }
                                 >
-                                    <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-transparent">
+                                    <div className="w-full h-36 rounded-t-2xl overflow-hidden mb-3 bg-white flex items-center justify-center">
                                         <img
                                             src={
                                                 product.images?.[0] ||
                                                 "https://www.hydroscand.se/media/catalog/product/placeholder/default/image-placeholder-base.png"
                                             }
                                             alt={displayName}
-                                            className="w-full h-full object-cover rounded-t-2xl"
+                                            className="w-full h-full object-contain"
                                             onError={(e) => {
                                                 e.currentTarget.onerror = null;
                                                 e.currentTarget.src =
@@ -296,71 +289,15 @@ const HomeScreen = () => {
             </div>
             {/* Bottom Navigation */}
             <TabBar current="Home" />
-            <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
-                {selectedProduct && (
-                    <div className="flex flex-col items-center">
-                        <img
-                            src={
-                                selectedProduct.images?.[0] ||
-                                "https://via.placeholder.com/80x80?text=No+Image"
-                            }
-                            alt={
-                                selectedProduct.name?.uz ||
-                                selectedProduct.name?.ru ||
-                                t('productCard.product')
-                            }
-                            className="w-20 h-20 rounded-xl object-cover mb-2"
-                        />
-                        <div className="font-semibold text-lg text-[#232c43] mb-1">
-                            {selectedProduct.name?.uz ||
-                                selectedProduct.name?.ru ||
-                                "Product"}
-                        </div>
-                        <div className="text-[#ff7a00] font-bold text-base mb-2">
-                            {formatProductPrice(selectedProduct).price}
-                            <span className="text-xs font-normal text-gray-400">
-                                /{formatProductPrice(selectedProduct).unit}
-                            </span>
-                        </div>
-                        {/* Quantity controls */}
-                        <div className="flex flex-row items-center gap-4 my-4">
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                                onClick={() =>
-                                    setQuantity((q) => Math.max(1, q - 1))
-                                }
-                            >
-                                <Icon icon="mdi:minus" />
-                            </button>
-                            {/* <span className="text-2xl font-bold w-8 text-center">
-                                {quantity}
-                            </span> */}
-                            <input
-                                type="text"
-                                value={quantity}
-                                className="min-w-4 max-w-20 outline-none text-right text-[#333]"
-                                onChange={(e) =>
-                                    setQuantity(() =>
-                                        Number(e.target.value || 1)
-                                    )
-                                }
-                            />
-                            <button
-                                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#232c43] text-white text-xl font-bold"
-                                onClick={() => setQuantity((q) => q + 1)}
-                            >
-                                <Icon icon="mdi:plus" />
-                            </button>
-                        </div>
-                        <button
-                            className="w-full bg-[#ff7a00] text-white rounded-full py-3 text-lg font-bold mt-2"
-                            onClick={handleConfirm}
-                        >
-                            {t('productCard.addToCart')}
-                        </button>
-                    </div>
-                )}
-            </BottomSheet>
+            <ProductQuantitySheet
+                open={sheetOpen}
+                product={selectedProduct}
+                onClose={() => {
+                    setSheetOpen(false);
+                    setSelectedProduct(null);
+                }}
+                onConfirm={handleConfirm}
+            />
         </div>
     );
 };

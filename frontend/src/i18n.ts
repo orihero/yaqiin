@@ -34,15 +34,12 @@ const resources = {
         failedToLoadCategories: 'Failed to load categories.',
         allProducts: 'All products',
         allSubcategories: 'All subcategories',
+        allCategory: 'All {{category}}',
         popularFruits: 'Popular Fruits',
         seeAll: 'See all',
         loadingProducts: 'Loading products...',
         failedToLoadProducts: 'Failed to load products.',
         noMoreProducts: 'No more products',
-      },
-      search: {
-        placeholder: 'Search products...',
-        enterKeyHint: 'done'
       },
       common: {
         filter: 'Filter',
@@ -127,6 +124,7 @@ const resources = {
         title: 'My Cart',
         empty: 'Your cart is empty.',
         totalAmount: 'Total amount',
+        includesDelivery: 'Includes delivery:',
         checkout: 'Checkout',
         processing: 'Processing...',
         userNotLoaded: 'User not loaded.',
@@ -134,6 +132,24 @@ const resources = {
         multipleShops: 'All items must be from the same shop.',
         orderSuccess: 'Order placed successfully!',
         checkoutFailed: 'Checkout failed'
+      },
+      checkout: {
+        title: 'Checkout',
+        address: 'Address',
+        payment: 'Payment',
+        addNew: 'Add new',
+        noAddresses: 'No addresses found',
+        addFirstAddress: 'Add your first address',
+        building: 'Building',
+        entrance: 'Entrance',
+        apartment: 'Apartment',
+        cash: 'Cash',
+        card: 'Card',
+        cashDescription: 'Pay with cash on delivery',
+        cardDescription: 'Pay with card on delivery',
+        totalAmount: 'Total amount',
+        continue: 'Continue',
+        processing: 'Processing...'
       },
       profile: {
         title: 'Profile',
@@ -333,10 +349,6 @@ const resources = {
       auth: {
         relaunchRequired: 'Вы не можете использовать приложение в данный момент, пожалуйста, перезапустите'
       },
-      search: {
-        placeholder: 'Поиск продуктов...',
-        enterKeyHint: 'done'
-      },
       home: {
         title: 'Ежедневные продукты',
         title1: 'Ежедневные',
@@ -345,6 +357,7 @@ const resources = {
         failedToLoadCategories: 'Не удалось загрузить категории.',
         allProducts: 'Все продукты',
         allSubcategories: 'Все подкатегории',
+        allCategory: 'Все {{category}}',
         popularFruits: 'Популярные фрукты',
         seeAll: 'Смотреть все',
         loadingProducts: 'Загрузка продуктов...',
@@ -434,6 +447,7 @@ const resources = {
         title: 'Моя корзина',
         empty: 'Ваша корзина пуста.',
         totalAmount: 'Общая сумма',
+        includesDelivery: 'Включая доставку:',
         checkout: 'Оформить заказ',
         processing: 'Обработка...',
         userNotLoaded: 'Пользователь не загружен.',
@@ -441,6 +455,24 @@ const resources = {
         multipleShops: 'Все товары должны быть из одного магазина.',
         orderSuccess: 'Заказ успешно оформлен!',
         checkoutFailed: 'Ошибка оформления заказа'
+      },
+      checkout: {
+        title: 'Оформление заказа',
+        address: 'Адрес',
+        payment: 'Оплата',
+        addNew: 'Добавить новый',
+        noAddresses: 'Адреса не найдены',
+        addFirstAddress: 'Добавьте ваш первый адрес',
+        building: 'Здание',
+        entrance: 'Подъезд',
+        apartment: 'Квартира',
+        cash: 'Наличные',
+        card: 'Карта',
+        cashDescription: 'Оплата наличными при получении',
+        cardDescription: 'Оплата картой при получении',
+        totalAmount: 'Общая сумма',
+        continue: 'Продолжить',
+        processing: 'Обработка...'
       },
       profile: {
         title: 'Профиль',
@@ -640,10 +672,6 @@ const resources = {
       auth: {
         relaunchRequired: 'Hozirda ilovadan foydalana olmaysiz, iltimos, qayta ishga tushiring'
       },
-      search: {
-        placeholder: 'Mahsulotlarni qidirish...',
-        enterKeyHint: 'done'
-      },
       home: {
         title: 'Kundalik oziq-ovqat',
         title1: 'Kundalik',
@@ -652,6 +680,7 @@ const resources = {
         failedToLoadCategories: 'Kategoriyalarni yuklab boʻlmadi.',
         allProducts: 'Barcha mahsulotlar',
         allSubcategories: 'Barcha kichik kategoriyalar',
+        allCategory: 'Barcha {{category}}',
         popularFruits: 'Mashhur mevalar',
         seeAll: 'Hammasini ko\'rish',
         loadingProducts: 'Mahsulotlar yuklanmoqda...',
@@ -739,15 +768,34 @@ const resources = {
       },
       cart: {
         title: 'Mening savatim',
-        empty: 'Savat bo‘sh.',
+        empty: 'Savat bo\'sh.',
         totalAmount: 'Jami summa',
+        includesDelivery: 'Yetkazib berish bilan:',
         checkout: 'Buyurtma berish',
         processing: 'Qayta ishlanmoqda...',
         userNotLoaded: 'Foydalanuvchi yuklanmadi.',
         noAddress: 'Yetkazib berish manzili topilmadi.',
-        multipleShops: 'Barcha mahsulotlar bir doʻkondan bo‘lishi kerak.',
+        multipleShops: 'Barcha mahsulotlar bir do\'kondan bo\'lishi kerak.',
         orderSuccess: 'Buyurtma muvaffaqiyatli bajarildi!',
-        checkoutFailed: 'To‘lovni amalga oshirishda xatolik'
+        checkoutFailed: 'To\'lovni amalga oshirishda xatolik'
+      },
+      checkout: {
+        title: 'Buyurtma berish',
+        address: 'Manzil',
+        payment: 'To\'lov',
+        addNew: 'Yangi qo\'shish',
+        noAddresses: 'Manzillar topilmadi',
+        addFirstAddress: 'Birinchi manzilingizni qo\'shing',
+        building: 'Bino',
+        entrance: 'Kirish',
+        apartment: 'Kvartira',
+        cash: 'Naqd pul',
+        card: 'Karta',
+        cashDescription: 'Yetkazib berishda naqd pul bilan to\'lov',
+        cardDescription: 'Yetkazib berishda karta bilan to\'lov',
+        totalAmount: 'Jami summa',
+        continue: 'Davom etish',
+        processing: 'Qayta ishlanmoqda...'
       },
       profile: {
         title: 'Profil',
